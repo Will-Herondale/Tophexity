@@ -35,7 +35,7 @@ class BackupScenario(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         nullable=False, index=True,
     )
     career_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("careers.id", ondelete="CASCADE"),
+        UUID(as_uuid=True), ForeignKey("careers.id", ondelete="RESTRICT"),
         nullable=False, index=True,
     )
     scenario_name: Mapped[str] = mapped_column(String(500), nullable=False)

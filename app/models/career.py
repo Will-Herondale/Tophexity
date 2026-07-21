@@ -56,7 +56,7 @@ class CareerSkill(UUIDPrimaryKeyMixin, Base):
         UUID(as_uuid=True), ForeignKey("careers.id", ondelete="CASCADE"), nullable=False, index=True
     )
     skill_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("skills.id", ondelete="CASCADE"), nullable=False, index=True
+        UUID(as_uuid=True), ForeignKey("skills.id", ondelete="RESTRICT"), nullable=False, index=True
     )
     level: Mapped[SkillLevel] = mapped_column(default=SkillLevel.INTERMEDIATE, nullable=False)
     is_required: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
@@ -85,7 +85,7 @@ class CareerDegree(UUIDPrimaryKeyMixin, Base):
         UUID(as_uuid=True), ForeignKey("careers.id", ondelete="CASCADE"), nullable=False, index=True
     )
     degree_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("degrees.id", ondelete="CASCADE"), nullable=False, index=True
+        UUID(as_uuid=True), ForeignKey("degrees.id", ondelete="RESTRICT"), nullable=False, index=True
     )
     is_required: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
 
@@ -114,7 +114,7 @@ class CareerCollege(UUIDPrimaryKeyMixin, Base):
         UUID(as_uuid=True), ForeignKey("careers.id", ondelete="CASCADE"), nullable=False, index=True
     )
     college_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("colleges.id", ondelete="CASCADE"), nullable=False, index=True
+        UUID(as_uuid=True), ForeignKey("colleges.id", ondelete="RESTRICT"), nullable=False, index=True
     )
     program_name: Mapped[str | None] = mapped_column(String(500), nullable=True)
 
@@ -142,7 +142,7 @@ class CareerEntranceExam(UUIDPrimaryKeyMixin, Base):
         UUID(as_uuid=True), ForeignKey("careers.id", ondelete="CASCADE"), nullable=False, index=True
     )
     exam_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("entrance_exams.id", ondelete="CASCADE"), nullable=False, index=True
+        UUID(as_uuid=True), ForeignKey("entrance_exams.id", ondelete="RESTRICT"), nullable=False, index=True
     )
     is_required: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
 
@@ -173,7 +173,7 @@ class CareerScholarship(UUIDPrimaryKeyMixin, Base):
         UUID(as_uuid=True), ForeignKey("careers.id", ondelete="CASCADE"), nullable=False, index=True
     )
     scholarship_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("scholarships.id", ondelete="CASCADE"), nullable=False, index=True
+        UUID(as_uuid=True), ForeignKey("scholarships.id", ondelete="RESTRICT"), nullable=False, index=True
     )
 
     career: Mapped["Career"] = relationship(back_populates="career_scholarships")
@@ -201,7 +201,7 @@ class CareerResource(UUIDPrimaryKeyMixin, Base):
         UUID(as_uuid=True), ForeignKey("careers.id", ondelete="CASCADE"), nullable=False, index=True
     )
     resource_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("resources.id", ondelete="CASCADE"), nullable=False, index=True
+        UUID(as_uuid=True), ForeignKey("resources.id", ondelete="RESTRICT"), nullable=False, index=True
     )
 
     career: Mapped["Career"] = relationship(back_populates="career_resources")

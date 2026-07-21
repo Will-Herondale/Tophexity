@@ -35,7 +35,7 @@ class RecommendationItem(UUIDPrimaryKeyMixin, Base):
         nullable=False, index=True,
     )
     career_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("careers.id", ondelete="CASCADE"),
+        UUID(as_uuid=True), ForeignKey("careers.id", ondelete="RESTRICT"),
         nullable=False, index=True,
     )
     match_score: Mapped[float] = mapped_column(Numeric(5, 2), nullable=False)

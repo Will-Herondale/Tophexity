@@ -16,7 +16,7 @@ class Roadmap(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
     )
     career_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("careers.id", ondelete="CASCADE"), nullable=False, index=True
+        UUID(as_uuid=True), ForeignKey("careers.id", ondelete="RESTRICT"), nullable=False, index=True
     )
     title: Mapped[str | None] = mapped_column(String(500), nullable=True)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)

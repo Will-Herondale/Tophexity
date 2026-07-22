@@ -1,0 +1,146 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/AuthContext";
+import { getProfile, getRecommendationsHistory, getPortfolioItems } from "@/lib/api";
+import type { Profile } from "@/types/profile";
+import type { Recommendation } from "@/types/recommendation";
+import type { PortfolioItem } from "@/types/portfolio";
+import Card from "@/components/ui/Card";
+import Button from "@/components/ui/Button";
+import {
+  User, Briefcase, Star, Map, FolderOpen, Shield, MessageSquare, ArrowRight,
+} from "lucide-react";
+
+export default function DashboardPage() {
+  const { } = useAuth();
+  const router = useRouter();
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
+  const [portfolioItems, setPortfolioItems] = useState<PortfolioItem[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    Promise.allSettled([
+      getProfile().catch(() => null),
+      getRecommendationsHistory(1, 3).catch(() => null),
+      getPortfolioItems({ page: 1, page_size: 5 }).catch(() => null),
+    ]).then(([profileRes, recsRes, portfolioRes]) => {
+      if (cancelled) return;
+      if (profileRes.status === "fulfilled" && profileRes.value) setProfile(profileRes.value as Profile);
+      if (recsRes.status === "fulfilled" && recsRes.value) setRecommendations((recsRes.value as { items: Recommendation[] }).items || []);
+      if (portfolioRes.status === "fulfilled" && portfolioRes.value) setPortfolioItems((portfolioRes.value as { items: PortfolioItem[] }).items || []);
+    });
+    return () => { cancelled = true; };
+  }, []);
+
+  const quickLinks = [
+    { icon: <User className="h-5 w-5" />, label: "Profile", href: "/profile", color: "bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400" },
+    { icon: <Briefcase className="h-5 w-5" />, label: "Careers", href: "/careers", color: "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400" },
+    { icon: <FolderOpen className="h-5 w-5" />, label: "Portfolio", href: "/portfolio", color: "bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400" },
+    { icon: <Star className="h-5 w-5" />, label: "Recommendations", href: "/recommendations", color: "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400" },
+    { icon: <Map className="h-5 w-5" />, label: "Roadmaps", href: "/roadmaps", color: "bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400" },
+    { icon: <Shield className="h-5 w-5" />, label: "Backup Plans", href: "/backups", color: "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400" },
+    { icon: <MessageSquare className="h-5 w-5" />, label: "Chat", href: "/chat", color: "bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400" },
+  ];
+
+  return (
+    <div className="mx-auto max-w-5xl px-4 py-8">
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+          Welcome back{profile?.full_name ? `, ${profile.full_name}` : ""}!
+        </h1>
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          {profile
+            ? profile.headline || "Manage your career journey"
+            : "Complete your profile to get started"}
+        </p>
+      </div>
+
+      {!profile && (
+        <Card className="mb-6 border-indigo-200 bg-indigo-50 dark:border-indigo-700 dark:bg-indigo-900/30">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-semibold text-indigo-900 dark:text-indigo-300">Complete your profile</h3>
+              <p className="mt-1 text-xs text-indigo-700 dark:text-indigo-400">
+                Tell us about yourself to get personalized career recommendations.
+              </p>
+            </div>
+            <Button size="sm" onClick={() => router.push("/profile")}>
+              Get Started <ArrowRight className="ml-1 h-3 w-3" />
+            </Button>
+          </div>
+        </Card>
+      )}
+
+      <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+        {quickLinks.map((link) => (
+          <button
+            key={link.href}
+            onClick={() => router.push(link.href)}
+            className="flex flex-col items-center gap-2 rounded-xl border border-gray-200 bg-white p-4 text-center transition-colors hover:border-indigo-200 hover:bg-indigo-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:border-indigo-700 dark:hover:bg-indigo-900/30"
+          >
+            <div className={`rounded-lg p-2.5 ${link.color}`}>{link.icon}</div>
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{link.label}</span>
+          </button>
+        ))}
+      </div>
+
+      <div className="grid gap-6 md:grid-cols-2">
+        <Card>
+          <h3 className="mb-3 text-sm font-semibold text-gray-900 dark:text-gray-100">
+            <Star className="mr-1 inline h-4 w-4 text-amber-500" />
+            Recent Recommendations
+          </h3>
+          {recommendations.length === 0 ? (
+            <p className="text-xs text-gray-400 dark:text-gray-500">No recommendations yet. Complete your profile to get started.</p>
+          ) : (
+            <div className="space-y-2">
+              {recommendations.map((rec) => (
+                <button
+                  key={rec.id}
+                  onClick={() => router.push(`/recommendations/${rec.id}`)}
+                  className="flex w-full items-center justify-between rounded-lg border border-gray-100 p-3 text-left hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-700"
+                >
+                  <div>
+                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{rec.title || "Career Recommendation"}</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500">{rec.items.length} careers</p>
+                  </div>
+                  <ArrowRight className="h-4 w-4 text-gray-300 dark:text-gray-600" />
+                </button>
+              ))}
+            </div>
+          )}
+        </Card>
+
+        <Card>
+          <h3 className="mb-3 text-sm font-semibold text-gray-900 dark:text-gray-100">
+            <FolderOpen className="mr-1 inline h-4 w-4 text-amber-500" />
+            Portfolio Items
+          </h3>
+          {portfolioItems.length === 0 ? (
+            <p className="text-xs text-gray-400 dark:text-gray-500">No portfolio items yet. Start showcasing your work.</p>
+          ) : (
+            <div className="space-y-2">
+              {portfolioItems.map((item) => (
+                <div key={item.id} className="rounded-lg border border-gray-100 p-3 dark:border-gray-700">
+                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{item.title}</p>
+                  <p className="text-xs text-gray-400 capitalize dark:text-gray-500">{item.item_type.replace("_", " ")}</p>
+                </div>
+              ))}
+            </div>
+          )}
+          {portfolioItems.length > 0 && (
+            <button
+              onClick={() => router.push("/portfolio")}
+              className="mt-3 text-xs font-medium text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300"
+            >
+              View all →
+            </button>
+          )}
+        </Card>
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,92 @@
+[
+  {
+    "title": "Software Engineer",
+    "description": "Design, develop, and maintain software systems. Work with multiple programming languages and frameworks to build scalable applications serving millions of users.",
+    "average_salary": 95000,
+    "growth_outlook": "above_average",
+    "demand_level": "high",
+    "required_education": {"minimum": "bachelor", "preferred": "master"},
+    "typical_skills": {"languages": ["Python", "JavaScript", "SQL"], "tools": ["Git", "Docker", "CI/CD"]}
+  },
+  {
+    "title": "Data Scientist",
+    "description": "Analyze complex datasets to extract insights and build predictive models using statistical methods and machine learning algorithms.",
+    "average_salary": 110000,
+    "growth_outlook": "much_above_average",
+    "demand_level": "very_high",
+    "required_education": {"minimum": "bachelor", "preferred": "master"},
+    "typical_skills": {"languages": ["Python", "R", "SQL"], "tools": ["Pandas", "Scikit-learn", "TensorFlow"]}
+  },
+  {
+    "title": "Cloud Architect",
+    "description": "Design and oversee cloud computing strategies, ensuring scalability, security, and cost optimization across enterprise infrastructure.",
+    "average_salary": 130000,
+    "growth_outlook": "much_above_average",
+    "demand_level": "very_high",
+    "required_education": {"minimum": "bachelor"},
+    "typical_skills": {"cloud": ["AWS", "Azure", "GCP"], "tools": ["Kubernetes", "Terraform", "Docker"]}
+  },
+  {
+    "title": "DevOps Engineer",
+    "description": "Bridge development and operations by automating CI/CD pipelines, infrastructure provisioning, and monitoring systems.",
+    "average_salary": 115000,
+    "growth_outlook": "above_average",
+    "demand_level": "high",
+    "required_education": {"minimum": "bachelor"},
+    "typical_skills": {"tools": ["Docker", "Kubernetes", "Jenkins"], "os": ["Linux"], "iac": ["Terraform", "Ansible"]}
+  },
+  {
+    "title": "Product Manager",
+    "description": "Lead product strategy and execution, working cross-functionally with engineering, design, and business teams to deliver products users love.",
+    "average_salary": 120000,
+    "growth_outlook": "average",
+    "demand_level": "high",
+    "required_education": {"minimum": "bachelor", "preferred": "MBA"},
+    "typical_skills": {"soft": ["Strategy", "Communication", "Leadership"], "tools": ["Jira", "Figma", "Analytics"]}
+  },
+  {
+    "title": "AI/ML Engineer",
+    "description": "Design and deploy machine learning models and AI systems. Work on training, fine-tuning, and serving models at scale.",
+    "average_salary": 125000,
+    "growth_outlook": "much_above_average",
+    "demand_level": "very_high",
+    "required_education": {"minimum": "bachelor", "preferred": "master"},
+    "typical_skills": {"languages": ["Python"], "ml": ["PyTorch", "TensorFlow", "Hugging Face"], "infra": ["MLflow", "Kubernetes"]}
+  },
+  {
+    "title": "Cybersecurity Analyst",
+    "description": "Protect organizations from cyber threats by monitoring networks, investigating security incidents, and implementing security controls.",
+    "average_salary": 95000,
+    "growth_outlook": "above_average",
+    "demand_level": "high",
+    "required_education": {"minimum": "bachelor"},
+    "typical_skills": {"tools": ["Wireshark", "SIEM", "Nmap"], "concepts": ["Networking", "Cryptography", "Incident Response"]}
+  },
+  {
+    "title": "UX Designer",
+    "description": "Research and design intuitive user experiences for web and mobile applications. Create wireframes, prototypes, and design systems.",
+    "average_salary": 85000,
+    "growth_outlook": "average",
+    "demand_level": "average",
+    "required_education": {"minimum": "bachelor"},
+    "typical_skills": {"tools": ["Figma", "Sketch", "Adobe XD"], "concepts": ["User Research", "Prototyping", "Design Systems"]}
+  },
+  {
+    "title": "Blockchain Developer",
+    "description": "Build decentralized applications and smart contracts. Work with blockchain protocols and Web3 technologies.",
+    "average_salary": 120000,
+    "growth_outlook": "above_average",
+    "demand_level": "above_average",
+    "required_education": {"minimum": "bachelor"},
+    "typical_skills": {"languages": ["Solidity", "Rust", "Go"], "platforms": ["Ethereum", "Solana"], "tools": ["Hardhat", "Foundry"]}
+  },
+  {
+    "title": "Technical Writer",
+    "description": "Create clear, concise documentation for software products including API references, user guides, and tutorials.",
+    "average_salary": 70000,
+    "growth_outlook": "average",
+    "demand_level": "average",
+    "required_education": {"minimum": "bachelor"},
+    "typical_skills": {"tools": ["Markdown", "Git", "Swagger"], "concepts": ["API Documentation", "Information Architecture"]}
+  }
+]

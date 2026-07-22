@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     APP_NAME: str = "AI Career Path Creator"
     APP_VERSION: str = "0.1.0"
     DEBUG: bool = False
-    API_V1_PREFIX: str = "/api/v1"
+    API_V1_PREFIX: str = "/v1"
 
     DATABASE_URL: str = "postgresql+asyncpg://user:pass@localhost:5432/career_path"
     DATABASE_ECHO: bool = False
@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     JWT_SECRET_KEY: str = "CHANGE_ME_IN_PRODUCTION"
     JWT_ALGORITHM: str = "HS256"
     JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    JWT_REFRESH_TOKEN_EXPIRE_MINUTES: int = 10080
 
     AI_ENDPOINT: str = ""
     AI_API_KEY: str = ""

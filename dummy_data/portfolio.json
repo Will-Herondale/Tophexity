@@ -1,0 +1,7 @@
+[
+  {"email": "alice@example.com", "title": "E-commerce API Platform", "description": "Built a high-performance REST API for an e-commerce platform using FastAPI, PostgreSQL, and Redis caching. Handles 10k+ requests per second.", "item_type": "project", "url": "https://github.com/alice/ecommerce-api"},
+  {"email": "alice@example.com", "title": "Smart City Hackathon Winner", "description": "Won first place at SmartCity Hyderabad 2025 for building an IoT-based traffic management system with real-time analytics dashboard.", "item_type": "hackathon"},
+  {"email": "alice@example.com", "title": "AWS Solutions Architect Associate", "description": "Earned AWS Solutions Architect Associate certification demonstrating proficiency in designing distributed systems on AWS.", "item_type": "certificate", "url": "https://aws.amazon.com/certification/"},
+  {"email": "alice@example.com", "title": "Backend Developer Intern at TechCorp", "description": "Developed microservices for the core payment processing system. Reduced API response time by 40% through query optimization.", "item_type": "internship"},
+  {"email": "alice@example.com", "title": "Distributed Consensus Algorithms Research", "description": "Co-authored a paper on improving Raft consensus algorithm performance in geo-distributed database clusters.", "item_type": "research", "url": "https://arxiv.org/example"}
+]

@@ -11,35 +11,47 @@ async def test_health_check(client):
 
 @pytest.mark.anyio
 async def test_v1_auth_health(client):
-    response = await client.get("/api/v1/auth/health")
+    response = await client.get("/v1/auth/health")
     assert response.status_code == 200
 
 
 @pytest.mark.anyio
 async def test_v1_users_health(client):
-    response = await client.get("/api/v1/users/health")
+    response = await client.get("/v1/users/health")
     assert response.status_code == 200
 
 
 @pytest.mark.anyio
 async def test_v1_recommendations_health(client):
-    response = await client.get("/api/v1/recommendations/health")
+    response = await client.get("/v1/recommendations/health")
     assert response.status_code == 200
 
 
 @pytest.mark.anyio
 async def test_v1_roadmaps_health(client):
-    response = await client.get("/api/v1/roadmaps/health")
+    response = await client.get("/v1/roadmaps/health")
     assert response.status_code == 200
 
 
 @pytest.mark.anyio
 async def test_v1_portfolio_health(client):
-    response = await client.get("/api/v1/portfolio/health")
+    response = await client.get("/v1/portfolio/health")
     assert response.status_code == 200
 
 
 @pytest.mark.anyio
 async def test_v1_chat_health(client):
-    response = await client.get("/api/v1/chat/health")
+    response = await client.get("/v1/chat/health")
+    assert response.status_code == 200
+
+
+@pytest.mark.anyio
+async def test_v1_careers_health(client):
+    response = await client.get("/v1/careers/health")
+    assert response.status_code == 200
+
+
+@pytest.mark.anyio
+async def test_v1_backups_health(client):
+    response = await client.get("/v1/backups/health")
     assert response.status_code == 200

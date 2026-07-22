@@ -1,0 +1,16 @@
+{
+  "alice@example.com": {
+    "title": "Path to Cloud Architect",
+    "description": "A structured 24-month learning roadmap to transition from full-stack developer to Cloud Architect.",
+    "estimated_duration_months": 24,
+    "career_title": "Cloud Architect",
+    "steps": [
+      {"title": "Master Linux & Networking", "description": "Build foundational infrastructure knowledge including Linux administration, TCP/IP, DNS, and load balancing.", "step_order": 1, "duration_months": 3},
+      {"title": "AWS Cloud Fundamentals", "description": "Complete AWS Cloud Practitioner and Solutions Architect Associate certifications.", "step_order": 2, "duration_months": 6, "resources": {"courses": ["AWS Skill Builder", "A Cloud Guru"], "cert": "AWS SAA"}},
+      {"title": "Container Orchestration", "description": "Master Docker and Kubernetes for containerized application deployment and management.", "step_order": 3, "duration_months": 6, "resources": {"courses": ["Kubernetes official docs", "CKAD prep"]}},
+      {"title": "Infrastructure as Code", "description": "Learn Terraform and Pulumi for declarative infrastructure provisioning.", "step_order": 4, "duration_months": 3},
+      {"title": "Architecture Patterns", "description": "Study distributed systems design patterns: microservices, event-driven, CQRS, saga.", "step_order": 5, "duration_months": 3, "resources": {"books": ["Designing Data-Intensive Applications"]}},
+      {"title": "Certification & Job Prep", "description": "Get AWS Solutions Architect Professional certification and prepare for system design interviews.", "step_order": 6, "duration_months": 3}
+    ]
+  }
+}

@@ -41,3 +41,16 @@ class ChatMessageRole(str, enum.Enum):
     USER = "user"
     ASSISTANT = "assistant"
     SYSTEM = "system"
+
+
+class PortfolioItemType(str, enum.Enum):
+    PROJECT = "project"
+    HACKATHON = "hackathon"
+    COMPETITION = "competition"
+    CERTIFICATE = "certificate"
+    RESEARCH = "research"
+    INTERNSHIP = "internship"
+    OLYMPIAD = "olympiad"
+    LEADERSHIP = "leadership"
+    VOLUNTEERING = "volunteering"
+    ACHIEVEMENT = "achievement"

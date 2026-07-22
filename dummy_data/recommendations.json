@@ -1,0 +1,20 @@
+{
+  "alice@example.com": {
+    "title": "Career Recommendations for Alice",
+    "summary": "Based on your full-stack development background and cloud architecture interests, here are your top career matches.",
+    "items": [
+      {"career_title": "Cloud Architect", "match_score": 95.0, "reasoning": "Strong match based on your FastAPI/Python skills and interest in distributed systems. 3 years of backend experience provides solid foundation.", "rank": 1},
+      {"career_title": "Software Engineer", "match_score": 90.0, "reasoning": "Excellent match with your current skill set. Growth into senior roles is natural progression.", "rank": 2},
+      {"career_title": "DevOps Engineer", "match_score": 80.0, "reasoning": "Good fit with your Go/Python skills and cloud interests. Would require learning infrastructure-as-code tools.", "rank": 3}
+    ]
+  },
+  "bob@example.com": {
+    "title": "Career Recommendations for Bob",
+    "summary": "Based on your CS student background and data science interests, here are your top career matches.",
+    "items": [
+      {"career_title": "Data Scientist", "match_score": 92.0, "reasoning": "Perfect alignment with your Python/R/SQL skills and ML interests.", "rank": 1},
+      {"career_title": "AI/ML Engineer", "match_score": 85.0, "reasoning": "Strong match with your ML coursework. Would benefit from deep learning specialization.", "rank": 2},
+      {"career_title": "Software Engineer", "match_score": 75.0, "reasoning": "Good fallback option with your CS fundamentals.", "rank": 3}
+    ]
+  }
+}

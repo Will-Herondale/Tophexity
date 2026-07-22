@@ -1,0 +1,26 @@
+{
+  "alice@example.com": {
+    "full_name": "Alice Johnson",
+    "headline": "Full-Stack Developer",
+    "bio": "Passionate about building scalable web applications with 3 years of experience in Python and JavaScript ecosystems.",
+    "location": "Hyderabad, India",
+    "education_level": "bachelor",
+    "years_experience": 3,
+    "current_field": "Software Engineering",
+    "target_fields": {"primary": "Cloud Architecture", "secondary": "AI/ML"},
+    "skills": {"languages": ["Python", "JavaScript", "Go"], "frameworks": ["FastAPI", "React", "Django"]},
+    "interests": {"topics": ["cloud", "distributed systems", "open source", "DevOps"]}
+  },
+  "bob@example.com": {
+    "full_name": "Bob Smith",
+    "headline": "Data Science Student",
+    "bio": "CS student at IIT Hyderabad interested in machine learning and data analytics. Looking for internship opportunities.",
+    "location": "Bangalore, India",
+    "education_level": "undergraduate",
+    "years_experience": 0,
+    "current_field": "Computer Science",
+    "target_fields": {"primary": "Data Science", "secondary": "Software Engineering"},
+    "skills": {"languages": ["Python", "R", "SQL"], "tools": ["Pandas", "Scikit-learn", "TensorFlow"]},
+    "interests": {"topics": ["machine learning", "data visualization", "NLP"]}
+  }
+}

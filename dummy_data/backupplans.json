@@ -1,0 +1,11 @@
+{
+  "alice@example.com": {
+    "title": "Career Contingency Plan",
+    "description": "Alternative career paths if the primary goal of Cloud Architecture does not work out.",
+    "scenarios": [
+      {"career_title": "Data Scientist", "scenario_name": "Switch to Data Science", "description": "Leverage Python and analytical skills to transition into data science. Would require ML specialization.", "transition_difficulty": "medium", "estimated_transition_months": 12, "reasoning": "Python proficiency and analytical mindset make this feasible."},
+      {"career_title": "DevOps Engineer", "scenario_name": "Move to DevOps", "description": "Natural transition given cloud interests. Focus on CI/CD, IaC, and monitoring.", "transition_difficulty": "easy", "estimated_transition_months": 6, "reasoning": "Overlaps significantly with Cloud Architecture skills."},
+      {"career_title": "Product Manager", "scenario_name": "Transition to Product Management", "description": "Move into product strategy leveraging technical background and communication skills.", "transition_difficulty": "hard", "estimated_transition_months": 18, "reasoning": "Requires developing business acumen and stakeholder management skills."}
+    ]
+  }
+}

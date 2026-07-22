@@ -1,0 +1,13 @@
+{
+  "alice@example.com": [
+    {
+      "title": "Career Guidance Chat",
+      "messages": [
+        {"role": "user", "content": "Hi, I'm a full-stack developer with 3 years of experience. I'm looking for career advice."},
+        {"role": "assistant", "content": "Hello Alice! I'd be happy to help with career guidance. With your background in full-stack development and 3 years of experience, you have several exciting paths ahead. What areas interest you most?"},
+        {"role": "user", "content": "I'm particularly interested in cloud architecture and distributed systems. What should I focus on?"},
+        {"role": "assistant", "content": "Great choice! Cloud Architecture is in high demand. I'd recommend: 1) Get AWS Solutions Architect certification, 2) Master Kubernetes and container orchestration, 3) Learn Infrastructure as Code with Terraform, 4) Study distributed systems design patterns. Would you like me to create a detailed learning roadmap?"}
+      ]
+    }
+  ]
+}

@@ -18,13 +18,13 @@ export default function RecommendationCard({ recommendation, onClick }: Recommen
     >
       <div className="flex items-start justify-between">
         <div className="flex-1">
-          <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+          <h3 className="text-sm font-semibold font-[family-name:var(--font-display)]" style={{ color: "#f0f0f0" }}>
             {recommendation.title || "Career Recommendation"}
           </h3>
           {recommendation.summary && (
-            <p className="mt-1 text-xs text-gray-500 line-clamp-2 dark:text-gray-400">{recommendation.summary}</p>
+            <p className="mt-1 text-xs line-clamp-2" style={{ color: "#8a8a9a" }}>{recommendation.summary}</p>
           )}
-          <div className="mt-2 flex items-center gap-3 text-xs text-gray-400 dark:text-gray-500">
+          <div className="mt-2 flex items-center gap-3 text-xs" style={{ color: "#5a5a6a" }}>
             <span className="flex items-center gap-1">
               <Calendar className="h-3 w-3" />
               {new Date(recommendation.created_at).toLocaleDateString()}
@@ -35,7 +35,7 @@ export default function RecommendationCard({ recommendation, onClick }: Recommen
             </span>
           </div>
         </div>
-        <ChevronRight className="h-5 w-5 text-gray-300 dark:text-gray-600" />
+        <ChevronRight className="h-5 w-5" style={{ color: "#5a5a6a" }} />
       </div>
 
       {recommendation.items.length > 0 && (
@@ -43,14 +43,15 @@ export default function RecommendationCard({ recommendation, onClick }: Recommen
           {recommendation.items.slice(0, 3).map((item) => (
             <span
               key={item.id}
-              className="inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-medium text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300"
+              className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium"
+              style={{ backgroundColor: "#1E4FA3", color: "#ffffff" }}
             >
               #{item.rank} {item.career?.title || "Career"}
-              <span className="text-indigo-400 dark:text-indigo-500">({item.match_score}%)</span>
+              <span style={{ color: "#5b9aff" }}>({item.match_score}%)</span>
             </span>
           ))}
           {recommendation.items.length > 3 && (
-            <span className="text-xs text-gray-400 dark:text-gray-500">+{recommendation.items.length - 3} more</span>
+            <span className="text-xs" style={{ color: "#5a5a6a" }}>+{recommendation.items.length - 3} more</span>
           )}
         </div>
       )}

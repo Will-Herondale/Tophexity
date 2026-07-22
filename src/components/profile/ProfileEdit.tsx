@@ -59,7 +59,7 @@ export default function ProfileEdit({ profile, onSave, onCancel }: ProfileEditPr
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <Card>
-        <h3 className="mb-4 text-sm font-semibold text-gray-900 dark:text-gray-100">Personal Information</h3>
+        <h3 className="mb-4 font-[family-name:var(--font-display)] text-sm font-semibold text-[#f0f0f0]">Personal Information</h3>
         <div className="grid gap-4 md:grid-cols-2">
           <Input
             label="Full Name"
@@ -87,26 +87,26 @@ export default function ProfileEdit({ profile, onSave, onCancel }: ProfileEditPr
           />
         </div>
         <div className="mt-4">
-          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Bio</label>
+          <label className="mb-1 block text-sm font-medium text-[#8a8a9a]">Bio</label>
           <textarea
             value={form.bio || ""}
             onChange={(e) => setForm({ ...form, bio: e.target.value })}
             rows={3}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-500"
+            className="w-full rounded-lg border border-[#1E4FA3]/15 bg-[#0d214f]/30 px-3 py-2 text-sm text-[#f0f0f0] placeholder:text-[#5a5a6a] focus:border-[#1E4FA3] focus:outline-none focus:ring-1 focus:ring-[#1E4FA3]"
             placeholder="Tell us about yourself..."
           />
         </div>
       </Card>
 
       <Card>
-        <h3 className="mb-4 text-sm font-semibold text-gray-900 dark:text-gray-100">Education & Experience</h3>
+        <h3 className="mb-4 font-[family-name:var(--font-display)] text-sm font-semibold text-[#f0f0f0]">Education &amp; Experience</h3>
         <div className="grid gap-4 md:grid-cols-3">
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Education Level</label>
+            <label className="mb-1 block text-sm font-medium text-[#8a8a9a]">Education Level</label>
             <select
               value={form.education_level || ""}
               onChange={(e) => setForm({ ...form, education_level: e.target.value || null })}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
+              className="w-full rounded-lg border border-[#1E4FA3]/15 bg-[#0d214f]/30 px-3 py-2 text-sm text-[#f0f0f0] focus:border-[#1E4FA3] focus:outline-none focus:ring-1 focus:ring-[#1E4FA3]"
             >
               <option value="">Select...</option>
               {EDUCATION_LEVELS.map((level) => (
@@ -133,12 +133,12 @@ export default function ProfileEdit({ profile, onSave, onCancel }: ProfileEditPr
       </Card>
 
       <Card>
-        <h3 className="mb-4 text-sm font-semibold text-gray-900 dark:text-gray-100">Target Fields</h3>
+        <h3 className="mb-4 font-[family-name:var(--font-display)] text-sm font-semibold text-[#f0f0f0]">Target Fields</h3>
         <div className="mb-3 flex flex-wrap gap-2">
           {(form.target_fields || []).map((field) => (
-            <span key={field} className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700 dark:bg-blue-900/50 dark:text-blue-300">
+            <span key={field} className="inline-flex items-center gap-1 rounded-full bg-[#1E4FA3]/15 px-3 py-1 text-xs font-medium text-[#1E4FA3]">
               {field}
-              <button type="button" onClick={() => removeFromArray("target_fields", field)} className="ml-0.5 text-blue-400 hover:text-blue-700 dark:text-blue-500 dark:hover:text-blue-300">
+              <button type="button" onClick={() => removeFromArray("target_fields", field)} className="ml-0.5 text-[#1E4FA3]/60 hover:text-[#1E4FA3]">
                 <span className="sr-only">Remove</span>&times;
               </button>
             </span>
@@ -157,7 +157,7 @@ export default function ProfileEdit({ profile, onSave, onCancel }: ProfileEditPr
               }
             }}
             placeholder="Add a target field..."
-            className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
+            className="flex-1 rounded-lg border border-[#1E4FA3]/15 bg-[#0d214f]/30 px-3 py-2 text-sm text-[#f0f0f0] placeholder:text-[#5a5a6a] focus:border-[#1E4FA3] focus:outline-none focus:ring-1 focus:ring-[#1E4FA3]"
           />
           <button
             type="button"
@@ -165,7 +165,7 @@ export default function ProfileEdit({ profile, onSave, onCancel }: ProfileEditPr
               addToArray("target_fields", targetInput);
               setTargetInput("");
             }}
-            className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+            className="rounded-lg border border-[#1E4FA3]/15 px-3 py-2 text-sm text-[#8a8a9a] hover:bg-[#0d214f]/30 hover:text-[#f0f0f0]"
           >
             Add
           </button>
@@ -173,7 +173,7 @@ export default function ProfileEdit({ profile, onSave, onCancel }: ProfileEditPr
       </Card>
 
       <Card>
-        <h3 className="mb-4 text-sm font-semibold text-gray-900 dark:text-gray-100">Skills</h3>
+        <h3 className="mb-4 font-[family-name:var(--font-display)] text-sm font-semibold text-[#f0f0f0]">Skills</h3>
         <SkillsInput
           value={(form.skills as Record<string, string>) || {}}
           onChange={(skills) => setForm({ ...form, skills })}
@@ -181,12 +181,12 @@ export default function ProfileEdit({ profile, onSave, onCancel }: ProfileEditPr
       </Card>
 
       <Card>
-        <h3 className="mb-4 text-sm font-semibold text-gray-900 dark:text-gray-100">Interests</h3>
+        <h3 className="mb-4 font-[family-name:var(--font-display)] text-sm font-semibold text-[#f0f0f0]">Interests</h3>
         <div className="mb-3 flex flex-wrap gap-2">
           {(form.interests || []).map((interest) => (
-            <span key={interest} className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700 dark:bg-amber-900/50 dark:text-amber-300">
+            <span key={interest} className="inline-flex items-center gap-1 rounded-full bg-[#1E4FA3]/15 px-3 py-1 text-xs font-medium text-[#1E4FA3]">
               {interest}
-              <button type="button" onClick={() => removeFromArray("interests", interest)} className="ml-0.5 text-amber-400 hover:text-amber-700 dark:text-amber-500 dark:hover:text-amber-300">
+              <button type="button" onClick={() => removeFromArray("interests", interest)} className="ml-0.5 text-[#1E4FA3]/60 hover:text-[#1E4FA3]">
                 <span className="sr-only">Remove</span>&times;
               </button>
             </span>
@@ -205,7 +205,7 @@ export default function ProfileEdit({ profile, onSave, onCancel }: ProfileEditPr
               }
             }}
             placeholder="Add an interest..."
-            className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
+            className="flex-1 rounded-lg border border-[#1E4FA3]/15 bg-[#0d214f]/30 px-3 py-2 text-sm text-[#f0f0f0] placeholder:text-[#5a5a6a] focus:border-[#1E4FA3] focus:outline-none focus:ring-1 focus:ring-[#1E4FA3]"
           />
           <button
             type="button"
@@ -213,7 +213,7 @@ export default function ProfileEdit({ profile, onSave, onCancel }: ProfileEditPr
               addToArray("interests", interestInput);
               setInterestInput("");
             }}
-            className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+            className="rounded-lg border border-[#1E4FA3]/15 px-3 py-2 text-sm text-[#8a8a9a] hover:bg-[#0d214f]/30 hover:text-[#f0f0f0]"
           >
             Add
           </button>

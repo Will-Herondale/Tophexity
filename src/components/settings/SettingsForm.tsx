@@ -23,15 +23,15 @@ export default function SettingsForm() {
     <div className="space-y-6">
       <Card>
         <div className="flex items-center gap-2 mb-4">
-          <Palette className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-          <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Appearance</h3>
+          <Palette className="h-4 w-4 text-[#5a5a6a]" />
+          <h3 className="text-sm font-semibold font-[family-name:var(--font-display)] text-[#f0f0f0]">Appearance</h3>
         </div>
         <div>
-          <label className="mb-1 block text-xs font-medium text-gray-500 dark:text-gray-400">Theme</label>
+          <label className="mb-1 block text-xs font-medium text-[#8a8a9a]">Theme</label>
           <select
             value={theme}
             onChange={(e) => setTheme(e.target.value as "light" | "dark" | "system")}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
+            className="w-full rounded-lg border border-[rgba(30,79,163,0.15)] bg-[#0d214f]/30 px-3 py-2 text-sm text-[#f0f0f0] focus:border-[#1E4FA3] focus:outline-none focus:ring-1 focus:ring-[#1E4FA3]"
           >
             <option value="light">Light</option>
             <option value="dark">Dark</option>
@@ -42,8 +42,8 @@ export default function SettingsForm() {
 
       <Card>
         <div className="flex items-center gap-2 mb-4">
-          <Bell className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-          <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Notifications</h3>
+          <Bell className="h-4 w-4 text-[#5a5a6a]" />
+          <h3 className="text-sm font-semibold font-[family-name:var(--font-display)] text-[#f0f0f0]">Notifications</h3>
         </div>
         <div className="space-y-3">
           {[
@@ -56,9 +56,9 @@ export default function SettingsForm() {
                 type="checkbox"
                 checked={notifications[item.key]}
                 onChange={(e) => setNotifications({ ...notifications, [item.key]: e.target.checked })}
-                className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700"
+                className="h-4 w-4 rounded border-[rgba(30,79,163,0.3)] bg-[#0d214f] text-[#1E4FA3] focus:ring-[#1E4FA3] focus:ring-offset-[#0a0a0f]"
               />
-              <span className="text-sm text-gray-700 dark:text-gray-300">{item.label}</span>
+              <span className="text-sm text-[#f0f0f0]">{item.label}</span>
             </label>
           ))}
         </div>

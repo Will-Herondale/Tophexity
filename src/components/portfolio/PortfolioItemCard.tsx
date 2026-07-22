@@ -7,20 +7,20 @@ import { ExternalLink, Edit3, Trash2 } from "lucide-react";
 
 function getTypeBadge(type: string) {
   const colors: Record<string, string> = {
-    project: "bg-blue-50 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300",
-    hackathon: "bg-purple-50 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300",
-    competition: "bg-red-50 text-red-700 dark:bg-red-900/50 dark:text-red-300",
-    certificate: "bg-green-50 text-green-700 dark:bg-green-900/50 dark:text-green-300",
-    research: "bg-indigo-50 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300",
-    internship: "bg-amber-50 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300",
-    olympiad: "bg-pink-50 text-pink-700 dark:bg-pink-900/50 dark:text-pink-300",
-    leadership: "bg-teal-50 text-teal-700 dark:bg-teal-900/50 dark:text-teal-300",
-    volunteering: "bg-cyan-50 text-cyan-700 dark:bg-cyan-900/50 dark:text-cyan-300",
-    achievement: "bg-orange-50 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300",
+    project: "bg-[#1E4FA3]/20 text-[#5b9aff]",
+    hackathon: "bg-purple-500/20 text-purple-300",
+    competition: "bg-red-500/20 text-red-300",
+    certificate: "bg-green-500/20 text-green-300",
+    research: "bg-indigo-500/20 text-indigo-300",
+    internship: "bg-amber-500/20 text-amber-300",
+    olympiad: "bg-pink-500/20 text-pink-300",
+    leadership: "bg-teal-500/20 text-teal-300",
+    volunteering: "bg-cyan-500/20 text-cyan-300",
+    achievement: "bg-orange-500/20 text-orange-300",
   };
   const label = PORTFOLIO_ITEM_TYPES.find((t) => t.value === type)?.label || type;
   return (
-    <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${colors[type] || "bg-gray-50 text-gray-700 dark:bg-gray-700 dark:text-gray-300"}`}>
+    <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${colors[type] || "bg-[#1E4FA3]/20 text-[#8a8a9a]"}`}>
       {label}
     </span>
   );
@@ -38,18 +38,18 @@ export default function PortfolioItemCard({ item, onEdit, onDelete }: PortfolioI
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <div className="flex items-center gap-2">
-            <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">{item.title}</h3>
+            <h3 className="text-sm font-semibold font-[family-name:var(--font-display)]" style={{ color: "#f0f0f0" }}>{item.title}</h3>
             {getTypeBadge(item.item_type)}
           </div>
           {item.description && (
-            <p className="mt-1.5 text-xs text-gray-500 line-clamp-2 dark:text-gray-400">{item.description}</p>
+            <p className="mt-1.5 text-xs line-clamp-2" style={{ color: "#8a8a9a" }}>{item.description}</p>
           )}
           {item.url && (
             <a
               href={item.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-2 inline-flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300"
+              className="mt-2 inline-flex items-center gap-1 text-xs text-[#1E4FA3] hover:text-[#5b9aff] transition-colors"
             >
               <ExternalLink className="h-3 w-3" />
               View link
@@ -58,7 +58,7 @@ export default function PortfolioItemCard({ item, onEdit, onDelete }: PortfolioI
           {item.skills_used && Object.keys(item.skills_used).length > 0 && (
             <div className="mt-2 flex flex-wrap gap-1">
               {Object.keys(item.skills_used).map((skill) => (
-                <span key={skill} className="rounded bg-gray-100 px-1.5 py-0.5 text-[10px] text-gray-600 dark:bg-gray-700 dark:text-gray-300">
+                <span key={skill} className="rounded px-1.5 py-0.5 text-[10px]" style={{ backgroundColor: "#112a5e", color: "#8a8a9a" }}>
                   {skill}
                 </span>
               ))}
@@ -66,10 +66,10 @@ export default function PortfolioItemCard({ item, onEdit, onDelete }: PortfolioI
           )}
         </div>
         <div className="ml-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          <button onClick={() => onEdit(item)} className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-300">
+          <button onClick={() => onEdit(item)} className="rounded p-1 hover:bg-[#112a5e] transition-colors" style={{ color: "#5a5a6a" }}>
             <Edit3 className="h-3.5 w-3.5" />
           </button>
-          <button onClick={() => onDelete(item)} className="rounded p-1 text-gray-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/30 dark:hover:text-red-400">
+          <button onClick={() => onDelete(item)} className="rounded p-1 hover:bg-red-500/20 hover:text-red-400 transition-colors" style={{ color: "#5a5a6a" }}>
             <Trash2 className="h-3.5 w-3.5" />
           </button>
         </div>

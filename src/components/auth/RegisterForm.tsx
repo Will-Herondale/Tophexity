@@ -61,71 +61,87 @@ export default function RegisterForm() {
     }
   };
 
+  const inputClass =
+    "border-[#1E4FA3]/15 bg-[#0a0a0f]/50 text-[#f0f0f0] placeholder:text-[#5a5a6a] focus:border-[#1E4FA3] focus:ring-[#1E4FA3]/30";
+
   return (
     <div className="w-full max-w-md">
-      <div className="mb-8 text-center">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Create your {APP_NAME} account</h1>
-        <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">Get started with your career journey.</p>
+      <div className="mb-2 text-center">
+        <h2 className="font-[family-name:var(--font-display)] text-sm font-semibold uppercase tracking-widest text-[#1E4FA3]">
+          {APP_NAME}
+        </h2>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {error && (
-          <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-            {error}
-          </div>
-        )}
+      <div className="rounded-2xl border border-[#1E4FA3]/10 bg-[#0d214f]/30 p-8 shadow-2xl shadow-black/20 backdrop-blur-sm">
+        <div className="mb-8 text-center">
+          <h1 className="font-[family-name:var(--font-display)] text-2xl font-bold text-[#f0f0f0]">
+            Create your account
+          </h1>
+          <p className="mt-2 text-sm text-[#8a8a9a]">Get started with your career journey.</p>
+        </div>
 
-        {success && (
-          <div className="rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-700">
-            {success}
-          </div>
-        )}
-
-        <Input
-          label="Email"
-          type="email"
-          placeholder="you@example.com"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-
-        <Input
-          label="Password"
-          type="password"
-          placeholder="At least 8 characters"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-
-        <Input
-          label="Confirm Password"
-          type="password"
-          placeholder="Repeat your password"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          required
-        />
-
-        <Button type="submit" className="w-full" disabled={loading}>
-          {loading ? (
-            <span className="flex items-center gap-2">
-              <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-              Creating account...
-            </span>
-          ) : (
-            <span className="flex items-center gap-2">
-              <UserPlus className="h-4 w-4" />
-              Create Account
-            </span>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {error && (
+            <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-400">
+              {error}
+            </div>
           )}
-        </Button>
-      </form>
 
-      <p className="mt-8 text-center text-sm text-gray-500 dark:text-gray-400">
+          {success && (
+            <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-emerald-400">
+              {success}
+            </div>
+          )}
+
+          <Input
+            label="Email"
+            type="email"
+            placeholder="you@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            className={inputClass}
+          />
+
+          <Input
+            label="Password"
+            type="password"
+            placeholder="At least 8 characters"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            className={inputClass}
+          />
+
+          <Input
+            label="Confirm Password"
+            type="password"
+            placeholder="Repeat your password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+            className={inputClass}
+          />
+
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? (
+              <span className="flex items-center gap-2">
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                Creating account...
+              </span>
+            ) : (
+              <span className="flex items-center gap-2">
+                <UserPlus className="h-4 w-4" />
+                Create Account
+              </span>
+            )}
+          </Button>
+        </form>
+      </div>
+
+      <p className="mt-6 text-center text-sm text-[#8a8a9a]">
         Already have an account?{" "}
-        <Link href="/login" className="font-medium text-indigo-600 hover:text-indigo-500">
+        <Link href="/login" className="font-medium text-[#1E4FA3] transition-colors hover:text-[#2b63c9]">
           Sign in
         </Link>
       </p>

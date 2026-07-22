@@ -14,13 +14,13 @@ export default function BackupPlanCard({ plan, onClick }: BackupPlanCardProps) {
     <Card hover onClick={() => onClick(plan.id)} className="cursor-pointer">
       <div className="flex items-start justify-between">
         <div className="flex-1">
-          <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+          <h3 className="text-sm font-semibold font-[family-name:var(--font-display)] text-[#f0f0f0]">
             {plan.title || "Backup Career Plan"}
           </h3>
           {plan.description && (
-            <p className="mt-1 text-xs text-gray-500 line-clamp-2 dark:text-gray-400">{plan.description}</p>
+            <p className="mt-1 text-xs text-[#8a8a9a] line-clamp-2">{plan.description}</p>
           )}
-          <div className="mt-2 flex items-center gap-3 text-xs text-gray-400 dark:text-gray-500">
+          <div className="mt-2 flex items-center gap-3 text-xs text-[#5a5a6a]">
             <span className="flex items-center gap-1">
               <Calendar className="h-3 w-3" />
               {new Date(plan.created_at).toLocaleDateString()}
@@ -31,7 +31,7 @@ export default function BackupPlanCard({ plan, onClick }: BackupPlanCardProps) {
             </span>
           </div>
         </div>
-        <ChevronRight className="h-5 w-5 text-gray-300 dark:text-gray-600" />
+        <ChevronRight className="h-5 w-5 text-[#5a5a6a]" />
       </div>
     </Card>
   );

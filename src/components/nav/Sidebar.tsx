@@ -26,17 +26,19 @@ export default function Sidebar() {
 
   return (
     <aside
-      className={`flex h-screen flex-col border-r border-gray-200 bg-white transition-all duration-200 dark:border-gray-700 dark:bg-gray-800 ${
-        collapsed ? "w-16" : "w-60"
+      className={`flex h-screen flex-col border-r border-[#1E4FA3]/10 bg-[#0d214f]/50 transition-all duration-200 ${
+        collapsed ? "w-[72px]" : "w-64"
       }`}
     >
-      <div className={`flex items-center border-b border-gray-200 p-4 dark:border-gray-700 ${collapsed ? "justify-center" : "justify-between"}`}>
+      <div className={`flex items-center border-b border-[#1E4FA3]/10 p-4 ${collapsed ? "justify-center" : "justify-between"}`}>
         {!collapsed && (
-          <span className="text-lg font-bold text-indigo-600 dark:text-indigo-400">Tophexity</span>
+          <span className="font-[family-name:var(--font-display)] text-lg font-bold text-[#1E4FA3]">
+            Tophexity
+          </span>
         )}
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+          className="rounded p-1 text-[#8a8a9a] hover:bg-[#1E4FA3]/10 hover:text-[#f0f0f0]"
         >
           {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
         </button>
@@ -44,14 +46,14 @@ export default function Sidebar() {
 
       <nav className="flex-1 overflow-y-auto p-3 space-y-1">
         {visibleItems.map((item) => (
-          <SidebarItem key={item.id} href={item.href} label={item.label} icon={item.icon} />
+          <SidebarItem key={item.id} href={item.href} label={item.label} icon={item.icon} collapsed={collapsed} />
         ))}
       </nav>
 
-      <div className="border-t border-gray-200 p-3 dark:border-gray-700">
+      <div className="border-t border-[#1E4FA3]/10 p-3">
         <button
           onClick={cycleTheme}
-          className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-100 transition-colors dark:text-gray-400 dark:hover:bg-gray-700 ${
+          className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-[#8a8a9a] hover:bg-[#1E4FA3]/5 hover:text-[#f0f0f0] transition-colors ${
             collapsed ? "justify-center" : ""
           }`}
           title={`Theme: ${settings.theme}`}
@@ -61,11 +63,11 @@ export default function Sidebar() {
         </button>
 
         {!collapsed && user && (
-          <p className="my-2 truncate px-3 text-xs text-gray-400 dark:text-gray-500">{user.email}</p>
+          <p className="my-2 truncate px-3 text-xs text-[#8a8a9a]">{user.email}</p>
         )}
         <button
           onClick={() => logout()}
-          className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-600 hover:bg-red-50 hover:text-red-600 transition-colors dark:text-gray-400 dark:hover:bg-red-900/20 dark:hover:text-red-400 ${
+          className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-[#8a8a9a] hover:bg-red-900/20 hover:text-red-400 transition-colors ${
             collapsed ? "justify-center" : ""
           }`}
         >

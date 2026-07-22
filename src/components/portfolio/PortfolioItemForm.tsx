@@ -70,11 +70,12 @@ export default function PortfolioItemForm({ item, onSave, onClose }: PortfolioIt
         />
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Type</label>
+          <label className="mb-1 block text-sm font-medium" style={{ color: "#8a8a9a" }}>Type</label>
           <select
             value={itemType}
             onChange={(e) => setItemType(e.target.value as PortfolioItemType)}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
+            className="w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#1E4FA3]"
+            style={{ borderColor: "rgba(30, 79, 163, 0.15)", backgroundColor: "#0d214f", color: "#f0f0f0" }}
           >
             {PORTFOLIO_ITEM_TYPES.map((type) => (
               <option key={type.value} value={type.value}>
@@ -85,12 +86,13 @@ export default function PortfolioItemForm({ item, onSave, onClose }: PortfolioIt
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
+          <label className="mb-1 block text-sm font-medium" style={{ color: "#8a8a9a" }}>Description</label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={3}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
+            className="w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#1E4FA3]"
+            style={{ borderColor: "rgba(30, 79, 163, 0.15)", backgroundColor: "#0d214f", color: "#f0f0f0" }}
             placeholder="What did you do? What did you learn?"
           />
         </div>
@@ -103,12 +105,12 @@ export default function PortfolioItemForm({ item, onSave, onClose }: PortfolioIt
         />
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Skills Used</label>
+          <label className="mb-1 block text-sm font-medium" style={{ color: "#8a8a9a" }}>Skills Used</label>
           <div className="mb-2 flex flex-wrap gap-1.5">
             {Object.entries(skills).map(([skill, level]) => (
-              <span key={skill} className="inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-medium text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300">
-                {skill} <span className="text-[10px] capitalize text-indigo-400 dark:text-indigo-500">{level}</span>
-                <button type="button" onClick={() => removeSkill(skill)} className="ml-0.5 text-indigo-400 hover:text-indigo-700 dark:text-indigo-500 dark:hover:text-indigo-300">
+              <span key={skill} className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium" style={{ backgroundColor: "#1E4FA3", color: "#ffffff" }}>
+                {skill} <span className="text-[10px] capitalize" style={{ color: "#5b9aff" }}>{level}</span>
+                <button type="button" onClick={() => removeSkill(skill)} className="ml-0.5 hover:text-white transition-colors" style={{ color: "#8a8a9a" }}>
                   &times;
                 </button>
               </span>
@@ -126,19 +128,22 @@ export default function PortfolioItemForm({ item, onSave, onClose }: PortfolioIt
                 }
               }}
               placeholder="Type a skill..."
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
+              className="w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#1E4FA3]"
+              style={{ borderColor: "rgba(30, 79, 163, 0.15)", backgroundColor: "#0d214f", color: "#f0f0f0" }}
             />
             {skillInput && suggestions.length > 0 && (
-              <div className="absolute top-full left-0 z-10 mt-1 max-h-32 w-full overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
+              <div className="absolute top-full left-0 z-10 mt-1 max-h-32 w-full overflow-y-auto rounded-lg border shadow-lg" style={{ borderColor: "rgba(30, 79, 163, 0.15)", backgroundColor: "#0d214f" }}>
                 {suggestions.slice(0, 5).map((s) => (
-                  <button key={s} type="button" onClick={() => addSkill(s)} className="block w-full px-3 py-2 text-left text-sm hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-700">
+                  <button key={s} type="button" onClick={() => addSkill(s)} className="block w-full px-3 py-2 text-left text-sm transition-colors" style={{ color: "#f0f0f0" }}
+                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#112a5e")}
+                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#0d214f")}>
                     {s}
                   </button>
                 ))}
               </div>
             )}
           </div>
-          <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">Default level: {DEFAULT_SKILL_LEVEL}. Add a skill to edit its level.</p>
+          <p className="mt-1 text-xs" style={{ color: "#5a5a6a" }}>Default level: {DEFAULT_SKILL_LEVEL}. Add a skill to edit its level.</p>
         </div>
 
         <div className="flex justify-end gap-3 pt-2">

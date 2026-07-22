@@ -1,126 +1,719 @@
 "use client";
 
-import Link from "next/link";
-import { useAuth } from "@/contexts/AuthContext";
+import { motion, useInView, AnimatePresence } from "framer-motion";
 import {
-  ArrowRight, Target, BarChart3, Map, Compass,
-  Brain, TrendingUp,
+  Brain,
+  BarChart3,
+  Map,
+  Shield,
+  TrendingUp,
+  Briefcase,
+  Code,
+  Palette,
+  Building2,
+  Heart,
+  GraduationCap,
+  Cog,
+  Menu,
+  X,
+  ArrowRight,
+  Star,
+  ChevronDown,
+  ChevronRight,
+  Sparkles,
+  Users,
+  FileText,
+  Zap,
 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import Link from "next/link";
+import { useState, useEffect, useRef } from "react";
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 40 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" as const } },
+};
+
+const stagger = {
+  visible: { transition: { staggerChildren: 0.1 } },
+};
+
+function AnimatedCounter({ target, suffix = "" }: { target: number; suffix?: string }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const isInView = useInView(ref, { once: true });
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    if (!isInView) return;
+    let start = 0;
+    const duration = 2000;
+    const increment = target / (duration / 16);
+    const timer = setInterval(() => {
+      start += increment;
+      if (start >= target) {
+        setCount(target);
+        clearInterval(timer);
+      } else {
+        setCount(Math.floor(start));
+      }
+    }, 16);
+    return () => clearInterval(timer);
+  }, [isInView, target]);
+
+  return (
+    <span ref={ref} className="text-3xl font-bold text-white font-[family-name:var(--font-display)]">
+      {count.toLocaleString()}{suffix}
+    </span>
+  );
+}
+
+const features = [
+  { icon: Brain, title: "Smart Discovery", desc: "AI analyzes your skills, interests, and values to surface career paths you never considered but are perfectly suited for." },
+  { icon: BarChart3, title: "Deep Analysis", desc: "Comprehensive breakdown of each career including salary ranges, growth potential, required skills, and market demand." },
+  { icon: Map, title: "Personalized Roadmaps", desc: "Step-by-step action plans with milestones, resources, and timelines tailored to your current position and goals." },
+  { icon: Shield, title: "Backup Plans", desc: "Intelligent contingency career paths that keep you prepared for market shifts and industry disruptions." },
+  { icon: TrendingUp, title: "Market Intelligence", desc: "Real-time labor market data, hiring trends, and emerging roles so you stay ahead of the curve." },
+  { icon: Briefcase, title: "Portfolio Builder", desc: "AI-assisted portfolio and resume optimization to present your best professional self to employers." },
+];
+
+const steps = [
+  { num: "01", title: "Build Profile", desc: "Tell us about your skills, experience, and what drives you." },
+  { num: "02", title: "AI Analysis", desc: "Our AI engine processes your data against thousands of career models." },
+  { num: "03", title: "Compare Careers", desc: "Explore ranked career matches with detailed insights and projections." },
+  { num: "04", title: "Get Roadmap", desc: "Receive your personalized action plan to reach your ideal career." },
+];
+
+const categories = [
+  { icon: Code, title: "Technology", desc: "Software, AI, cybersecurity, and data science roles.", count: 120 },
+  { icon: Palette, title: "Design", desc: "UX, graphic, product, and creative direction roles.", count: 45 },
+  { icon: Building2, title: "Business", desc: "Management, consulting, finance, and operations roles.", count: 80 },
+  { icon: Heart, title: "Healthcare", desc: "Medical, biotech, health tech, and wellness roles.", count: 65 },
+  { icon: GraduationCap, title: "Education", desc: "Teaching, training, curriculum, and EdTech roles.", count: 40 },
+  { icon: Cog, title: "Engineering", desc: "Mechanical, civil, electrical, and systems roles.", count: 55 },
+];
+
+const testimonials = [
+  { name: "Sarah Chen", role: "Software Engineer at Google", quote: "Tophexity revealed career paths I never knew existed. The AI analysis was scarily accurate — it identified strengths I hadn't even recognized in myself.", stars: 5 },
+  { name: "Marcus Johnson", role: "Product Manager at Stripe", quote: "After 8 years in consulting, I felt stuck. Tophexity mapped out a transition plan that got me into product management in under 6 months.", stars: 5 },
+  { name: "Priya Patel", role: "UX Lead at Figma", quote: "The backup plans feature alone is worth it. Having intelligent contingency paths gives me confidence to take calculated risks in my career.", stars: 5 },
+];
+
+const faqs = [
+  { q: "How does the AI career matching work?", a: "Our AI engine analyzes over 200 data points including your skills, work history, personality traits, values, and market trends to generate career recommendations with confidence scores." },
+  { q: "Is Tophexity free to use?", a: "We offer a robust free tier that includes career discovery and basic analysis. Premium plans unlock personalized roadmaps, backup planning, market intelligence, and portfolio building tools." },
+  { q: "How accurate are the career predictions?", a: "Our models are trained on millions of career trajectories and validated against real-world outcomes. Users report an 89% satisfaction rate with their matched career paths within the first year." },
+  { q: "Can I use Tophexity if I'm changing careers?", a: "Absolutely. Career changers are one of our core audiences. The platform specifically identifies transferable skills and creates transition roadmaps that minimize downtime and maximize your existing experience." },
+  { q: "What data do you collect?", a: "We only collect information you explicitly provide. Your data is encrypted, never sold to third parties, and you can delete your account and all associated data at any time." },
+];
+
+const footerProduct = [
+  { label: "Career Discovery", href: "#" },
+  { label: "Skill Analysis", href: "#" },
+  { label: "Roadmaps", href: "#" },
+  { label: "Market Intel", href: "#" },
+  { label: "Pricing", href: "#" },
+];
+
+const footerCompany = [
+  { label: "About Us", href: "#" },
+  { label: "Blog", href: "#" },
+  { label: "Careers", href: "#" },
+  { label: "Privacy Policy", href: "#" },
+  { label: "Terms of Service", href: "#" },
+];
 
 export default function HomePage() {
   const { user } = useAuth();
+  const [scrolled, setScrolled] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      <nav className="flex items-center justify-between px-6 py-4">
-        <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">CareerPath AI</h1>
-        <div className="flex items-center gap-3">
-          {user ? (
-            <Link
-              href="/dashboard"
-              className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
-            >
-              Dashboard
-            </Link>
-          ) : (
-            <>
-              <Link href="/login" className="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100">
-                Sign In
-              </Link>
-              <Link
-                href="/register"
-                className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+    <div className="min-h-screen bg-[#0a0a0f] text-[#f0f0f0] overflow-x-hidden">
+      {/* ─── Navbar ─── */}
+      <nav
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+          scrolled
+            ? "bg-[#0a0a0f]/80 backdrop-blur-xl border-b border-[rgba(30,79,163,0.15)]"
+            : "bg-transparent"
+        }`}
+      >
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2">
+            <Sparkles className="w-6 h-6 text-[#1E4FA3]" />
+            <span className="text-xl font-bold font-[family-name:var(--font-display)] text-white">
+              Tophexity
+            </span>
+          </Link>
+
+          <div className="hidden md:flex items-center gap-8">
+            {["Features", "How It Works", "Pricing", "FAQ"].map((link) => (
+              <a
+                key={link}
+                href={`#${link.toLowerCase().replace(/\s+/g, "-")}`}
+                className="text-sm text-[#8a8a9a] hover:text-white transition-colors"
               >
-                Get Started
+                {link}
+              </a>
+            ))}
+          </div>
+
+          <div className="hidden md:flex items-center gap-3">
+            {user ? (
+              <Link
+                href="/dashboard"
+                className="px-4 py-2 rounded-lg bg-[#1E4FA3] text-white text-sm font-medium hover:bg-[#1E4FA3]/80 transition-colors"
+              >
+                Dashboard
               </Link>
-            </>
-          )}
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="px-4 py-2 rounded-lg text-sm text-[#8a8a9a] hover:text-white transition-colors"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/register"
+                  className="px-4 py-2 rounded-lg bg-[#1E4FA3] text-white text-sm font-medium hover:bg-[#1E4FA3]/80 transition-colors"
+                >
+                  Get Started
+                </Link>
+              </>
+            )}
+          </div>
+
+          <button
+            onClick={() => setMobileOpen(!mobileOpen)}
+            className="md:hidden p-2 text-[#8a8a9a] hover:text-white transition-colors"
+          >
+            {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
         </div>
+
+        <AnimatePresence>
+          {mobileOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="md:hidden bg-[#0a0a0f]/95 backdrop-blur-xl border-b border-[rgba(30,79,163,0.15)] overflow-hidden"
+            >
+              <div className="px-6 py-4 flex flex-col gap-4">
+                {["Features", "How It Works", "Pricing", "FAQ"].map((link) => (
+                  <a
+                    key={link}
+                    href={`#${link.toLowerCase().replace(/\s+/g, "-")}`}
+                    onClick={() => setMobileOpen(false)}
+                    className="text-sm text-[#8a8a9a] hover:text-white transition-colors py-2"
+                  >
+                    {link}
+                  </a>
+                ))}
+                <div className="flex flex-col gap-2 pt-2 border-t border-[rgba(30,79,163,0.15)]">
+                  {user ? (
+                    <Link
+                      href="/dashboard"
+                      onClick={() => setMobileOpen(false)}
+                      className="px-4 py-2 rounded-lg bg-[#1E4FA3] text-white text-sm font-medium text-center"
+                    >
+                      Dashboard
+                    </Link>
+                  ) : (
+                    <>
+                      <Link
+                        href="/login"
+                        onClick={() => setMobileOpen(false)}
+                        className="px-4 py-2 rounded-lg text-sm text-[#8a8a9a] text-center"
+                      >
+                        Sign In
+                      </Link>
+                      <Link
+                        href="/register"
+                        onClick={() => setMobileOpen(false)}
+                        className="px-4 py-2 rounded-lg bg-[#1E4FA3] text-white text-sm font-medium text-center"
+                      >
+                        Get Started
+                      </Link>
+                    </>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </nav>
 
-      <section className="mx-auto max-w-5xl px-6 py-20 text-center">
-        <h2 className="text-5xl font-bold leading-tight text-gray-900 dark:text-gray-100">
-          Find Your <span className="text-indigo-600 dark:text-indigo-400">Perfect Career</span>
-        </h2>
-        <p className="mx-auto mt-6 max-w-2xl text-lg text-gray-600 dark:text-gray-300">
-          AI-powered career recommendations based on your unique profile, skills, interests, and goals.
-          Get a personalized roadmap to your dream career.
-        </p>
-        <div className="mt-8 flex items-center justify-center gap-4">
-          <Link
-            href={user ? "/profile" : "/register"}
-            className="flex items-center gap-2 rounded-lg bg-indigo-600 px-6 py-3 text-base font-medium text-white shadow-md hover:bg-indigo-700"
+      {/* ─── Hero ─── */}
+      <section className="relative min-h-screen flex items-center justify-center px-6">
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-[#1E4FA3]/20 rounded-full blur-[128px]" />
+          <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-[#0d214f]/40 rounded-full blur-[128px]" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#1E4FA3]/10 rounded-full blur-[160px]" />
+        </div>
+
+        <div className="relative max-w-4xl mx-auto text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[rgba(30,79,163,0.3)] bg-[#0d214f]/50 backdrop-blur-sm mb-8"
           >
-            Start Your Journey
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-          <Link
-            href="/login"
-            className="rounded-lg border border-gray-300 px-6 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+            <Zap className="w-4 h-4 text-[#1E4FA3]" />
+            <span className="text-sm text-[#8a8a9a]">AI-Powered Career Intelligence</span>
+          </motion.div>
+
+          <motion.h1
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="text-5xl md:text-7xl font-bold font-[family-name:var(--font-display)] leading-tight mb-6"
           >
-            Sign In
-          </Link>
+            Discover Your <br />
+            <span className="bg-gradient-to-r from-[#1E4FA3] to-[#3B82F6] bg-clip-text text-transparent">
+              Perfect Career
+            </span>
+          </motion.h1>
+
+          <motion.p
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="text-lg md:text-xl text-[#8a8a9a] max-w-2xl mx-auto mb-10 leading-relaxed"
+          >
+            Leverage advanced AI to analyze your unique skills, personality, and goals.
+            Get personalized career recommendations with actionable roadmaps built for the modern workforce.
+          </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="flex flex-col sm:flex-row items-center justify-center gap-4"
+          >
+            <Link
+              href="/register"
+              className="flex items-center gap-2 px-8 py-3.5 rounded-xl bg-[#1E4FA3] text-white font-medium hover:bg-[#1E4FA3]/80 transition-all hover:shadow-[0_0_30px_rgba(30,79,163,0.4)]"
+            >
+              Start Your Journey
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+            <a
+              href="#how-it-works"
+              className="flex items-center gap-2 px-8 py-3.5 rounded-xl border border-[rgba(30,79,163,0.3)] text-[#8a8a9a] hover:text-white hover:border-[rgba(30,79,163,0.6)] transition-all"
+            >
+              Learn More
+            </a>
+          </motion.div>
         </div>
       </section>
 
-      <section className="mx-auto max-w-5xl px-6 pb-20">
-        <div className="grid gap-8 md:grid-cols-3">
+      {/* ─── Stats Bar ─── */}
+      <section className="border-y border-[rgba(30,79,163,0.15)] bg-[#0d214f]/30">
+        <div className="max-w-7xl mx-auto px-6 py-12 grid grid-cols-2 md:grid-cols-4 gap-8">
           {[
-            {
-              icon: <Compass className="h-6 w-6" />,
-              title: "Discover Careers",
-              desc: "Get personalized career recommendations scored by match percentage based on your complete profile.",
-            },
-            {
-              icon: <Brain className="h-6 w-6" />,
-              title: "AI Analysis",
-              desc: "Our AI analyzes your skills, personality, interests, and goals to find careers that truly fit you.",
-            },
-            {
-              icon: <TrendingUp className="h-6 w-6" />,
-              title: "Detailed Roadmap",
-              desc: "Get timelines, required skills, colleges, exams, scholarships, and backup plans for each career.",
-            },
-          ].map((f) => (
-            <div
-              key={f.title}
-              className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800"
+            { target: 500, suffix: "+", label: "Career Paths" },
+            { target: 100, suffix: "+", label: "Skill Categories" },
+            { target: 50, suffix: "+", label: "Industries" },
+            { target: 10000, suffix: "+", label: "Users Guided" },
+          ].map((stat) => (
+            <motion.div
+              key={stat.label}
+              variants={fadeUp}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              className="text-center"
             >
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400">
-                {f.icon}
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{f.title}</h3>
-              <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">{f.desc}</p>
-            </div>
+              <AnimatedCounter target={stat.target} suffix={stat.suffix} />
+              <p className="text-sm text-[#8a8a9a] mt-2">{stat.label}</p>
+            </motion.div>
           ))}
         </div>
+      </section>
 
-        <div className="mt-16 rounded-xl border border-gray-200 bg-white p-8 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-          <h3 className="text-center text-xl font-bold text-gray-900 dark:text-gray-100">How It Works</h3>
-          <div className="mt-8 grid gap-6 md:grid-cols-4">
-            {[
-              { step: "1", icon: <Target className="h-5 w-5" />, title: "Build Profile", desc: "Share your academics, skills, interests, and goals" },
-              { step: "2", icon: <Brain className="h-5 w-5" />, title: "AI Analysis", desc: "Our AI matches you with the best career options" },
-              { step: "3", icon: <BarChart3 className="h-5 w-5" />, title: "Compare", desc: "Compare top career recommendations side by side" },
-              { step: "4", icon: <Map className="h-5 w-5" />, title: "Get Roadmap", desc: "Follow a step-by-step plan to reach your goals" },
-            ].map((s) => (
-              <div key={s.step} className="text-center">
-                <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-indigo-600 text-white font-bold text-sm">
-                  {s.step}
+      {/* ─── Features ─── */}
+      <section id="features" className="py-24 px-6">
+        <div className="max-w-7xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-3xl md:text-4xl font-bold font-[family-name:var(--font-display)] mb-4">
+              Everything You Need to <span className="text-[#1E4FA3]">Choose Wisely</span>
+            </h2>
+            <p className="text-[#8a8a9a] max-w-2xl mx-auto">
+              A complete toolkit designed to transform career uncertainty into confident, data-driven decisions.
+            </p>
+          </motion.div>
+
+          <motion.div
+            variants={stagger}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          >
+            {features.map((f) => (
+              <motion.div
+                key={f.title}
+                variants={fadeUp}
+                className="group relative p-6 rounded-2xl bg-[#0d214f]/40 border border-[rgba(30,79,163,0.15)] hover:border-[rgba(30,79,163,0.4)] transition-all hover:shadow-[0_0_40px_rgba(30,79,163,0.15)]"
+              >
+                <div className="w-12 h-12 rounded-xl bg-[#1E4FA3]/20 flex items-center justify-center mb-4 group-hover:bg-[#1E4FA3]/30 transition-colors">
+                  <f.icon className="w-6 h-6 text-[#1E4FA3]" />
                 </div>
-                <div className="mx-auto mt-3 flex h-8 w-8 items-center justify-center text-indigo-600 dark:text-indigo-400">
-                  {s.icon}
+                <h3 className="text-lg font-semibold font-[family-name:var(--font-display)] mb-2">{f.title}</h3>
+                <p className="text-sm text-[#8a8a9a] leading-relaxed">{f.desc}</p>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ─── How It Works ─── */}
+      <section id="how-it-works" className="py-24 px-6 bg-[#0d214f]/10">
+        <div className="max-w-7xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-3xl md:text-4xl font-bold font-[family-name:var(--font-display)] mb-4">
+              How <span className="text-[#1E4FA3]">Tophexity</span> Works
+            </h2>
+            <p className="text-[#8a8a9a] max-w-2xl mx-auto">
+              Four simple steps from uncertainty to a clear, actionable career plan.
+            </p>
+          </motion.div>
+
+          <div className="relative">
+            <div className="hidden lg:block absolute top-16 left-[12.5%] right-[12.5%] h-px bg-gradient-to-r from-[#1E4FA3]/0 via-[#1E4FA3]/40 to-[#1E4FA3]/0" />
+
+            <motion.div
+              variants={stagger}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
+            >
+              {steps.map((step) => (
+                <motion.div key={step.num} variants={fadeUp} className="relative text-center">
+                  <div className="w-14 h-14 rounded-full bg-[#0d214f] border-2 border-[#1E4FA3] flex items-center justify-center mx-auto mb-6 relative z-10">
+                    <span className="text-lg font-bold font-[family-name:var(--font-display)] text-[#1E4FA3]">
+                      {step.num}
+                    </span>
+                  </div>
+                  <h3 className="text-lg font-semibold font-[family-name:var(--font-display)] mb-2">{step.title}</h3>
+                  <p className="text-sm text-[#8a8a9a] leading-relaxed max-w-[240px] mx-auto">{step.desc}</p>
+                </motion.div>
+              ))}
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── Career Categories ─── */}
+      <section className="py-24 px-6">
+        <div className="max-w-7xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-3xl md:text-4xl font-bold font-[family-name:var(--font-display)] mb-4">
+              Explore <span className="text-[#1E4FA3]">Career Categories</span>
+            </h2>
+            <p className="text-[#8a8a9a] max-w-2xl mx-auto">
+              Dive deep into industry-specific insights and discover where your skills shine brightest.
+            </p>
+          </motion.div>
+
+          <motion.div
+            variants={stagger}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          >
+            {categories.map((cat) => (
+              <motion.div
+                key={cat.title}
+                variants={fadeUp}
+                className="group p-6 rounded-2xl bg-[#0d214f]/40 border border-[rgba(30,79,163,0.15)] hover:border-[rgba(30,79,163,0.4)] transition-all cursor-pointer hover:shadow-[0_0_40px_rgba(30,79,163,0.15)]"
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <div className="w-12 h-12 rounded-xl bg-[#1E4FA3]/20 flex items-center justify-center group-hover:bg-[#1E4FA3]/30 transition-colors">
+                    <cat.icon className="w-6 h-6 text-[#1E4FA3]" />
+                  </div>
+                  <span className="text-sm text-[#8a8a9a] bg-[#0a0a0f] px-3 py-1 rounded-full">
+                    {cat.count} careers
+                  </span>
                 </div>
-                <h4 className="mt-2 text-sm font-semibold text-gray-900 dark:text-gray-100">{s.title}</h4>
-                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{s.desc}</p>
-              </div>
+                <h3 className="text-lg font-semibold font-[family-name:var(--font-display)] mb-2">{cat.title}</h3>
+                <p className="text-sm text-[#8a8a9a] leading-relaxed">{cat.desc}</p>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ─── Vision / Mission ─── */}
+      <section className="py-24 px-6 bg-[#0d214f]/10">
+        <div className="max-w-4xl mx-auto text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            <Sparkles className="w-8 h-8 text-[#1E4FA3] mx-auto mb-6" />
+            <h2 className="text-3xl md:text-5xl font-bold font-[family-name:var(--font-display)] leading-tight mb-6">
+              We propel careers forward with{" "}
+              <span className="bg-gradient-to-r from-[#1E4FA3] to-[#3B82F6] bg-clip-text text-transparent">
+                precision built for today
+              </span>
+            </h2>
+            <p className="text-[#8a8a9a] text-lg max-w-2xl mx-auto leading-relaxed">
+              Tophexity combines deep career intelligence with cutting-edge AI to deliver insights
+              that traditional career counseling simply cannot match. Your next chapter starts here.
+            </p>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ─── Testimonials ─── */}
+      <section className="py-24 px-6">
+        <div className="max-w-7xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-3xl md:text-4xl font-bold font-[family-name:var(--font-display)] mb-4">
+              Trusted by <span className="text-[#1E4FA3]">Professionals</span>
+            </h2>
+            <p className="text-[#8a8a9a] max-w-2xl mx-auto">
+              Thousands of professionals have transformed their careers with Tophexity.
+            </p>
+          </motion.div>
+
+          <motion.div
+            variants={stagger}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            className="grid grid-cols-1 md:grid-cols-3 gap-6"
+          >
+            {testimonials.map((t) => (
+              <motion.div
+                key={t.name}
+                variants={fadeUp}
+                className="p-6 rounded-2xl bg-[#0d214f]/40 border border-[rgba(30,79,163,0.15)]"
+              >
+                <div className="flex gap-1 mb-4">
+                  {Array.from({ length: t.stars }).map((_, i) => (
+                    <Star key={i} className="w-4 h-4 fill-yellow-500 text-yellow-500" />
+                  ))}
+                </div>
+                <p className="text-sm text-[#8a8a9a] leading-relaxed mb-6">&ldquo;{t.quote}&rdquo;</p>
+                <div>
+                  <p className="font-semibold font-[family-name:var(--font-display)] text-white text-sm">{t.name}</p>
+                  <p className="text-xs text-[#8a8a9a]">{t.role}</p>
+                </div>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ─── FAQ ─── */}
+      <section id="faq" className="py-24 px-6 bg-[#0d214f]/10">
+        <div className="max-w-3xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-3xl md:text-4xl font-bold font-[family-name:var(--font-display)] mb-4">
+              Frequently Asked <span className="text-[#1E4FA3]">Questions</span>
+            </h2>
+            <p className="text-[#8a8a9a] max-w-xl mx-auto">
+              Everything you need to know about Tophexity.
+            </p>
+          </motion.div>
+
+          <div className="space-y-3">
+            {faqs.map((faq, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: i * 0.05 }}
+                className="rounded-xl border border-[rgba(30,79,163,0.15)] bg-[#0d214f]/30 overflow-hidden"
+              >
+                <button
+                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                  className="w-full flex items-center justify-between p-5 text-left"
+                >
+                  <span className="font-medium font-[family-name:var(--font-display)] text-sm md:text-base pr-4">
+                    {faq.q}
+                  </span>
+                  <ChevronDown
+                    className={`w-5 h-5 text-[#8a8a9a] shrink-0 transition-transform duration-300 ${
+                      openFaq === i ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+                <AnimatePresence>
+                  {openFaq === i && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className="overflow-hidden"
+                    >
+                      <p className="px-5 pb-5 text-sm text-[#8a8a9a] leading-relaxed">{faq.a}</p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      <footer className="border-t border-gray-200 bg-white py-8 text-center text-sm text-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400">
-        CareerPath AI &mdash; Powered by AI, Built for Your Future
+      {/* ─── CTA Banner ─── */}
+      <section className="py-24 px-6">
+        <div className="max-w-5xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="relative rounded-3xl overflow-hidden p-12 md:p-16 text-center"
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-[#0d214f] via-[#1E4FA3]/30 to-[#0d214f]" />
+            <div className="absolute inset-0 bg-[rgba(30,79,163,0.05)] backdrop-blur-sm" />
+            <div className="relative z-10">
+              <h2 className="text-3xl md:text-4xl font-bold font-[family-name:var(--font-display)] mb-4">
+                Ready to Find Your Perfect Career?
+              </h2>
+              <p className="text-[#8a8a9a] max-w-xl mx-auto mb-8">
+                Join thousands of professionals who have discovered their ideal career path with AI-powered intelligence.
+              </p>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <Link
+                  href="/register"
+                  className="flex items-center gap-2 px-8 py-3.5 rounded-xl bg-[#1E4FA3] text-white font-medium hover:bg-[#1E4FA3]/80 transition-all hover:shadow-[0_0_30px_rgba(30,79,163,0.4)]"
+                >
+                  Get Started Free
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+                <Link
+                  href="/dashboard"
+                  className="flex items-center gap-2 px-8 py-3.5 rounded-xl border border-[rgba(30,79,163,0.3)] text-[#8a8a9a] hover:text-white hover:border-[rgba(30,79,163,0.6)] transition-all"
+                >
+                  View Demo
+                </Link>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ─── Footer ─── */}
+      <footer className="border-t border-[rgba(30,79,163,0.15)] bg-[#0a0a0f]">
+        <div className="max-w-7xl mx-auto px-6 py-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+            <div>
+              <div className="flex items-center gap-2 mb-4">
+                <Sparkles className="w-6 h-6 text-[#1E4FA3]" />
+                <span className="text-xl font-bold font-[family-name:var(--font-display)] text-white">Tophexity</span>
+              </div>
+              <p className="text-sm text-[#8a8a9a] leading-relaxed mb-6">
+                AI-powered career intelligence platform helping professionals discover, analyze, and navigate their ideal career paths.
+              </p>
+              <div className="flex gap-4">
+                {["X", "In", "GH"].map((social) => (
+                  <a
+                    key={social}
+                    href="#"
+                    className="w-9 h-9 rounded-lg bg-[#0d214f]/50 border border-[rgba(30,79,163,0.15)] flex items-center justify-center text-xs text-[#8a8a9a] hover:text-white hover:border-[rgba(30,79,163,0.4)] transition-all"
+                  >
+                    {social}
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <h4 className="font-semibold font-[family-name:var(--font-display)] text-sm mb-4">Product</h4>
+              <ul className="space-y-3">
+                {footerProduct.map((link) => (
+                  <li key={link.label}>
+                    <a href={link.href} className="text-sm text-[#8a8a9a] hover:text-white transition-colors">
+                      {link.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="font-semibold font-[family-name:var(--font-display)] text-sm mb-4">Company</h4>
+              <ul className="space-y-3">
+                {footerCompany.map((link) => (
+                  <li key={link.label}>
+                    <a href={link.href} className="text-sm text-[#8a8a9a] hover:text-white transition-colors">
+                      {link.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="font-semibold font-[family-name:var(--font-display)] text-sm mb-4">Contact</h4>
+              <ul className="space-y-3">
+                <li className="text-sm text-[#8a8a9a]">hello@tophexity.com</li>
+                <li className="text-sm text-[#8a8a9a]">San Francisco, CA</li>
+                <li className="text-sm text-[#8a8a9a]">+1 (555) 123-4567</li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="mt-12 pt-8 border-t border-[rgba(30,79,163,0.15)] flex flex-col md:flex-row items-center justify-between gap-4">
+            <p className="text-xs text-[#8a8a9a]">
+              &copy; {new Date().getFullYear()} Tophexity. All rights reserved.
+            </p>
+            <div className="flex gap-6">
+              <a href="#" className="text-xs text-[#8a8a9a] hover:text-white transition-colors">Privacy</a>
+              <a href="#" className="text-xs text-[#8a8a9a] hover:text-white transition-colors">Terms</a>
+              <a href="#" className="text-xs text-[#8a8a9a] hover:text-white transition-colors">Cookies</a>
+            </div>
+          </div>
+        </div>
       </footer>
     </div>
   );

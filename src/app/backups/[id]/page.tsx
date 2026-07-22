@@ -27,7 +27,7 @@ export default function BackupDetailPage() {
   if (loading) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-200 border-t-indigo-600 dark:border-indigo-700 dark:border-t-indigo-400" />
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#1E4FA3]/30 border-t-[#1E4FA3]" />
       </div>
     );
   }
@@ -36,14 +36,14 @@ export default function BackupDetailPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
-      <button onClick={() => router.push("/backups")} className="mb-6 flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
+      <button onClick={() => router.push("/backups")} className="mb-6 flex items-center gap-2 text-sm text-[#8a8a9a] hover:text-[#f0f0f0] transition-colors">
         <ArrowLeft className="h-4 w-4" /> Back to Backup Plans
       </button>
 
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{plan.title || "Backup Career Plan"}</h1>
-        {plan.description && <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">{plan.description}</p>}
-        <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">Created {new Date(plan.created_at).toLocaleDateString()}</p>
+        <h1 className="text-2xl font-bold font-[family-name:var(--font-display)] text-[#f0f0f0]">{plan.title || "Backup Career Plan"}</h1>
+        {plan.description && <p className="mt-2 text-sm text-[#8a8a9a]">{plan.description}</p>}
+        <p className="mt-1 text-xs text-[#5a5a6a]">Created {new Date(plan.created_at).toLocaleDateString()}</p>
       </div>
 
       {plan.scenarios.length > 0 ? (
@@ -53,8 +53,8 @@ export default function BackupDetailPage() {
           ))}
         </div>
       ) : (
-        <div className="rounded-xl border-2 border-dashed border-gray-200 bg-white p-12 text-center dark:border-gray-700 dark:bg-gray-800">
-          <p className="text-sm text-gray-500 dark:text-gray-400">This backup plan has no scenarios yet.</p>
+        <div className="rounded-xl border-2 border-dashed border-[rgba(30,79,163,0.15)] bg-[#0d214f]/30 p-12 text-center">
+          <p className="text-sm text-[#8a8a9a]">This backup plan has no scenarios yet.</p>
         </div>
       )}
     </div>

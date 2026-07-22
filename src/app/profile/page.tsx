@@ -55,7 +55,7 @@ export default function ProfilePage() {
   if (loading) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-200 border-t-indigo-600" />
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#1E4FA3]/30 border-t-[#1E4FA3]" />
       </div>
     );
   }
@@ -64,8 +64,8 @@ export default function ProfilePage() {
     <div className="mx-auto max-w-3xl px-4 py-8">
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">My Profile</h1>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          <h1 className="font-[family-name:var(--font-display)] text-2xl font-bold text-[#f0f0f0]">My Profile</h1>
+          <p className="mt-1 text-sm text-[#8a8a9a]">
             {hasProfile ? "Manage your career profile" : "Create your profile to get personalized recommendations"}
           </p>
         </div>
@@ -79,10 +79,10 @@ export default function ProfilePage() {
 
       {message && (
         <div
-          className={`mb-6 rounded-lg border p-3 text-sm ${
+          className={`mb-6 rounded-xl border p-3 text-sm ${
             message.type === "success"
-              ? "border-green-200 bg-green-50 text-green-700 dark:border-green-800 dark:bg-green-900/30 dark:text-green-400"
-              : "border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-900/30 dark:text-red-400"
+              ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-400"
+              : "border-red-500/20 bg-red-500/10 text-red-400"
           }`}
         >
           {message.text}
@@ -98,12 +98,12 @@ export default function ProfilePage() {
       ) : hasProfile ? (
         <ProfileView profile={profile} />
       ) : (
-        <div className="rounded-xl border-2 border-dashed border-gray-200 bg-white p-12 text-center dark:border-gray-700 dark:bg-gray-800">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900/50">
-            <Plus className="h-8 w-8 text-indigo-600 dark:text-indigo-400" />
+        <div className="rounded-2xl border-2 border-dashed border-[#1E4FA3]/20 bg-[#0d214f]/30 p-12 text-center">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#1E4FA3]/20">
+            <Plus className="h-8 w-8 text-[#1E4FA3]" />
           </div>
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">No profile yet</h3>
-          <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">Create your profile to start getting career recommendations.</p>
+          <h3 className="font-[family-name:var(--font-display)] text-lg font-semibold text-[#f0f0f0]">No profile yet</h3>
+          <p className="mt-2 text-sm text-[#8a8a9a]">Create your profile to start getting career recommendations.</p>
           <Button className="mt-6" onClick={() => setEditing(true)}>
             <Plus className="mr-1 h-4 w-4" />
             Create Profile
@@ -113,7 +113,7 @@ export default function ProfilePage() {
 
       {hasProfile && !editing && (
         <div className="mt-8">
-          <button className="flex items-center gap-2 text-sm text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300">
+          <button className="flex items-center gap-2 text-sm text-[#5a5a6a] hover:text-[#8a8a9a]">
             <History className="h-4 w-4" />
             View profile version history
           </button>

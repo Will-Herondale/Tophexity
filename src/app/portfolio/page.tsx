@@ -51,11 +51,11 @@ export default function PortfolioPage() {
   };
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8">
+    <div className="mx-auto max-w-5xl px-4 py-8" style={{ backgroundColor: "#0a0a0f" }}>
       <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">My Portfolio</h1>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{items.length} items</p>
+          <h1 className="font-[family-name:var(--font-display)] text-2xl font-bold" style={{ color: "#f0f0f0" }}>My Portfolio</h1>
+          <p className="mt-1 text-sm" style={{ color: "#8a8a9a" }}>{items.length} items</p>
         </div>
         <Button onClick={() => { setEditItem(null); setShowForm(true); }}>
           <Plus className="mr-1 h-4 w-4" /> Add Item
@@ -64,12 +64,14 @@ export default function PortfolioPage() {
 
       <div className="mb-6 flex flex-wrap gap-2">
         <button onClick={() => { setFilter(""); setPage(1); }}
-          className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${!filter ? "bg-indigo-600 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"}`}>
+          className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${!filter ? "text-white" : "hover:bg-[#112a5e]"}`}
+          style={{ backgroundColor: !filter ? "#1E4FA3" : "#0d214f", color: !filter ? "#ffffff" : "#8a8a9a" }}>
           All
         </button>
         {PORTFOLIO_ITEM_TYPES.map((type) => (
           <button key={type.value} onClick={() => { setFilter(type.value); setPage(1); }}
-            className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${filter === type.value ? "bg-indigo-600 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"}`}>
+            className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${filter === type.value ? "text-white" : "hover:bg-[#112a5e]"}`}
+            style={{ backgroundColor: filter === type.value ? "#1E4FA3" : "#0d214f", color: filter === type.value ? "#ffffff" : "#8a8a9a" }}>
             {type.label}
           </button>
         ))}
@@ -77,15 +79,15 @@ export default function PortfolioPage() {
 
       {loading ? (
         <div className="flex min-h-[200px] items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-200 border-t-indigo-600 dark:border-indigo-700 dark:border-t-indigo-400" />
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#1E4FA3]/30 border-t-[#1E4FA3]" />
         </div>
       ) : items.length === 0 ? (
-        <div className="rounded-xl border-2 border-dashed border-gray-200 bg-white p-12 text-center dark:border-gray-700 dark:bg-gray-800">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700">
-            <FolderOpen className="h-8 w-8 text-gray-400 dark:text-gray-500" />
+        <div className="rounded-xl border-2 border-dashed p-12 text-center" style={{ borderColor: "rgba(30, 79, 163, 0.15)", backgroundColor: "#0d214f" }}>
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full" style={{ backgroundColor: "#112a5e" }}>
+            <FolderOpen className="h-8 w-8" style={{ color: "#5a5a6a" }} />
           </div>
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">No portfolio items yet</h3>
-          <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">Start showcasing your projects, achievements, and experience.</p>
+          <h3 className="text-lg font-semibold font-[family-name:var(--font-display)]" style={{ color: "#f0f0f0" }}>No portfolio items yet</h3>
+          <p className="mt-2 text-sm" style={{ color: "#8a8a9a" }}>Start showcasing your projects, achievements, and experience.</p>
           <Button className="mt-6" onClick={() => { setEditItem(null); setShowForm(true); }}>
             <Plus className="mr-1 h-4 w-4" /> Add Your First Item
           </Button>
@@ -96,7 +98,7 @@ export default function PortfolioPage() {
           {totalPages > 1 && (
             <div className="mt-6 flex justify-center gap-2">
               <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage(page - 1)}>Previous</Button>
-              <span className="flex items-center px-3 text-sm text-gray-500 dark:text-gray-400">Page {page} of {totalPages}</span>
+              <span className="flex items-center px-3 text-sm" style={{ color: "#8a8a9a" }}>Page {page} of {totalPages}</span>
               <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage(page + 1)}>Next</Button>
             </div>
           )}
@@ -109,7 +111,7 @@ export default function PortfolioPage() {
 
       {deleteConfirm && (
         <Modal isOpen onClose={() => setDeleteConfirm(null)} title="Delete Item">
-          <p className="text-sm text-gray-600 dark:text-gray-300">Are you sure you want to delete <strong>{deleteConfirm.title}</strong>?</p>
+          <p className="text-sm" style={{ color: "#8a8a9a" }}>Are you sure you want to delete <strong style={{ color: "#f0f0f0" }}>{deleteConfirm.title}</strong>?</p>
           <div className="mt-6 flex justify-end gap-3">
             <Button variant="outline" onClick={() => setDeleteConfirm(null)}>Cancel</Button>
             <Button variant="danger" onClick={handleDelete}>Delete</Button>

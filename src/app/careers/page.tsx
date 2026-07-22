@@ -57,8 +57,8 @@ export default function CareersPage() {
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Explore Careers</h1>
-        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{total > 0 ? `${total} careers available` : "Discover career paths"}</p>
+        <h1 className="font-[family-name:var(--font-display)] text-2xl font-bold text-[#f0f0f0]">Explore Careers</h1>
+        <p className="mt-1 text-sm text-[#8a8a9a]">{total > 0 ? `${total} careers available` : "Discover career paths"}</p>
       </div>
 
       <div className="mb-6">
@@ -67,15 +67,15 @@ export default function CareersPage() {
 
       {loading ? (
         <div className="flex min-h-[300px] items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-200 border-t-indigo-600 dark:border-indigo-700 dark:border-t-indigo-400" />
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#1E4FA3]/30 border-t-[#1E4FA3]" />
         </div>
       ) : careers.length === 0 ? (
-        <div className="rounded-xl border-2 border-dashed border-gray-200 bg-white p-12 text-center dark:border-gray-700 dark:bg-gray-800">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700">
-            <Briefcase className="h-8 w-8 text-gray-400 dark:text-gray-500" />
+        <div className="rounded-2xl border-2 border-dashed border-[#1E4FA3]/20 bg-[#0d214f]/30 p-12 text-center">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#1E4FA3]/10">
+            <Briefcase className="h-8 w-8 text-[#5a5a6a]" />
           </div>
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">No careers found</h3>
-          <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">Try adjusting your search or filters.</p>
+          <h3 className="font-[family-name:var(--font-display)] text-lg font-semibold text-[#f0f0f0]">No careers found</h3>
+          <p className="mt-2 text-sm text-[#8a8a9a]">Try adjusting your search or filters.</p>
         </div>
       ) : (
         <>
@@ -87,7 +87,7 @@ export default function CareersPage() {
           {totalPages > 1 && (
             <div className="mt-6 flex items-center justify-center gap-3">
               <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage(page - 1)}>Previous</Button>
-              <span className="text-sm text-gray-500 dark:text-gray-400">Page {page} of {totalPages}</span>
+              <span className="text-sm text-[#8a8a9a]">Page {page} of {totalPages}</span>
               <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage(page + 1)}>Next</Button>
             </div>
           )}

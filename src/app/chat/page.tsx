@@ -60,7 +60,7 @@ export default function ChatPage() {
 
       {deleteConfirm && (
         <Modal isOpen onClose={() => setDeleteConfirm(null)} title="Delete Conversation">
-          <p className="text-sm text-gray-600 dark:text-gray-300">Are you sure you want to delete this conversation?</p>
+          <p className="text-sm text-[#8a8a9a]">Are you sure you want to delete this conversation?</p>
           <div className="mt-6 flex justify-end gap-3">
             <Button variant="outline" onClick={() => setDeleteConfirm(null)}>Cancel</Button>
             <Button variant="danger" onClick={handleDeleteSession}>Delete</Button>

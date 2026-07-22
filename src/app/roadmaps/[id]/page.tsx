@@ -27,7 +27,7 @@ export default function RoadmapDetailPage() {
   if (loading) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-200 border-t-indigo-600 dark:border-indigo-700 dark:border-t-indigo-400" />
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#1E4FA3]/30 border-t-[#1E4FA3]" />
       </div>
     );
   }
@@ -35,15 +35,15 @@ export default function RoadmapDetailPage() {
   if (!roadmap) return null;
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8">
-      <button onClick={() => router.push("/roadmaps")} className="mb-6 flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
+    <div className="mx-auto max-w-3xl px-4 py-8" style={{ backgroundColor: "#0a0a0f" }}>
+      <button onClick={() => router.push("/roadmaps")} className="mb-6 flex items-center gap-2 text-sm transition-colors hover:text-[#f0f0f0]" style={{ color: "#8a8a9a" }}>
         <ArrowLeft className="h-4 w-4" /> Back to Roadmaps
       </button>
 
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{roadmap.title || "Learning Roadmap"}</h1>
-        {roadmap.description && <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">{roadmap.description}</p>}
-        <div className="mt-2 flex items-center gap-3 text-xs text-gray-400 dark:text-gray-500">
+        <h1 className="font-[family-name:var(--font-display)] text-2xl font-bold" style={{ color: "#f0f0f0" }}>{roadmap.title || "Learning Roadmap"}</h1>
+        {roadmap.description && <p className="mt-2 text-sm" style={{ color: "#8a8a9a" }}>{roadmap.description}</p>}
+        <div className="mt-2 flex items-center gap-3 text-xs" style={{ color: "#5a5a6a" }}>
           <span>Created {new Date(roadmap.created_at).toLocaleDateString()}</span>
           {roadmap.estimated_duration_months && (
             <span className="flex items-center gap-1">
@@ -54,12 +54,12 @@ export default function RoadmapDetailPage() {
       </div>
 
       {roadmap.steps.length > 0 ? (
-        <div className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
+        <div className="rounded-xl border p-6" style={{ borderColor: "rgba(30, 79, 163, 0.15)", backgroundColor: "#0d214f" }}>
           <RoadmapTimeline steps={roadmap.steps} />
         </div>
       ) : (
-        <div className="rounded-xl border-2 border-dashed border-gray-200 bg-white p-12 text-center dark:border-gray-700 dark:bg-gray-800">
-          <p className="text-sm text-gray-500 dark:text-gray-400">This roadmap has no steps yet.</p>
+        <div className="rounded-xl border-2 border-dashed p-12 text-center" style={{ borderColor: "rgba(30, 79, 163, 0.15)", backgroundColor: "#0d214f" }}>
+          <p className="text-sm" style={{ color: "#8a8a9a" }}>This roadmap has no steps yet.</p>
         </div>
       )}
     </div>

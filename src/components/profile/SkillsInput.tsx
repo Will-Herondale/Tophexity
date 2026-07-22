@@ -54,10 +54,10 @@ export default function SkillsInput({ value, onChange }: SkillsInputProps) {
             <button
               type="button"
               onClick={() => setEditingSkill(editingSkill === name ? null : name)}
-              className="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 px-3 py-1.5 text-xs font-medium text-indigo-700 hover:bg-indigo-100 transition-colors dark:bg-indigo-900/50 dark:text-indigo-300 dark:hover:bg-indigo-800/50"
+              className="inline-flex items-center gap-1.5 rounded-full bg-[#1E4FA3]/15 px-3 py-1.5 text-xs font-medium text-[#1E4FA3] transition-colors hover:bg-[#1E4FA3]/25"
             >
               {name}
-              <span className="text-[10px] text-indigo-400 dark:text-indigo-500 capitalize">{level}</span>
+              <span className="text-[10px] capitalize text-[#1E4FA3]/60">{level}</span>
               <span
                 role="button"
                 tabIndex={0}
@@ -71,20 +71,20 @@ export default function SkillsInput({ value, onChange }: SkillsInputProps) {
                     removeSkill(name);
                   }
                 }}
-                className="ml-0.5 rounded-full p-0.5 text-indigo-400 hover:bg-indigo-200 hover:text-indigo-700 dark:text-indigo-500 dark:hover:bg-indigo-800 dark:hover:text-indigo-300"
+                className="ml-0.5 rounded-full p-0.5 text-[#1E4FA3]/60 hover:bg-[#1E4FA3]/20 hover:text-[#1E4FA3]"
               >
                 <X className="h-3 w-3" />
               </span>
             </button>
             {editingSkill === name && (
-              <div className="absolute top-full left-0 z-10 mt-1 rounded-lg border border-gray-200 bg-white p-3 shadow-lg dark:border-gray-700 dark:bg-gray-800">
-                <p className="mb-2 text-xs font-medium text-gray-700 dark:text-gray-300">
-                  {name} — <span className="capitalize">{level}</span>
+              <div className="absolute top-full left-0 z-10 mt-1 rounded-lg border border-[#1E4FA3]/15 bg-[#0d214f] p-3 shadow-lg shadow-black/30">
+                <p className="mb-2 text-xs font-medium text-[#8a8a9a]">
+                  {name} — <span className="capitalize text-[#f0f0f0]">{level}</span>
                 </p>
                 <select
                   value={level}
                   onChange={(e) => updateLevel(name, e.target.value)}
-                  className="w-full rounded-lg border border-gray-300 px-2 py-1.5 text-xs focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+                  className="w-full rounded-lg border border-[#1E4FA3]/15 bg-[#0a0a0f]/60 px-2 py-1.5 text-xs text-[#f0f0f0] focus:border-[#1E4FA3] focus:outline-none focus:ring-1 focus:ring-[#1E4FA3]"
                 >
                   {SKILL_LEVELS.map((sl) => (
                     <option key={sl.value} value={sl.value}>
@@ -112,16 +112,16 @@ export default function SkillsInput({ value, onChange }: SkillsInputProps) {
               }
             }}
             placeholder="Type a skill name..."
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-500"
+            className="w-full rounded-lg border border-[#1E4FA3]/15 bg-[#0d214f]/30 px-3 py-2 text-sm text-[#f0f0f0] placeholder:text-[#5a5a6a] focus:border-[#1E4FA3] focus:outline-none focus:ring-1 focus:ring-[#1E4FA3]"
           />
           {input && suggestions.length > 0 && (
-            <div className="absolute top-full left-0 z-10 mt-1 max-h-40 w-full overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
+            <div className="absolute top-full left-0 z-10 mt-1 max-h-40 w-full overflow-y-auto rounded-lg border border-[#1E4FA3]/15 bg-[#0d214f] shadow-lg shadow-black/30">
               {suggestions.slice(0, 8).map((s) => (
                 <button
                   key={s}
                   type="button"
                   onClick={() => addSkill(s)}
-                  className="block w-full px-3 py-2 text-left text-sm hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-700"
+                  className="block w-full px-3 py-2 text-left text-sm text-[#f0f0f0] hover:bg-[#1E4FA3]/15"
                 >
                   {s}
                 </button>
@@ -132,24 +132,24 @@ export default function SkillsInput({ value, onChange }: SkillsInputProps) {
         <button
           type="button"
           onClick={() => input.trim() && addSkill(input)}
-          className="rounded-lg bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+          className="rounded-lg bg-[#1E4FA3] px-3 py-2 text-sm font-medium text-white hover:bg-[#1E4FA3]/80"
         >
           <Plus className="h-4 w-4" />
         </button>
         <button
           type="button"
           onClick={() => setShowPresets(!showPresets)}
-          className="flex items-center gap-1 rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+          className="flex items-center gap-1 rounded-lg border border-[#1E4FA3]/15 px-3 py-2 text-sm text-[#8a8a9a] hover:bg-[#0d214f]/30 hover:text-[#f0f0f0]"
         >
           Quick Add <ChevronDown className="h-4 w-4" />
         </button>
       </div>
 
       {showPresets && (
-        <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-800/50">
+        <div className="rounded-lg border border-[#1E4FA3]/15 bg-[#0d214f]/30 p-3">
           {Object.entries(SKILL_PRESETS).map(([category, skills]) => (
             <div key={category} className="mb-3 last:mb-0">
-              <p className="mb-1.5 text-xs font-semibold text-gray-500 dark:text-gray-400">{category}</p>
+              <p className="mb-1.5 text-xs font-semibold text-[#5a5a6a]">{category}</p>
               <div className="flex flex-wrap gap-1.5">
                 {skills
                   .filter((s) => !value[s])
@@ -158,7 +158,7 @@ export default function SkillsInput({ value, onChange }: SkillsInputProps) {
                       key={skill}
                       type="button"
                       onClick={() => addSkill(skill)}
-                      className="rounded-full border border-gray-200 bg-white px-2.5 py-1 text-xs text-gray-600 hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700 transition-colors dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-indigo-600 dark:hover:bg-indigo-900/50 dark:hover:text-indigo-300"
+                      className="rounded-full border border-[#1E4FA3]/15 bg-[#0a0a0f]/40 px-2.5 py-1 text-xs text-[#8a8a9a] transition-colors hover:border-[#1E4FA3]/40 hover:bg-[#1E4FA3]/15 hover:text-[#1E4FA3]"
                     >
                       + {skill}
                     </button>

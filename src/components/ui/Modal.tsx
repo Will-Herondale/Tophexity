@@ -31,10 +31,10 @@ export default function Modal({ isOpen, onClose, title, children, size = "md" }:
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="fixed inset-0 bg-black/50" onClick={onClose} />
+      <div className="fixed inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
       <div
         className={clsx(
-          "relative z-10 mx-4 max-h-[90vh] overflow-y-auto rounded-xl bg-white p-6 shadow-xl dark:bg-gray-800",
+          "relative z-10 mx-4 max-h-[90vh] overflow-y-auto rounded-2xl border border-[#1E4FA3]/15 bg-[#0d214f] p-6 shadow-xl",
           {
             "w-full max-w-md": size === "sm",
             "w-full max-w-lg": size === "md",
@@ -44,9 +44,9 @@ export default function Modal({ isOpen, onClose, title, children, size = "md" }:
         )}
       >
         <div className="mb-4 flex items-center justify-between">
-          {title && <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">{title}</h2>}
-          <button onClick={onClose} className="rounded-lg p-1 hover:bg-gray-100 dark:hover:bg-gray-700">
-            <X className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+          {title && <h2 className="font-[family-name:var(--font-display)] text-lg font-semibold text-[#f0f0f0]">{title}</h2>}
+          <button onClick={onClose} className="rounded-lg p-1 text-[#8a8a9a] hover:bg-[#1E4FA3]/10 hover:text-[#f0f0f0]">
+            <X className="h-5 w-5" />
           </button>
         </div>
         {children}

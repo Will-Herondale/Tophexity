@@ -28,32 +28,32 @@ export default function NavCustomizer() {
 
   return (
     <div>
-      <h3 className="mb-3 text-sm font-semibold text-gray-900 dark:text-gray-100">Navigation Items</h3>
-      <p className="mb-4 text-xs text-gray-500 dark:text-gray-400">Toggle visibility and reorder sidebar items.</p>
+      <h3 className="mb-3 text-sm font-semibold font-[family-name:var(--font-display)] text-[#f0f0f0]">Navigation Items</h3>
+      <p className="mb-4 text-xs text-[#8a8a9a]">Toggle visibility and reorder sidebar items.</p>
       <div className="space-y-2">
         {sorted.map((item, index) => (
           <div
             key={item.id}
-            className="flex items-center gap-3 rounded-lg border border-gray-200 bg-white px-3 py-2.5 dark:border-gray-700 dark:bg-gray-800"
+            className="flex items-center gap-3 rounded-lg border border-[rgba(30,79,163,0.15)] bg-[#0d214f]/30 px-3 py-2.5"
           >
             <button
               onClick={() => moveUp(index)}
               disabled={index === 0}
-              className="text-gray-300 hover:text-gray-600 disabled:opacity-30 dark:text-gray-600 dark:hover:text-gray-300"
+              className="text-[#5a5a6a] hover:text-[#8a8a9a] disabled:opacity-30"
             >
               <GripVertical className="h-4 w-4 rotate-180" />
             </button>
             <button
               onClick={() => moveDown(index)}
               disabled={index === sorted.length - 1}
-              className="text-gray-300 hover:text-gray-600 disabled:opacity-30 dark:text-gray-600 dark:hover:text-gray-300"
+              className="text-[#5a5a6a] hover:text-[#8a8a9a] disabled:opacity-30"
             >
               <GripVertical className="h-4 w-4" />
             </button>
-            <span className="flex-1 text-sm text-gray-700 dark:text-gray-300">{item.label}</span>
+            <span className="flex-1 text-sm text-[#f0f0f0]">{item.label}</span>
             <button
               onClick={() => toggleNavItem(item.id)}
-              className={`rounded p-1 ${item.visible ? "text-green-600 hover:bg-green-50 dark:text-green-400 dark:hover:bg-green-900/20" : "text-gray-300 hover:bg-gray-50 dark:text-gray-600 dark:hover:bg-gray-700"}`}
+              className={`rounded p-1 ${item.visible ? "text-emerald-400 hover:bg-emerald-500/10" : "text-[#5a5a6a] hover:bg-[#0d214f]/60"}`}
             >
               {item.visible ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
             </button>

@@ -21,13 +21,13 @@ export default function ProgressBar({
     <div className={clsx("space-y-2", className)}>
       {(label || showPercentage) && (
         <div className="flex items-center justify-between">
-          {label && <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{label}</span>}
-          {showPercentage && <span className="text-sm text-gray-500 dark:text-gray-400">{clamped}%</span>}
+          {label && <span className="text-sm font-medium text-[#f0f0f0]">{label}</span>}
+          {showPercentage && <span className="text-sm text-[#8a8a9a]">{clamped}%</span>}
         </div>
       )}
-      <div className="h-2 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
+      <div className="h-2 w-full overflow-hidden rounded-full bg-[#0d214f]/50">
         <div
-          className="h-full rounded-full bg-indigo-600 transition-all duration-500"
+          className="h-full rounded-full bg-[#1E4FA3] transition-all duration-500"
           style={{ width: `${clamped}%` }}
         />
       </div>

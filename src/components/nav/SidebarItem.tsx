@@ -2,44 +2,35 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  LayoutDashboard, User, Briefcase, FolderOpen, Star, Map, Shield, MessageSquare, Settings,
-} from "lucide-react";
-
-const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
-  LayoutDashboard,
-  User,
-  Briefcase,
-  FolderOpen,
-  Star,
-  Map,
-  Shield,
-  MessageSquare,
-  Settings,
-};
+import * as Icons from "lucide-react";
 
 interface SidebarItemProps {
   href: string;
   label: string;
   icon: string;
+  collapsed?: boolean;
 }
 
-export default function SidebarItem({ href, label, icon }: SidebarItemProps) {
+export default function SidebarItem({ href, label, icon, collapsed = false }: SidebarItemProps) {
   const pathname = usePathname();
   const isActive = pathname === href || pathname.startsWith(href + "/");
-  const Icon = iconMap[icon] || LayoutDashboard;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const Icon = (Icons as any)[icon] || Icons.LayoutDashboard;
 
   return (
     <Link
       href={href}
-      className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+      title={collapsed ? label : undefined}
+      className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors ${
+        collapsed ? "justify-center" : ""
+      } ${
         isActive
-          ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-400"
-          : "text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-200"
+          ? "bg-[#1E4FA3]/10 text-[#1E4FA3] font-medium"
+          : "text-[#8a8a9a] hover:text-[#f0f0f0] hover:bg-[#1E4FA3]/5"
       }`}
     >
       <Icon className="h-5 w-5 flex-shrink-0" />
-      {label}
+      {!collapsed && <span>{label}</span>}
     </Link>
   );
 }

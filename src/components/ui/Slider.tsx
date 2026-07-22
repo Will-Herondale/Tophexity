@@ -26,9 +26,9 @@ export default function Slider({
   return (
     <div className={clsx("space-y-2", className)}>
       <div className="flex items-center justify-between">
-        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">{label}</label>
+        <label className="text-sm font-medium text-[#8a8a9a]">{label}</label>
         {showValue && (
-          <span className="text-sm font-semibold text-indigo-600 dark:text-indigo-400">{value}</span>
+          <span className="text-sm font-semibold text-[#1E4FA3]">{value}</span>
         )}
       </div>
       <input
@@ -38,9 +38,9 @@ export default function Slider({
         step={step}
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-gray-200 dark:bg-gray-700 accent-indigo-600"
+        className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-[#0d214f]/50 accent-[#1E4FA3]"
       />
-      <div className="flex justify-between text-xs text-gray-400 dark:text-gray-500">
+      <div className="flex justify-between text-xs text-[#5a5a6a]">
         <span>{min}</span>
         <span>{max}</span>
       </div>

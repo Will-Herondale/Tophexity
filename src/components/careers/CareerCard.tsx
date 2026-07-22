@@ -6,21 +6,21 @@ import Card from "@/components/ui/Card";
 import { ChevronDown, ChevronUp, DollarSign, TrendingUp, Briefcase } from "lucide-react";
 
 const demandColors: Record<string, string> = {
-  very_high: "bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300",
-  high: "bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300",
-  above_average: "bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300",
-  average: "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300",
-  below_average: "bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300",
-  low: "bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300",
+  very_high: "bg-emerald-500/15 text-emerald-400",
+  high: "bg-emerald-500/15 text-emerald-400",
+  above_average: "bg-[#1E4FA3]/20 text-[#6aafff]",
+  average: "bg-[#5a5a6a]/20 text-[#8a8a9a]",
+  below_average: "bg-amber-500/15 text-amber-400",
+  low: "bg-red-500/15 text-red-400",
 };
 
 const growthColors: Record<string, string> = {
-  excellent: "text-green-600 dark:text-green-400",
-  high: "text-green-600 dark:text-green-400",
-  above_average: "text-blue-600 dark:text-blue-400",
-  average: "text-gray-500 dark:text-gray-400",
-  below_average: "text-amber-600 dark:text-amber-400",
-  declining: "text-red-600 dark:text-red-400",
+  excellent: "text-emerald-400",
+  high: "text-emerald-400",
+  above_average: "text-[#6aafff]",
+  average: "text-[#8a8a9a]",
+  below_average: "text-amber-400",
+  declining: "text-red-400",
 };
 
 interface CareerCardProps {
@@ -44,30 +44,30 @@ export default function CareerCard({ career, onViewDetails }: CareerCardProps) {
       <div className="cursor-pointer" onClick={() => setExpanded(!expanded)}>
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">{career.title}</h3>
+            <h3 className="font-[family-name:var(--font-display)] text-base font-semibold text-[#f0f0f0]">{career.title}</h3>
             {career.description && (
-              <p className="mt-1 text-sm text-gray-500 line-clamp-2 dark:text-gray-400">{career.description}</p>
+              <p className="mt-1 text-sm text-[#8a8a9a] line-clamp-2">{career.description}</p>
             )}
           </div>
-          <span className="ml-2 text-gray-400 dark:text-gray-500">
+          <span className="ml-2 text-[#5a5a6a]">
             {expanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
           </span>
         </div>
 
         <div className="mt-3 flex flex-wrap gap-2">
           {career.demand_level && (
-            <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${demandColors[career.demand_level] || "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300"}`}>
+            <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${demandColors[career.demand_level] || "bg-[#5a5a6a]/20 text-[#8a8a9a]"}`}>
               {career.demand_level.replace("_", " ")} demand
             </span>
           )}
           {career.growth_outlook && (
-            <span className={`flex items-center gap-1 text-xs ${growthColors[career.growth_outlook] || "text-gray-500 dark:text-gray-400"}`}>
+            <span className={`flex items-center gap-1 text-xs ${growthColors[career.growth_outlook] || "text-[#8a8a9a]"}`}>
               <TrendingUp className="h-3 w-3" />
               {career.growth_outlook.replace("_", " ")} growth
             </span>
           )}
           {career.average_salary && (
-            <span className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+            <span className="flex items-center gap-1 text-xs text-[#8a8a9a]">
               <DollarSign className="h-3 w-3" />
               ${(career.average_salary / 1000).toFixed(0)}k avg
             </span>
@@ -76,25 +76,25 @@ export default function CareerCard({ career, onViewDetails }: CareerCardProps) {
       </div>
 
       {expanded && (
-        <div className="mt-4 border-t border-gray-100 pt-4 dark:border-gray-700">
+        <div className="mt-4 border-t border-[#1E4FA3]/15 pt-4">
           {career.description && (
-            <p className="mb-3 text-sm text-gray-600 dark:text-gray-300">{career.description}</p>
+            <p className="mb-3 text-sm text-[#8a8a9a]">{career.description}</p>
           )}
           {educationText && (
-            <p className="mb-2 text-xs text-gray-500 dark:text-gray-400">
+            <p className="mb-2 text-xs text-[#5a5a6a]">
               <Briefcase className="mr-1 inline h-3 w-3" />
               Typical education: {educationText}
             </p>
           )}
           {skillsText && (
-            <p className="mb-3 text-xs text-gray-500 dark:text-gray-400">Typical skills: {skillsText}</p>
+            <p className="mb-3 text-xs text-[#5a5a6a]">Typical skills: {skillsText}</p>
           )}
           <button
             onClick={(e) => {
               e.stopPropagation();
               onViewDetails(career);
             }}
-            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 transition-colors"
+            className="rounded-xl bg-[#1E4FA3] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#2a5fb3]"
           >
             View Full Details
           </button>

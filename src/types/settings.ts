@@ -29,7 +29,7 @@ export const DEFAULT_SETTINGS: UserSettings = {
     { id: "chat", label: "Chat", href: "/chat", icon: "MessageSquare", visible: true, order: 7 },
     { id: "settings", label: "Settings", href: "/settings", icon: "Settings", visible: true, order: 8 },
   ],
-  theme: "system",
+  theme: "dark",
   notifications: {
     email: true,
     recommendations: true,

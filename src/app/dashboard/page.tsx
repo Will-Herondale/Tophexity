@@ -36,22 +36,22 @@ export default function DashboardPage() {
   }, []);
 
   const quickLinks = [
-    { icon: <User className="h-5 w-5" />, label: "Profile", href: "/profile", color: "bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400" },
-    { icon: <Briefcase className="h-5 w-5" />, label: "Careers", href: "/careers", color: "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400" },
-    { icon: <FolderOpen className="h-5 w-5" />, label: "Portfolio", href: "/portfolio", color: "bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400" },
-    { icon: <Star className="h-5 w-5" />, label: "Recommendations", href: "/recommendations", color: "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400" },
-    { icon: <Map className="h-5 w-5" />, label: "Roadmaps", href: "/roadmaps", color: "bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400" },
-    { icon: <Shield className="h-5 w-5" />, label: "Backup Plans", href: "/backups", color: "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400" },
-    { icon: <MessageSquare className="h-5 w-5" />, label: "Chat", href: "/chat", color: "bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400" },
+    { icon: <User className="h-5 w-5" />, label: "Profile", href: "/profile", color: "bg-[#1E4FA3]/20 text-[#4a90e2]" },
+    { icon: <Briefcase className="h-5 w-5" />, label: "Careers", href: "/careers", color: "bg-[#1E4FA3]/20 text-[#6aafff]" },
+    { icon: <FolderOpen className="h-5 w-5" />, label: "Portfolio", href: "/portfolio", color: "bg-amber-500/15 text-amber-400" },
+    { icon: <Star className="h-5 w-5" />, label: "Recommendations", href: "/recommendations", color: "bg-emerald-500/15 text-emerald-400" },
+    { icon: <Map className="h-5 w-5" />, label: "Roadmaps", href: "/roadmaps", color: "bg-purple-500/15 text-purple-400" },
+    { icon: <Shield className="h-5 w-5" />, label: "Backup Plans", href: "/backups", color: "bg-red-500/15 text-red-400" },
+    { icon: <MessageSquare className="h-5 w-5" />, label: "Chat", href: "/chat", color: "bg-teal-500/15 text-teal-400" },
   ];
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+        <h1 className="font-[family-name:var(--font-display)] text-2xl font-bold text-[#f0f0f0]">
           Welcome back{profile?.full_name ? `, ${profile.full_name}` : ""}!
         </h1>
-        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        <p className="mt-1 text-sm text-[#8a8a9a]">
           {profile
             ? profile.headline || "Manage your career journey"
             : "Complete your profile to get started"}
@@ -59,11 +59,11 @@ export default function DashboardPage() {
       </div>
 
       {!profile && (
-        <Card className="mb-6 border-indigo-200 bg-indigo-50 dark:border-indigo-700 dark:bg-indigo-900/30">
+        <Card className="mb-6 border-[#1E4FA3]/30 bg-[#0d214f]/50">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-semibold text-indigo-900 dark:text-indigo-300">Complete your profile</h3>
-              <p className="mt-1 text-xs text-indigo-700 dark:text-indigo-400">
+              <h3 className="text-sm font-semibold text-[#f0f0f0]">Complete your profile</h3>
+              <p className="mt-1 text-xs text-[#8a8a9a]">
                 Tell us about yourself to get personalized career recommendations.
               </p>
             </div>
@@ -79,35 +79,35 @@ export default function DashboardPage() {
           <button
             key={link.href}
             onClick={() => router.push(link.href)}
-            className="flex flex-col items-center gap-2 rounded-xl border border-gray-200 bg-white p-4 text-center transition-colors hover:border-indigo-200 hover:bg-indigo-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:border-indigo-700 dark:hover:bg-indigo-900/30"
+            className="flex flex-col items-center gap-2 rounded-2xl border border-[#1E4FA3]/10 bg-[#0d214f]/30 p-4 text-center transition-all hover:border-[#1E4FA3]/20 hover:bg-[#0d214f]/50"
           >
-            <div className={`rounded-lg p-2.5 ${link.color}`}>{link.icon}</div>
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{link.label}</span>
+            <div className={`rounded-xl p-2.5 ${link.color}`}>{link.icon}</div>
+            <span className="text-sm font-medium text-[#f0f0f0]">{link.label}</span>
           </button>
         ))}
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
-          <h3 className="mb-3 text-sm font-semibold text-gray-900 dark:text-gray-100">
-            <Star className="mr-1 inline h-4 w-4 text-amber-500" />
+          <h3 className="mb-3 text-sm font-semibold text-[#f0f0f0] font-[family-name:var(--font-display)]">
+            <Star className="mr-1 inline h-4 w-4 text-amber-400" />
             Recent Recommendations
           </h3>
           {recommendations.length === 0 ? (
-            <p className="text-xs text-gray-400 dark:text-gray-500">No recommendations yet. Complete your profile to get started.</p>
+            <p className="text-xs text-[#5a5a6a]">No recommendations yet. Complete your profile to get started.</p>
           ) : (
             <div className="space-y-2">
               {recommendations.map((rec) => (
                 <button
                   key={rec.id}
                   onClick={() => router.push(`/recommendations/${rec.id}`)}
-                  className="flex w-full items-center justify-between rounded-lg border border-gray-100 p-3 text-left hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-700"
+                  className="flex w-full items-center justify-between rounded-xl border border-[#1E4FA3]/10 p-3 text-left transition-colors hover:border-[#1E4FA3]/20 hover:bg-[#0d214f]/30"
                 >
                   <div>
-                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{rec.title || "Career Recommendation"}</p>
-                    <p className="text-xs text-gray-400 dark:text-gray-500">{rec.items.length} careers</p>
+                    <p className="text-sm font-medium text-[#f0f0f0]">{rec.title || "Career Recommendation"}</p>
+                    <p className="text-xs text-[#5a5a6a]">{rec.items.length} careers</p>
                   </div>
-                  <ArrowRight className="h-4 w-4 text-gray-300 dark:text-gray-600" />
+                  <ArrowRight className="h-4 w-4 text-[#5a5a6a]" />
                 </button>
               ))}
             </div>
@@ -115,18 +115,18 @@ export default function DashboardPage() {
         </Card>
 
         <Card>
-          <h3 className="mb-3 text-sm font-semibold text-gray-900 dark:text-gray-100">
-            <FolderOpen className="mr-1 inline h-4 w-4 text-amber-500" />
+          <h3 className="mb-3 text-sm font-semibold text-[#f0f0f0] font-[family-name:var(--font-display)]">
+            <FolderOpen className="mr-1 inline h-4 w-4 text-amber-400" />
             Portfolio Items
           </h3>
           {portfolioItems.length === 0 ? (
-            <p className="text-xs text-gray-400 dark:text-gray-500">No portfolio items yet. Start showcasing your work.</p>
+            <p className="text-xs text-[#5a5a6a]">No portfolio items yet. Start showcasing your work.</p>
           ) : (
             <div className="space-y-2">
               {portfolioItems.map((item) => (
-                <div key={item.id} className="rounded-lg border border-gray-100 p-3 dark:border-gray-700">
-                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{item.title}</p>
-                  <p className="text-xs text-gray-400 capitalize dark:text-gray-500">{item.item_type.replace("_", " ")}</p>
+                <div key={item.id} className="rounded-xl border border-[#1E4FA3]/10 p-3">
+                  <p className="text-sm font-medium text-[#f0f0f0]">{item.title}</p>
+                  <p className="text-xs text-[#5a5a6a] capitalize">{item.item_type.replace("_", " ")}</p>
                 </div>
               ))}
             </div>
@@ -134,7 +134,7 @@ export default function DashboardPage() {
           {portfolioItems.length > 0 && (
             <button
               onClick={() => router.push("/portfolio")}
-              className="mt-3 text-xs font-medium text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300"
+              className="mt-3 text-xs font-medium text-[#1E4FA3] hover:text-[#4a90e2]"
             >
               View all →
             </button>

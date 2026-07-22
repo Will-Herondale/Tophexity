@@ -30,7 +30,7 @@ export default function RecommendationDetailPage() {
   if (loading) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-200 border-t-indigo-600 dark:border-indigo-700 dark:border-t-indigo-400" />
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#1E4FA3]/30 border-t-[#1E4FA3]" />
       </div>
     );
   }
@@ -38,15 +38,15 @@ export default function RecommendationDetailPage() {
   if (!rec) return null;
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8">
-      <button onClick={() => router.push("/recommendations")} className="mb-6 flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
+    <div className="mx-auto max-w-3xl px-4 py-8" style={{ backgroundColor: "#0a0a0f" }}>
+      <button onClick={() => router.push("/recommendations")} className="mb-6 flex items-center gap-2 text-sm transition-colors hover:text-[#f0f0f0]" style={{ color: "#8a8a9a" }}>
         <ArrowLeft className="h-4 w-4" /> Back to Recommendations
       </button>
 
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{rec.title || "Career Recommendation"}</h1>
-        {rec.summary && <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">{rec.summary}</p>}
-        <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">Generated on {new Date(rec.created_at).toLocaleDateString()}</p>
+        <h1 className="font-[family-name:var(--font-display)] text-2xl font-bold" style={{ color: "#f0f0f0" }}>{rec.title || "Career Recommendation"}</h1>
+        {rec.summary && <p className="mt-2 text-sm" style={{ color: "#8a8a9a" }}>{rec.summary}</p>}
+        <p className="mt-1 text-xs" style={{ color: "#5a5a6a" }}>Generated on {new Date(rec.created_at).toLocaleDateString()}</p>
       </div>
 
       <div className="space-y-4">
@@ -58,10 +58,10 @@ export default function RecommendationDetailPage() {
       </div>
 
       {rec.items.length === 0 && (
-        <div className="rounded-xl border-2 border-dashed border-gray-200 bg-white p-12 text-center dark:border-gray-700 dark:bg-gray-800">
-          <Star className="mx-auto mb-4 h-8 w-8 text-gray-400 dark:text-gray-500" />
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">No career matches</h3>
-          <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">This recommendation has no ranked items yet.</p>
+        <div className="rounded-xl border-2 border-dashed p-12 text-center" style={{ borderColor: "rgba(30, 79, 163, 0.15)", backgroundColor: "#0d214f" }}>
+          <Star className="mx-auto mb-4 h-8 w-8" style={{ color: "#5a5a6a" }} />
+          <h3 className="text-lg font-semibold font-[family-name:var(--font-display)]" style={{ color: "#f0f0f0" }}>No career matches</h3>
+          <p className="mt-2 text-sm" style={{ color: "#8a8a9a" }}>This recommendation has no ranked items yet.</p>
         </div>
       )}
 
@@ -73,34 +73,34 @@ export default function RecommendationDetailPage() {
 }
 
 function RankedItem({ item, onViewDetails }: { item: RecommendationItem; onViewDetails: (careerId: string) => void }) {
-  const scoreColor =
-    item.match_score >= 90 ? "text-green-600 bg-green-50 dark:text-green-400 dark:bg-green-900/30" :
-    item.match_score >= 75 ? "text-indigo-600 bg-indigo-50 dark:text-indigo-400 dark:bg-indigo-900/30" :
-    item.match_score >= 60 ? "text-amber-600 bg-amber-50 dark:text-amber-400 dark:bg-amber-900/30" :
-    "text-gray-600 bg-gray-50 dark:text-gray-400 dark:bg-gray-700";
+  const scoreStyle =
+    item.match_score >= 90 ? { color: "#4ade80", backgroundColor: "rgba(74, 222, 128, 0.1)" } :
+    item.match_score >= 75 ? { color: "#5b9aff", backgroundColor: "rgba(30, 79, 163, 0.1)" } :
+    item.match_score >= 60 ? { color: "#fbbf24", backgroundColor: "rgba(251, 191, 36, 0.1)" } :
+    { color: "#8a8a9a", backgroundColor: "#112a5e" };
 
   return (
     <Card>
       <div className="flex items-start gap-4">
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-100 text-sm font-bold text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400">
+        <div className="flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold" style={{ backgroundColor: "#1E4FA3", color: "#ffffff" }}>
           #{item.rank}
         </div>
         <div className="flex-1">
           <div className="flex items-start justify-between">
             <div>
-              <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">
+              <h3 className="text-base font-semibold font-[family-name:var(--font-display)]" style={{ color: "#f0f0f0" }}>
                 {item.career?.title || "Career"}
               </h3>
               {item.career?.description && (
-                <p className="mt-1 text-xs text-gray-500 line-clamp-2 dark:text-gray-400">{item.career.description}</p>
+                <p className="mt-1 text-xs line-clamp-2" style={{ color: "#8a8a9a" }}>{item.career.description}</p>
               )}
             </div>
-            <span className={`ml-3 rounded-full px-3 py-1 text-sm font-bold ${scoreColor}`}>
+            <span className={`ml-3 rounded-full px-3 py-1 text-sm font-bold`} style={scoreStyle}>
               {item.match_score}%
             </span>
           </div>
           {item.reasoning && (
-            <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">{item.reasoning}</p>
+            <p className="mt-2 text-sm" style={{ color: "#8a8a9a" }}>{item.reasoning}</p>
           )}
           <div className="mt-3 flex gap-2">
             <Button size="sm" onClick={() => onViewDetails(item.career_id)}>

@@ -14,8 +14,8 @@ export default function Card({ children, className, onClick, hover = false }: Ca
     <div
       onClick={onClick}
       className={clsx(
-        "rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800",
-        hover && "cursor-pointer transition-shadow hover:shadow-md",
+        "rounded-2xl border border-[#1E4FA3]/10 bg-[#0d214f]/30 p-6",
+        hover && "cursor-pointer transition-all duration-200 hover:border-[#1E4FA3]/20 hover:shadow-lg hover:shadow-[#1E4FA3]/5",
         onClick && "cursor-pointer",
         className
       )}
@@ -30,5 +30,5 @@ export function CardHeader({ children, className }: { children: React.ReactNode;
 }
 
 export function CardTitle({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <h3 className={clsx("text-lg font-semibold text-gray-900 dark:text-gray-100", className)}>{children}</h3>;
+  return <h3 className={clsx("font-[family-name:var(--font-display)] text-lg font-semibold text-[#f0f0f0]", className)}>{children}</h3>;
 }

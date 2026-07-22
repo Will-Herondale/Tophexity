@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     JWT_REFRESH_TOKEN_EXPIRE_MINUTES: int = 10080
 
-    AI_ENDPOINT: str = "https://tophex.openai.azure.com/openai/v1"
+    AI_ENDPOINT: str = "https://tophex.cognitiveservices.azure.com/"
     AI_API_KEY: str = ""
     AI_DEPLOYMENT_NAME: str = "gpt-5"
     AI_API_VERSION: str = "2024-12-01-preview"

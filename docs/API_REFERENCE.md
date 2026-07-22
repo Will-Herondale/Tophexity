@@ -93,7 +93,7 @@ Verify Azure AI connectivity, deployment, authentication, and latency. No authen
   "authentication_valid": true,
   "latency_ms": 931.7,
   "model": "gpt-5",
-  "endpoint": "https://tophex.openai.azure.com/openai/v1",
+  "endpoint": "https://tophex.cognitiveservices.azure.com/",
   "error": null
 }
 ```
@@ -1860,7 +1860,7 @@ Verify Azure AI connectivity, deployment, authentication, and latency.
   "authentication_valid": true,
   "latency_ms": 931.7,
   "model": "gpt-5",
-  "endpoint": "https://tophex.openai.azure.com/openai/v1",
+  "endpoint": "https://tophex.cognitiveservices.azure.com/",
   "error": null
 }
 ```
@@ -1962,6 +1962,160 @@ Send a simple message to Azure AI and return the response. For backend verificat
 | `POST` | `/v1/ai/prompts/{name}/test` | Yes | Test-render a prompt |
 
 **Total: 48 endpoints**
+
+---
+
+## Auth Usage Examples
+
+### Python — Register, Login, and Use the API
+
+```python
+import httpx
+
+BASE_URL = "https://tophexity-func.azurewebsites.net"
+
+
+def register(email: str, password: str) -> dict:
+    resp = httpx.post(f"{BASE_URL}/v1/auth/register", json={
+        "email": email,
+        "password": password,
+    })
+    resp.raise_for_status()
+    return resp.json()
+
+
+def login(email: str, password: str) -> dict:
+    resp = httpx.post(f"{BASE_URL}/v1/auth/login", json={
+        "email": email,
+        "password": password,
+    })
+    resp.raise_for_status()
+    return resp.json()
+
+
+def auth_headers(access_token: str) -> dict:
+    return {"Authorization": f"Bearer {access_token}"}
+
+
+def refresh(refresh_token: str) -> dict:
+    resp = httpx.post(f"{BASE_URL}/v1/auth/refresh", json={
+        "refresh_token": refresh_token,
+    })
+    resp.raise_for_status()
+    return resp.json()
+
+
+# --- Full flow ---
+if __name__ == "__main__":
+    # 1. Register
+    user = register("user@example.com", "securepass123")
+    print("Registered:", user["id"])
+
+    # 2. Login
+    tokens = login("user@example.com", "securepass123")
+    access = tokens["access_token"]
+    refresh_tok = tokens["refresh_token"]
+    print("Logged in:", tokens["user_id"])
+
+    # 3. Get current user
+    me = httpx.get(f"{BASE_URL}/v1/auth/me", headers=auth_headers(access))
+    print("Current user:", me.json()["email"])
+
+    # 4. Create a profile
+    profile = httpx.post(f"{BASE_URL}/v1/users/profile", headers=auth_headers(access), json={
+        "full_name": "Jane Doe",
+        "headline": "ML Engineer",
+        "location": "Hyderabad",
+        "education_level": "master",
+        "years_experience": 3,
+        "current_field": "data science",
+        "skills": {"python": "advanced", "tensorflow": "intermediate"},
+    })
+    print("Profile created:", profile.status_code)
+
+    # 5. Create a chat session
+    session = httpx.post(f"{BASE_URL}/v1/chat/sessions", headers=auth_headers(access), json={
+        "title": "Career Guidance",
+    })
+    session_id = session.json()["id"]
+
+    # 6. Send a message (triggers AI response)
+    messages = httpx.post(
+        f"{BASE_URL}/v1/chat/sessions/{session_id}/messages",
+        headers=auth_headers(access),
+        json=[{"role": "user", "content": "What career should I pursue?"}],
+    )
+    for msg in messages.json():
+        print(f"  [{msg['role']}] {msg['content'][:100]}...")
+
+    # 7. Refresh tokens (when access token expires)
+    new_tokens = refresh(refresh_tok)
+    access = new_tokens["access_token"]
+    print("Token refreshed")
+
+    # 8. Logout
+    httpx.post(f"{BASE_URL}/v1/auth/logout", headers=auth_headers(access))
+    print("Logged out")
+```
+
+### cURL — Register and Login
+
+```bash
+# Register
+curl -X POST https://tophexity-func.azurewebsites.net/v1/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"email": "user@example.com", "password": "securepass123"}'
+
+# Login
+curl -X POST https://tophexity-func.azurewebsites.net/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email": "user@example.com", "password": "securepass123"}'
+
+# Use access token
+curl https://tophexity-func.azurewebsites.net/v1/auth/me \
+  -H "Authorization: Bearer <access_token>"
+
+# Refresh token
+curl -X POST https://tophexity-func.azurewebsites.net/v1/auth/refresh \
+  -H "Content-Type: application/json" \
+  -d '{"refresh_token": "<refresh_token>"}'
+```
+
+### JavaScript (fetch) — Register and Login
+
+```javascript
+const BASE = "https://tophexity-func.azurewebsites.net";
+
+async function register(email, password) {
+  const res = await fetch(`${BASE}/v1/auth/register`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
+  return res.json();
+}
+
+async function login(email, password) {
+  const res = await fetch(`${BASE}/v1/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
+  return res.json();
+}
+
+async function getMe(accessToken) {
+  const res = await fetch(`${BASE}/v1/auth/me`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  return res.json();
+}
+
+// Usage
+const user = await register("user@example.com", "securepass123");
+const tokens = await login("user@example.com", "securepass123");
+const me = await getMe(tokens.access_token);
+```
 
 ---
 

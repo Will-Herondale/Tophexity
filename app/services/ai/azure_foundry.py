@@ -1,10 +1,13 @@
-"""Azure AI Foundry / Azure OpenAI provider implementation."""
+"""Azure AI Foundry / Azure OpenAI provider implementation.
+
+Uses the official `openai` Python SDK with AsyncAzureOpenAI client.
+"""
 
 import time
 import uuid
-from typing import Any
 
-import httpx
+import openai
+from openai import AsyncAzureOpenAI
 
 from app.core.config import get_settings
 from app.core.logging import logger
@@ -23,44 +26,40 @@ class AzureFoundryProvider(AIProvider):
         self.deployment = settings.AI_DEPLOYMENT_NAME
         self.api_version = settings.AI_API_VERSION
         self.timeout = settings.AI_REQUEST_TIMEOUT
+        self._client: AsyncAzureOpenAI | None = None
 
-    def _headers(self) -> dict[str, str]:
-        return {
-            "Content-Type": "application/json",
-            "api-key": self.api_key,
-        }
-
-    def _build_url(self) -> str:
-        return (
-            f"{self.endpoint}/deployments/{self.deployment}/chat/completions"
-            f"?api-version={self.api_version}"
-        )
+    @property
+    def client(self) -> AsyncAzureOpenAI:
+        if self._client is None:
+            self._client = AsyncAzureOpenAI(
+                azure_endpoint=self.endpoint,
+                api_key=self.api_key,
+                api_version=self.api_version,
+                timeout=self.timeout,
+            )
+        return self._client
 
     async def complete(self, request: AIRequest) -> AIResponse:
-        url = self._build_url()
-        payload: dict[str, Any] = {
-            "messages": request.messages,
-            "temperature": request.temperature or settings.AI_TEMPERATURE,
-            "max_tokens": request.max_tokens or settings.AI_MAX_TOKENS,
-        }
-        if request.response_format:
-            payload["response_format"] = {"type": request.response_format}
-
         request_id = str(uuid.uuid4())
         start = time.perf_counter()
 
+        kwargs: dict = {
+            "model": self.deployment,
+            "messages": request.messages,
+            "max_completion_tokens": request.max_tokens or settings.AI_MAX_TOKENS,
+        }
+        if request.response_format:
+            kwargs["response_format"] = {"type": request.response_format}
+
         try:
-            async with httpx.AsyncClient(timeout=self.timeout) as client:
-                response = await client.post(url, headers=self._headers(), json=payload)
-                response.raise_for_status()
-                data = response.json()
-        except httpx.TimeoutException as e:
+            response = await self.client.chat.completions.create(**kwargs)
+        except openai.APITimeoutError as e:
             latency = (time.perf_counter() - start) * 1000
             logger.error("Azure AI timeout after %.0fms: %s", latency, str(e)[:200])
             raise AITimeoutError(f"Azure AI request timed out after {latency:.0f}ms") from e
-        except httpx.HTTPStatusError as e:
+        except openai.APIStatusError as e:
             latency = (time.perf_counter() - start) * 1000
-            status_code = e.response.status_code
+            status_code = e.status_code
             logger.error("Azure AI HTTP %d after %.0fms: %s", status_code, latency, str(e)[:200])
             raise AIServiceError(
                 f"Azure AI returned status {status_code}",
@@ -73,29 +72,28 @@ class AzureFoundryProvider(AIProvider):
 
         latency = (time.perf_counter() - start) * 1000
 
-        choice = data.get("choices", [{}])[0]
-        message = choice.get("message", {})
-        content = message.get("content", "")
-        finish_reason = choice.get("finish_reason", "stop")
+        choice = response.choices[0] if response.choices else None
+        content = choice.message.content if choice and choice.message else ""
+        finish_reason = str(choice.finish_reason) if choice and choice.finish_reason else "stop"
 
-        usage_data = data.get("usage", {})
+        usage_data = response.usage
         token_usage = build_usage(
-            prompt_tokens=usage_data.get("prompt_tokens", 0),
-            completion_tokens=usage_data.get("completion_tokens", 0),
-            model=data.get("model", self.deployment),
+            prompt_tokens=usage_data.prompt_tokens if usage_data else 0,
+            completion_tokens=usage_data.completion_tokens if usage_data else 0,
+            model=response.model or self.deployment,
         )
 
         logger.info(
             "Azure AI response: request_id=%s model=%s tokens=%d latency=%.0fms",
-            request_id, data.get("model", self.deployment),
+            request_id, response.model or self.deployment,
             token_usage.total_tokens, latency,
         )
 
         return AIResponse(
-            content=content,
+            content=content or "",
             finish_reason=finish_reason,
             token_usage=token_usage,
-            model=data.get("model", self.deployment),
+            model=response.model or self.deployment,
             latency_ms=latency,
             request_id=request_id,
         )

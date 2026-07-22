@@ -19,3 +19,4 @@ alembic/versions/*.pyc
 .vscode/
 *.swp
 *.swo
+api_key.txt

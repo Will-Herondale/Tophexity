@@ -1,4 +1,5 @@
 from functools import lru_cache
+from pathlib import Path
 
 from pydantic_settings import BaseSettings
 
@@ -19,15 +20,55 @@ class Settings(BaseSettings):
     JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     JWT_REFRESH_TOKEN_EXPIRE_MINUTES: int = 10080
 
-    AI_ENDPOINT: str = ""
+    AI_ENDPOINT: str = "https://tophex.openai.azure.com/openai/v1"
     AI_API_KEY: str = ""
-    AI_DEPLOYMENT_NAME: str = ""
+    AI_DEPLOYMENT_NAME: str = "gpt-5"
+    AI_API_VERSION: str = "2024-12-01-preview"
+    AI_FOUNDRY_PROJECT_URL: str = "https://tophex.services.ai.azure.com/api/projects/proj-tophex"
+
+    AI_MAX_RETRIES: int = 3
+    AI_RETRY_BASE_DELAY: float = 1.0
+    AI_RETRY_MAX_DELAY: float = 30.0
+    AI_REQUEST_TIMEOUT: float = 60.0
+    AI_MAX_TOKENS: int = 4096
+    AI_TEMPERATURE: float = 0.7
+
+    AI_RATE_LIMIT_PER_MINUTE: int = 20
+    AI_RATE_LIMIT_PER_HOUR: int = 200
+    AI_RATE_LIMIT_PER_USER_PER_MINUTE: int = 10
+    AI_RATE_LIMIT_PER_IP_PER_MINUTE: int = 30
+    AI_RATE_LIMIT_PER_CONVERSATION_PER_MINUTE: int = 15
+
+    AI_SUMMARY_THRESHOLD_MESSAGES: int = 20
+    AI_SUMMARY_KEEP_RECENT: int = 10
+    AI_MAX_CONTEXT_MESSAGES: int = 50
 
     RECOMMENDATION_SERVICE_URL: str = "http://localhost:8001"
 
     CORS_ORIGINS: list[str] = ["http://localhost:3000"]
 
     LOG_LEVEL: str = "INFO"
+
+
+def _load_api_key_into_env() -> None:
+    """Read api_key.txt and set AI_API_KEY env var if not already set."""
+    import os
+
+    if os.environ.get("AI_API_KEY"):
+        return
+
+    api_key_path = Path(__file__).resolve().parent.parent.parent / "api_key.txt"
+    if not api_key_path.exists():
+        return
+
+    key = api_key_path.read_text().strip()
+    if not key:
+        return
+
+    os.environ["AI_API_KEY"] = key
+
+
+_load_api_key_into_env()
 
 
 @lru_cache

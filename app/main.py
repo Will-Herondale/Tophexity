@@ -13,6 +13,13 @@ from app.middleware.timing import RequestTimingMiddleware
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     logger.info("Starting %s v%s", settings.APP_NAME, settings.APP_VERSION)
+    from app.services.ai.client import get_ai_client
+    client = get_ai_client()
+    if client.is_configured:
+        logger.info("AI client configured: endpoint=%s deployment=%s",
+                     settings.AI_ENDPOINT, settings.AI_DEPLOYMENT_NAME)
+    else:
+        logger.warning("AI client not configured - AI endpoints will return 503")
     yield
     logger.info("Shutting down %s", settings.APP_NAME)
 
@@ -50,6 +57,16 @@ def create_app() -> FastAPI:
                      description="Returns service health status and version.")
     async def health_check():
         return {"status": "healthy", "version": settings.APP_VERSION}
+
+    @application.get(
+        "/health/ai",
+        tags=["AI"],
+        summary="AI health check",
+        description="Verify Azure AI connectivity, deployment, authentication, and latency.",
+    )
+    async def ai_health_check():
+        from app.services.ai.health import check_ai_health
+        return await check_ai_health()
 
     return application
 

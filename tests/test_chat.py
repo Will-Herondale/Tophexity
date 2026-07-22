@@ -47,7 +47,8 @@ async def test_get_session_messages(auth_client):
 @pytest.mark.anyio
 async def test_add_messages(auth_client):
     session_id = uuid4()
-    with patch("app.api.v1.chat.chat_service.add_messages", new_callable=AsyncMock) as mock_svc:
+    with patch("app.api.v1.chat.chat_service.add_messages", new_callable=AsyncMock) as mock_svc, \
+         patch("app.api.v1.chat.get_ai_client") as mock_get_client:
         mock_svc.return_value = [
             type("R", (), {
                 "model_dump": lambda self: {}, "json": lambda self: "{}",
@@ -56,6 +57,8 @@ async def test_add_messages(auth_client):
                 "created_at": datetime.now(timezone.utc),
             })()
         ]
+        mock_client = mock_get_client.return_value
+        mock_client.is_configured = False
         response = await auth_client.post(f"/v1/chat/sessions/{session_id}/messages", json=[
             {"role": "user", "content": "Hello"},
         ])

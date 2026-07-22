@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useInView, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Brain,
   BarChart3,
@@ -17,12 +17,8 @@ import {
   Menu,
   X,
   ArrowRight,
-  Star,
   ChevronDown,
-  ChevronRight,
   Sparkles,
-  Users,
-  FileText,
   Zap,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -37,35 +33,6 @@ const fadeUp = {
 const stagger = {
   visible: { transition: { staggerChildren: 0.1 } },
 };
-
-function AnimatedCounter({ target, suffix = "" }: { target: number; suffix?: string }) {
-  const ref = useRef<HTMLSpanElement>(null);
-  const isInView = useInView(ref, { once: true });
-  const [count, setCount] = useState(0);
-
-  useEffect(() => {
-    if (!isInView) return;
-    let start = 0;
-    const duration = 2000;
-    const increment = target / (duration / 16);
-    const timer = setInterval(() => {
-      start += increment;
-      if (start >= target) {
-        setCount(target);
-        clearInterval(timer);
-      } else {
-        setCount(Math.floor(start));
-      }
-    }, 16);
-    return () => clearInterval(timer);
-  }, [isInView, target]);
-
-  return (
-    <span ref={ref} className="text-3xl font-bold text-white font-[family-name:var(--font-display)]">
-      {count.toLocaleString()}{suffix}
-    </span>
-  );
-}
 
 const features = [
   { icon: Brain, title: "Smart Discovery", desc: "AI analyzes your skills, interests, and values to surface career paths you never considered but are perfectly suited for." },
@@ -92,32 +59,24 @@ const categories = [
   { icon: Cog, title: "Engineering", desc: "Mechanical, civil, electrical, and systems roles.", count: 55 },
 ];
 
-const testimonials = [
-  { name: "Sarah Chen", role: "Software Engineer at Google", quote: "Tophexity revealed career paths I never knew existed. The AI analysis was scarily accurate — it identified strengths I hadn't even recognized in myself.", stars: 5 },
-  { name: "Marcus Johnson", role: "Product Manager at Stripe", quote: "After 8 years in consulting, I felt stuck. Tophexity mapped out a transition plan that got me into product management in under 6 months.", stars: 5 },
-  { name: "Priya Patel", role: "UX Lead at Figma", quote: "The backup plans feature alone is worth it. Having intelligent contingency paths gives me confidence to take calculated risks in my career.", stars: 5 },
-];
-
 const faqs = [
-  { q: "How does the AI career matching work?", a: "Our AI engine analyzes over 200 data points including your skills, work history, personality traits, values, and market trends to generate career recommendations with confidence scores." },
-  { q: "Is Tophexity free to use?", a: "We offer a robust free tier that includes career discovery and basic analysis. Premium plans unlock personalized roadmaps, backup planning, market intelligence, and portfolio building tools." },
-  { q: "How accurate are the career predictions?", a: "Our models are trained on millions of career trajectories and validated against real-world outcomes. Users report an 89% satisfaction rate with their matched career paths within the first year." },
-  { q: "Can I use Tophexity if I'm changing careers?", a: "Absolutely. Career changers are one of our core audiences. The platform specifically identifies transferable skills and creates transition roadmaps that minimize downtime and maximize your existing experience." },
-  { q: "What data do you collect?", a: "We only collect information you explicitly provide. Your data is encrypted, never sold to third parties, and you can delete your account and all associated data at any time." },
+  { q: "How does the AI career matching work?", a: "Our AI engine analyzes your skills, work history, personality traits, values, and interests to generate career recommendations with confidence scores tailored to you." },
+  { q: "Is Tophexity free to use?", a: "Yes! Tophexity offers career discovery and basic analysis at no cost. Additional features like personalized roadmaps and backup planning are available as the platform grows." },
+  { q: "How accurate are the career predictions?", a: "Our recommendations are based on real career data and skill-demand analysis. As you build a detailed profile, the AI gets more accurate at matching you with the right paths." },
+  { q: "Can I use Tophexity if I'm changing careers?", a: "Absolutely. Career changers are one of our core audiences. The platform identifies your transferable skills and creates transition roadmaps that maximize your existing experience." },
+  { q: "What data do you collect?", a: "We only collect information you explicitly provide. Your data is encrypted, never shared with third parties, and you can delete your account and all associated data at any time." },
 ];
 
 const footerProduct = [
-  { label: "Career Discovery", href: "#" },
-  { label: "Skill Analysis", href: "#" },
-  { label: "Roadmaps", href: "#" },
-  { label: "Market Intel", href: "#" },
-  { label: "Pricing", href: "#" },
+  { label: "Career Discovery", href: "/careers" },
+  { label: "Skill Analysis", href: "/profile" },
+  { label: "Roadmaps", href: "/roadmaps" },
+  { label: "Chat", href: "/chat" },
+  { label: "Dashboard", href: "/dashboard" },
 ];
 
 const footerCompany = [
   { label: "About Us", href: "#" },
-  { label: "Blog", href: "#" },
-  { label: "Careers", href: "#" },
   { label: "Privacy Policy", href: "#" },
   { label: "Terms of Service", href: "#" },
 ];
@@ -153,7 +112,7 @@ export default function HomePage() {
           </Link>
 
           <div className="hidden md:flex items-center gap-8">
-            {["Features", "How It Works", "Pricing", "FAQ"].map((link) => (
+                {["Features", "How It Works", "FAQ"].map((link) => (
               <a
                 key={link}
                 href={`#${link.toLowerCase().replace(/\s+/g, "-")}`}
@@ -207,7 +166,7 @@ export default function HomePage() {
               className="md:hidden bg-[#0a0a0f]/95 backdrop-blur-xl border-b border-[rgba(30,79,163,0.15)] overflow-hidden"
             >
               <div className="px-6 py-4 flex flex-col gap-4">
-                {["Features", "How It Works", "Pricing", "FAQ"].map((link) => (
+            {["Features", "How It Works", "FAQ"].map((link) => (
                   <a
                     key={link}
                     href={`#${link.toLowerCase().replace(/\s+/g, "-")}`}
@@ -254,9 +213,9 @@ export default function HomePage() {
       {/* ─── Hero ─── */}
       <section className="relative min-h-screen flex items-center justify-center px-6">
         <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-[#1E4FA3]/20 rounded-full blur-[128px]" />
-          <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-[#0d214f]/40 rounded-full blur-[128px]" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#1E4FA3]/10 rounded-full blur-[160px]" />
+          <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-[#1E4FA3]/20 rounded-full blur-[128px] animate-blob" />
+          <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-[#0d214f]/40 rounded-full blur-[128px] animate-blob-delay" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#1E4FA3]/10 rounded-full blur-[160px] animate-blob-delay-2" />
         </div>
 
         <div className="relative max-w-4xl mx-auto text-center">
@@ -312,30 +271,6 @@ export default function HomePage() {
               Learn More
             </a>
           </motion.div>
-        </div>
-      </section>
-
-      {/* ─── Stats Bar ─── */}
-      <section className="border-y border-[rgba(30,79,163,0.15)] bg-[#0d214f]/30">
-        <div className="max-w-7xl mx-auto px-6 py-12 grid grid-cols-2 md:grid-cols-4 gap-8">
-          {[
-            { target: 500, suffix: "+", label: "Career Paths" },
-            { target: 100, suffix: "+", label: "Skill Categories" },
-            { target: 50, suffix: "+", label: "Industries" },
-            { target: 10000, suffix: "+", label: "Users Guided" },
-          ].map((stat) => (
-            <motion.div
-              key={stat.label}
-              variants={fadeUp}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              className="text-center"
-            >
-              <AnimatedCounter target={stat.target} suffix={stat.suffix} />
-              <p className="text-sm text-[#8a8a9a] mt-2">{stat.label}</p>
-            </motion.div>
-          ))}
         </div>
       </section>
 
@@ -496,53 +431,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ─── Testimonials ─── */}
-      <section className="py-24 px-6">
-        <div className="max-w-7xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-3xl md:text-4xl font-bold font-[family-name:var(--font-display)] mb-4">
-              Trusted by <span className="text-[#1E4FA3]">Professionals</span>
-            </h2>
-            <p className="text-[#8a8a9a] max-w-2xl mx-auto">
-              Thousands of professionals have transformed their careers with Tophexity.
-            </p>
-          </motion.div>
-
-          <motion.div
-            variants={stagger}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            className="grid grid-cols-1 md:grid-cols-3 gap-6"
-          >
-            {testimonials.map((t) => (
-              <motion.div
-                key={t.name}
-                variants={fadeUp}
-                className="p-6 rounded-2xl bg-[#0d214f]/40 border border-[rgba(30,79,163,0.15)]"
-              >
-                <div className="flex gap-1 mb-4">
-                  {Array.from({ length: t.stars }).map((_, i) => (
-                    <Star key={i} className="w-4 h-4 fill-yellow-500 text-yellow-500" />
-                  ))}
-                </div>
-                <p className="text-sm text-[#8a8a9a] leading-relaxed mb-6">&ldquo;{t.quote}&rdquo;</p>
-                <div>
-                  <p className="font-semibold font-[family-name:var(--font-display)] text-white text-sm">{t.name}</p>
-                  <p className="text-xs text-[#8a8a9a]">{t.role}</p>
-                </div>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
-
       {/* ─── FAQ ─── */}
       <section id="faq" className="py-24 px-6 bg-[#0d214f]/10">
         <div className="max-w-3xl mx-auto">
@@ -620,7 +508,7 @@ export default function HomePage() {
                 Ready to Find Your Perfect Career?
               </h2>
               <p className="text-[#8a8a9a] max-w-xl mx-auto mb-8">
-                Join thousands of professionals who have discovered their ideal career path with AI-powered intelligence.
+                Join professionals who have discovered their ideal career path with AI-powered intelligence.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Link
@@ -645,7 +533,7 @@ export default function HomePage() {
       {/* ─── Footer ─── */}
       <footer className="border-t border-[rgba(30,79,163,0.15)] bg-[#0a0a0f]">
         <div className="max-w-7xl mx-auto px-6 py-16">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
             <div>
               <div className="flex items-center gap-2 mb-4">
                 <Sparkles className="w-6 h-6 text-[#1E4FA3]" />
@@ -690,15 +578,6 @@ export default function HomePage() {
                     </a>
                   </li>
                 ))}
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="font-semibold font-[family-name:var(--font-display)] text-sm mb-4">Contact</h4>
-              <ul className="space-y-3">
-                <li className="text-sm text-[#8a8a9a]">hello@tophexity.com</li>
-                <li className="text-sm text-[#8a8a9a]">San Francisco, CA</li>
-                <li className="text-sm text-[#8a8a9a]">+1 (555) 123-4567</li>
               </ul>
             </div>
           </div>

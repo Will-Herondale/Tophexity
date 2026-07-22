@@ -96,11 +96,6 @@ uvicorn app.main:app --reload
 pytest
 ```
 
-## API Docs
-
-- Swagger UI: http://localhost:8000/docs
-- ReDoc: http://localhost:8000/redoc
-
 ## Team
 
 | Developer | Responsibility |

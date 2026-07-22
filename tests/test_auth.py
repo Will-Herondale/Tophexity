@@ -17,7 +17,6 @@ async def test_register_success(client):
         response = await client.post("/v1/auth/register", json={
             "email": "new@example.com",
             "password": "securepassword123",
-            "full_name": "Test User",
         })
         assert response.status_code == 201
         data = response.json()

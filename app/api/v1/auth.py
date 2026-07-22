@@ -26,7 +26,7 @@ async def auth_health():
     response_model=UserResponse,
     status_code=201,
     summary="Register a new user",
-    description="Create a new user account with email and password. Password must be 8-128 characters.",
+    description="Create a new user account with email and password. Password must be 8-128 characters. Profile can be created separately after registration.",
     response_description="Created user profile",
     responses={
         409: {"description": "Email already registered"},

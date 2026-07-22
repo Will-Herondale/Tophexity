@@ -269,6 +269,5 @@ async def delete_career(db: AsyncSession, career_id: UUID) -> None:
     from sqlalchemy import delete as sa_delete
     for junction_model in [CareerSkill, CareerDegree, CareerCollege, CareerEntranceExam, CareerScholarship, CareerResource]:
         await db.execute(sa_delete(junction_model).where(junction_model.career_id == career_id))
-    await db.execute(select(Career).where(Career.id == career_id))
     await db.delete(career)
     await db.flush()

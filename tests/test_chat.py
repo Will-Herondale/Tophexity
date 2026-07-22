@@ -12,7 +12,10 @@ async def test_create_session(auth_client):
             "model_dump": lambda self: {}, "json": lambda self: "{}",
             "id": uuid4(), "user_id": uuid4(),
             "title": "Career Discussion",
+            "is_archived": False, "is_pinned": False,
+            "session_data": {},
             "created_at": datetime.now(timezone.utc),
+            "updated_at": datetime.now(timezone.utc),
         })()
         response = await auth_client.post("/v1/chat/sessions", json={
             "title": "Career Discussion",
@@ -26,6 +29,9 @@ async def test_list_sessions(auth_client):
         mock_svc.return_value = type("R", (), {
             "model_dump": lambda self: {}, "json": lambda self: "{}",
             "items": [], "total": 0, "page": 1, "page_size": 20, "total_pages": 1,
+            "is_archived": False, "is_pinned": False,
+            "session_data": {},
+            "updated_at": datetime.now(timezone.utc),
         })()
         response = await auth_client.get("/v1/chat/sessions")
         assert response.status_code == 200
@@ -38,7 +44,10 @@ async def test_get_session_messages(auth_client):
             "model_dump": lambda self: {}, "json": lambda self: "{}",
             "id": uuid4(), "user_id": uuid4(),
             "title": "Test", "messages": [],
+            "is_archived": False, "is_pinned": False,
+            "summary": None, "session_data": {},
             "created_at": datetime.now(timezone.utc),
+            "updated_at": datetime.now(timezone.utc),
         })()
         response = await auth_client.get(f"/v1/chat/sessions/{uuid4()}")
         assert response.status_code == 200
@@ -54,6 +63,9 @@ async def test_add_messages(auth_client):
                 "model_dump": lambda self: {}, "json": lambda self: "{}",
                 "id": uuid4(), "session_id": session_id,
                 "role": "user", "content": "Hello",
+                "token_count": None, "model_used": None,
+                "latency_ms": None, "request_id": None,
+                "message_data": {},
                 "created_at": datetime.now(timezone.utc),
             })()
         ]

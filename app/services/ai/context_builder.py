@@ -1,9 +1,13 @@
-"""Build context for AI requests from user data and conversation history."""
+"""Build context for AI requests from user data and conversation history.
+
+Implements priority-based assembly with token budgeting and trimming.
+"""
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from app.core.config import get_settings
 from app.core.logging import logger
 from app.models.backup import BackupPlan
 from app.models.chat import ChatMessage, ChatSession
@@ -14,9 +18,11 @@ from app.models.roadmap import Roadmap
 from app.models.user import User
 from app.services.ai.prompt_cache import prompt_cache
 
+settings = get_settings()
+
 
 class ContextBuilder:
-    """Assembles full context for AI requests."""
+    """Assembles context for AI requests with priority-based token budgeting."""
 
     def __init__(self, db: AsyncSession, user: User) -> None:
         self.db = db
@@ -26,6 +32,22 @@ class ContextBuilder:
         self._recommendation: dict | None = None
         self._roadmap: dict | None = None
         self._backup: dict | None = None
+        self._token_usage: dict = {}
+
+    def estimate_tokens(self, text: str) -> int:
+        """Conservative token estimate: 1 token ~ 3 characters."""
+        return max(1, len(text) // 3) if text else 0
+
+    def _calculate_budget(self) -> int:
+        """Calculate available token budget for context (excludes response reserve)."""
+        total = settings.AI_MAX_TOKENS
+        response_reserve = int(total * settings.AI_CONTEXT_BUDGET_RESPONSE_PCT)
+        return total - response_reserve
+
+    def _reserve_for_messages(self) -> int:
+        """Minimum tokens to reserve for recent messages."""
+        budget = self._calculate_budget()
+        return int(budget * settings.AI_CONTEXT_BUDGET_MESSAGES_PCT * 0.6)
 
     async def load_profile(self) -> dict:
         result = await self.db.execute(
@@ -171,6 +193,12 @@ class ContextBuilder:
             "latest_backup": self._backup,
         }
 
+    def build_system_prompt(self, prompt_name: str = "system") -> str:
+        """Load the system prompt and append user context."""
+        base = prompt_cache.get(prompt_name)
+        context = self.build_context_string()
+        return f"{base}\n\n## User Context\n{context}"
+
     def build_context_string(self) -> str:
         """Build a formatted context string for inclusion in prompts."""
         parts = []
@@ -192,8 +220,65 @@ class ContextBuilder:
 
         return "\n".join(parts) if parts else "No user data available."
 
-    def build_system_prompt(self, prompt_name: str = "system") -> str:
-        """Load the system prompt and append user context."""
-        base = prompt_cache.get(prompt_name)
-        context = self.build_context_string()
-        return f"{base}\n\n## User Context\n{context}"
+    async def build_context(self, session: ChatSession) -> list[dict[str, str]]:
+        """Build prioritized context messages within token budget."""
+        messages = []
+        token_budget = self._calculate_budget()
+        used = 0
+
+        # 1. System prompt (always, never trimmed)
+        system_prompt = self.build_system_prompt("system")
+        messages.append({"role": "system", "content": system_prompt})
+        used += self.estimate_tokens(system_prompt)
+
+        # 2. User profile (always if exists)
+        if self._profile and self._profile.get("full_name"):
+            profile_section = f"## User Profile\n{self._profile}"
+            messages.append({"role": "system", "content": profile_section})
+            used += self.estimate_tokens(profile_section)
+
+        # 3. User facts (high priority)
+        facts = (session.session_data or {}).get("facts", [])
+        if facts:
+            facts_text = "\n".join(
+                f"- [{f.get('category', 'general')}] {f['fact']}" for f in facts
+            )
+            facts_section = f"## Known Facts About User\n{facts_text}"
+            messages.append({"role": "system", "content": facts_section})
+            used += self.estimate_tokens(facts_section)
+
+        # 4. Conversation summary
+        if session.summary:
+            summary_section = f"## Conversation Summary\n{session.summary}"
+            messages.append({"role": "system", "content": summary_section})
+            used += self.estimate_tokens(summary_section)
+
+        # 5-9. Lower priority sections (included if budget allows)
+        remaining_sections = []
+        if self._portfolio:
+            remaining_sections.append(f"## Portfolio\n{self._portfolio}")
+        if self._recommendation:
+            remaining_sections.append(f"## Latest Recommendation\n{self._recommendation}")
+        if self._roadmap:
+            remaining_sections.append(f"## Latest Roadmap\n{self._roadmap}")
+        if self._backup:
+            remaining_sections.append(f"## Latest Backup Plan\n{self._backup}")
+
+        for section in remaining_sections:
+            section_tokens = self.estimate_tokens(section)
+            if used + section_tokens <= token_budget - self._reserve_for_messages():
+                messages.append({"role": "system", "content": section})
+                used += section_tokens
+
+        self._token_usage = {
+            "total_budget": settings.AI_MAX_TOKENS,
+            "available_budget": token_budget,
+            "used_tokens": used,
+            "remaining_tokens": token_budget - used,
+        }
+
+        return messages
+
+    def get_token_usage_report(self) -> dict:
+        """Return token usage report from last build_context call."""
+        return self._token_usage

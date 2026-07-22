@@ -6,12 +6,16 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.deps import get_current_active_user, get_db_session
 from app.models.user import User
 from app.schemas.chat import (
+    ChatExportResponse,
     ChatMessageCreate,
     ChatMessageResponse,
     ChatSessionCreate,
     ChatSessionDetailResponse,
     ChatSessionListResponse,
     ChatSessionResponse,
+    ChatSessionUpdate,
+    ChatStatsResponse,
+    MemoryRebuildResponse,
 )
 from app.schemas.common import MessageResponse
 from app.services import chat_service
@@ -48,7 +52,7 @@ async def create_session(
     "/sessions",
     response_model=ChatSessionListResponse,
     summary="List chat sessions",
-    description="Retrieve all chat sessions for the authenticated user.",
+    description="Retrieve chat sessions for the authenticated user with optional search and archive filter.",
     responses={
         401: {"description": "Not authenticated"},
     },
@@ -56,10 +60,14 @@ async def create_session(
 async def list_sessions(
     page: int = Query(1, ge=1, description="Page number"),
     page_size: int = Query(20, ge=1, le=100, description="Items per page"),
+    search: str | None = Query(None, description="Search sessions by title"),
+    is_archived: bool = Query(False, description="Filter by archived status"),
     db: AsyncSession = Depends(get_db_session),
     current_user: User = Depends(get_current_active_user),
 ):
-    return await chat_service.list_chat_sessions(db, current_user, page, page_size)
+    return await chat_service.list_chat_sessions(
+        db, current_user, page, page_size, search=search, is_archived=is_archived,
+    )
 
 
 @router.get(
@@ -78,6 +86,26 @@ async def get_session(
     current_user: User = Depends(get_current_active_user),
 ):
     return await chat_service.get_session_messages(db, current_user, session_id)
+
+
+@router.patch(
+    "/sessions/{session_id}",
+    response_model=ChatSessionResponse,
+    summary="Update chat session",
+    description="Update session title, pin, or archive status.",
+    responses={
+        400: {"description": "Invalid operation (e.g., pin archived session)"},
+        401: {"description": "Not authenticated"},
+        404: {"description": "Session not found"},
+    },
+)
+async def update_session(
+    session_id: UUID,
+    data: ChatSessionUpdate,
+    db: AsyncSession = Depends(get_db_session),
+    current_user: User = Depends(get_current_active_user),
+):
+    return await chat_service.update_chat_session(db, current_user, session_id, data)
 
 
 @router.post(
@@ -117,6 +145,10 @@ async def add_messages(
             conv_manager = ConversationManager(db, current_user)
             session_obj = await conv_manager.get_session(session_id)
 
+            # Generate title for first message
+            if session_obj.title is None and user_msgs:
+                await conv_manager.generate_title(session_obj, user_msgs[0].content)
+
             last_user_msg = user_msgs[-1].content
             ai_messages = await conv_manager.build_ai_messages(
                 session_obj, last_user_msg, prompt_name="chat",
@@ -129,12 +161,33 @@ async def add_messages(
                 ip=request.client.host if request.client else None,
             )
 
-            # Store assistant response
-            assistant_msgs = await chat_service.add_messages(
+            # Store assistant response with AI metadata
+            assistant_stored = await chat_service.add_message_with_metadata(
                 db, current_user, session_id,
-                [ChatMessageCreate(role="assistant", content=response.content)],
+                role="assistant",
+                content=response.content,
+                token_count=response.token_usage.total_tokens,
+                model_used=response.model,
+                latency_ms=response.latency_ms,
+                request_id=response.request_id,
+                message_data={
+                    "finish_reason": response.finish_reason,
+                    "prompt_tokens": response.token_usage.prompt_tokens,
+                    "completion_tokens": response.token_usage.completion_tokens,
+                },
             )
-            stored.extend(assistant_msgs)
+            stored.append(assistant_stored)
+
+            # Update session metadata
+            total_msg_count = len(session_obj.messages) + len(messages)
+            await conv_manager.update_session_metadata(
+                session_obj,
+                total_tokens=response.token_usage.total_tokens,
+                prompt_tokens=response.token_usage.prompt_tokens,
+                completion_tokens=response.token_usage.completion_tokens,
+                model=response.model,
+            )
+            await conv_manager.maybe_extract_facts(session_obj, total_msg_count)
 
     return stored
 
@@ -156,3 +209,67 @@ async def delete_session(
 ):
     await chat_service.delete_chat_session(db, current_user, session_id)
     return MessageResponse(message="Chat session deleted")
+
+
+@router.post(
+    "/sessions/{session_id}/rebuild-memory",
+    response_model=MemoryRebuildResponse,
+    summary="Rebuild conversation memory",
+    description="Clear and regenerate the session's summary and extracted facts.",
+    responses={
+        401: {"description": "Not authenticated"},
+        404: {"description": "Session not found"},
+    },
+)
+async def rebuild_memory(
+    session_id: UUID,
+    db: AsyncSession = Depends(get_db_session),
+    current_user: User = Depends(get_current_active_user),
+):
+    conv_manager = ConversationManager(db, current_user)
+    session_obj = await conv_manager.get_session(session_id)
+    result = await conv_manager.rebuild_memory(session_obj)
+    return MemoryRebuildResponse(
+        session_id=session_id,
+        summary=result["summary"],
+        summary_message_count=result["summary_message_count"],
+        facts_count=result["facts_count"],
+        message="Memory rebuilt successfully",
+    )
+
+
+@router.get(
+    "/sessions/{session_id}/export",
+    response_model=ChatExportResponse,
+    summary="Export chat session",
+    description="Export a chat session in JSON, Markdown, or plain text format.",
+    responses={
+        401: {"description": "Not authenticated"},
+        404: {"description": "Session not found"},
+    },
+)
+async def export_session(
+    session_id: UUID,
+    format: str = Query("json", description="Export format: json, markdown, text"),
+    db: AsyncSession = Depends(get_db_session),
+    current_user: User = Depends(get_current_active_user),
+):
+    data = await chat_service.export_chat_session(db, current_user, session_id, format)
+    return ChatExportResponse(**data)
+
+
+@router.get(
+    "/stats",
+    response_model=ChatStatsResponse,
+    summary="Get chat statistics",
+    description="Get aggregate chat statistics for the authenticated user.",
+    responses={
+        401: {"description": "Not authenticated"},
+    },
+)
+async def chat_stats(
+    db: AsyncSession = Depends(get_db_session),
+    current_user: User = Depends(get_current_active_user),
+):
+    data = await chat_service.get_chat_stats(db, current_user)
+    return ChatStatsResponse(**data)

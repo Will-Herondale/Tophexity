@@ -43,6 +43,28 @@ class Settings(BaseSettings):
     AI_SUMMARY_KEEP_RECENT: int = 10
     AI_MAX_CONTEXT_MESSAGES: int = 50
 
+    # Phase 3.2A — Conversation Platform
+    AI_CONVERSATION_RETENTION_DAYS: int = 90
+    AI_CONVERSATION_ARCHIVE_AFTER_DAYS: int = 30
+    AI_MAX_CONVERSATIONS_PER_USER: int = 100
+
+    AI_TITLE_GENERATION_ENABLED: bool = True
+    AI_TITLE_GENERATION_TIMEOUT: float = 3.0
+    AI_TITLE_MAX_LENGTH: int = 80
+
+    AI_MAX_SUMMARY_LENGTH: int = 2000
+    AI_FACT_EXTRACTION_INTERVAL: int = 5
+    AI_MIN_RECENT_MESSAGES: int = 4
+
+    AI_CONTEXT_BUDGET_SYSTEM_PCT: float = 0.15
+    AI_CONTEXT_BUDGET_SUMMARY_PCT: float = 0.10
+    AI_CONTEXT_BUDGET_FACTS_PCT: float = 0.05
+    AI_CONTEXT_BUDGET_MESSAGES_PCT: float = 0.50
+    AI_CONTEXT_BUDGET_RESPONSE_PCT: float = 0.20
+
+    AI_PROMPT_CACHE_TTL: float = 300.0
+    AI_PROMPT_DEBUG_ENABLED: bool = True
+
     RECOMMENDATION_SERVICE_URL: str = "http://localhost:8001"
 
     CORS_ORIGINS: list[str] = ["http://localhost:3000"]

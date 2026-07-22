@@ -1472,7 +1472,11 @@ Create a new AI chat session.
   "id": "uuid",
   "user_id": "uuid",
   "title": "Career Guidance Chat",
-  "created_at": "2026-07-22T10:00:00"
+  "is_archived": false,
+  "is_pinned": false,
+  "session_data": {},
+  "created_at": "2026-07-22T10:00:00",
+  "updated_at": "2026-07-22T10:00:00"
 }
 ```
 
@@ -1483,21 +1487,23 @@ Create a new AI chat session.
 
 ### `GET /v1/chat/sessions`
 
-List all chat sessions for the authenticated user.
+List chat sessions for the authenticated user with optional search and archive filter.
 
 **Auth required:** Yes
 
 **Query parameters:**
 
-| Parameter   | Type | Required | Default |
-|-------------|------|----------|---------|
-| `page`      | int  | No       | `1`     |
-| `page_size` | int  | No       | `20`    |
+| Parameter    | Type    | Required | Default | Description |
+|--------------|---------|----------|---------|-------------|
+| `page`       | int     | No       | `1`     | Page number |
+| `page_size`  | int     | No       | `20`    | Items per page (max 100) |
+| `search`     | string  | No       | null    | Search sessions by title |
+| `is_archived`| boolean | No       | `false` | Filter by archived status |
 
 **Request example:**
 
 ```
-GET /v1/chat/sessions?page=1&page_size=10
+GET /v1/chat/sessions?page=1&page_size=10&search=career&is_archived=false
 ```
 
 **Response 200:**
@@ -1509,7 +1515,11 @@ GET /v1/chat/sessions?page=1&page_size=10
       "id": "uuid",
       "user_id": "uuid",
       "title": "Career Guidance Chat",
-      "created_at": "2026-07-22T10:00:00"
+      "is_archived": false,
+      "is_pinned": true,
+      "session_data": {"message_count": 12, "total_tokens_used": 4500},
+      "created_at": "2026-07-22T10:00:00",
+      "updated_at": "2026-07-22T14:30:00"
     }
   ],
   "total": 1,
@@ -1540,13 +1550,23 @@ Get a chat session with all its messages.
   "id": "uuid",
   "user_id": "uuid",
   "title": "Career Guidance Chat",
+  "is_archived": false,
+  "is_pinned": false,
+  "summary": "User discussed transitioning to ML...",
+  "session_data": {"message_count": 12, "facts": []},
   "created_at": "2026-07-22T10:00:00",
+  "updated_at": "2026-07-22T14:30:00",
   "messages": [
     {
       "id": "uuid",
       "session_id": "uuid",
       "role": "user",
       "content": "What career should I pursue?",
+      "token_count": null,
+      "model_used": null,
+      "latency_ms": null,
+      "request_id": null,
+      "message_data": {},
       "created_at": "2026-07-22T10:00:05"
     },
     {
@@ -1554,6 +1574,11 @@ Get a chat session with all its messages.
       "session_id": "uuid",
       "role": "assistant",
       "content": "Based on your profile, I recommend...",
+      "token_count": 450,
+      "model_used": "gpt-5",
+      "latency_ms": 1234.5,
+      "request_id": "req-uuid",
+      "message_data": {"finish_reason": "stop", "prompt_tokens": 300, "completion_tokens": 150},
       "created_at": "2026-07-22T10:00:10"
     }
   ]
@@ -1566,9 +1591,47 @@ Get a chat session with all its messages.
 
 ---
 
+### `PATCH /v1/chat/sessions/{session_id}`
+
+Update session title, pin, or archive status.
+
+**Auth required:** Yes
+
+**Path parameters:**
+
+| Parameter    | Type | Description |
+|--------------|------|-------------|
+| `session_id` | UUID | Chat session ID |
+
+**Request body (all fields optional):**
+
+| Field         | Type    | Description |
+|---------------|---------|-------------|
+| `title`       | string  | New title (max 500 chars) |
+| `is_pinned`   | boolean | Pin/unpin the session |
+| `is_archived` | boolean | Archive/restore the session |
+
+**Request example:**
+
+```json
+{
+  "title": "New Title",
+  "is_pinned": true
+}
+```
+
+**Response 200:** Updated session object.
+
+**Errors:**
+- `400` - Cannot pin archived session or archive pinned session
+- `401` - Not authenticated
+- `404` - Session not found
+
+---
+
 ### `POST /v1/chat/sessions/{session_id}/messages`
 
-Send messages to a chat session. If user messages are included, Azure AI generates a response automatically.
+Send messages to a chat session. If user messages are included, Azure AI generates a response automatically. On first message to a titleless session, a title is auto-generated.
 
 **Auth required:** Yes
 
@@ -1605,6 +1668,11 @@ Send messages to a chat session. If user messages are included, Azure AI generat
     "session_id": "uuid",
     "role": "user",
     "content": "I'm interested in machine learning. What skills do I need?",
+    "token_count": null,
+    "model_used": null,
+    "latency_ms": null,
+    "request_id": null,
+    "message_data": {},
     "created_at": "2026-07-22T10:00:05"
   },
   {
@@ -1612,6 +1680,11 @@ Send messages to a chat session. If user messages are included, Azure AI generat
     "session_id": "uuid",
     "role": "assistant",
     "content": "To get started in machine learning, you'll need: 1) Strong Python programming...",
+    "token_count": 450,
+    "model_used": "gpt-5",
+    "latency_ms": 1234.5,
+    "request_id": "req-uuid",
+    "message_data": {"finish_reason": "stop", "prompt_tokens": 300, "completion_tokens": 150},
     "created_at": "2026-07-22T10:00:12"
   }
 ]
@@ -1619,9 +1692,11 @@ Send messages to a chat session. If user messages are included, Azure AI generat
 
 **Behavior notes:**
 - User messages trigger Azure AI response generation
-- AI response is built using: user profile, portfolio, latest recommendation, latest roadmap, conversation history
+- AI response is built using: user profile, portfolio, latest recommendation, latest roadmap, conversation summary, facts
+- On first message to a titleless session, a title is auto-generated via AI
+- Session metadata (token counts, message counts) is updated after each exchange
+- Facts are extracted periodically (every 5th user message)
 - If AI is not configured, only user messages are stored (no AI response)
-- Role must be exactly `"user"`, `"assistant"`, or `"system"` (case-sensitive, validated by regex)
 
 **Errors:**
 - `401` - Not authenticated
@@ -1652,6 +1727,115 @@ Delete a chat session and all its messages.
 **Errors:**
 - `401` - Not authenticated
 - `404` - Session not found
+
+---
+
+### `POST /v1/chat/sessions/{session_id}/rebuild-memory`
+
+Clear and regenerate the session's summary and extracted facts.
+
+**Auth required:** Yes
+
+**Path parameters:**
+
+| Parameter    | Type | Description |
+|--------------|------|-------------|
+| `session_id` | UUID | Chat session ID |
+
+**Response 200:**
+
+```json
+{
+  "session_id": "uuid",
+  "summary": "Regenerated summary...",
+  "summary_message_count": 10,
+  "facts_count": 3,
+  "message": "Memory rebuilt successfully"
+}
+```
+
+**Errors:**
+- `401` - Not authenticated
+- `404` - Session not found
+
+---
+
+### `GET /v1/chat/sessions/{session_id}/export`
+
+Export a chat session in JSON, Markdown, or plain text format.
+
+**Auth required:** Yes
+
+**Path parameters:**
+
+| Parameter    | Type | Description |
+|--------------|------|-------------|
+| `session_id` | UUID | Chat session ID |
+
+**Query parameters:**
+
+| Parameter | Type   | Required | Default | Description |
+|-----------|--------|----------|---------|-------------|
+| `format`  | string | No       | `json`  | Export format: `json`, `markdown`, `text` |
+
+**Response 200:**
+
+```json
+{
+  "session": {
+    "id": "uuid",
+    "title": "Career Discussion",
+    "created_at": "2026-07-22T10:00:00Z",
+    "message_count": 12
+  },
+  "summary": "User discussed transitioning to ML...",
+  "messages": [
+    {
+      "role": "user",
+      "content": "I want to switch to ML...",
+      "timestamp": "2026-07-22T10:00:05Z"
+    },
+    {
+      "role": "assistant",
+      "content": "Great choice! Based on your profile...",
+      "timestamp": "2026-07-22T10:00:12Z",
+      "model": "gpt-5",
+      "tokens": 450
+    }
+  ]
+}
+```
+
+**Errors:**
+- `401` - Not authenticated
+- `404` - Session not found
+
+---
+
+### `GET /v1/chat/stats`
+
+Get aggregate chat statistics for the authenticated user.
+
+**Auth required:** Yes
+
+**Response 200:**
+
+```json
+{
+  "total_sessions": 15,
+  "active_sessions": 12,
+  "archived_sessions": 3,
+  "total_messages": 156,
+  "total_tokens_used": 45200,
+  "estimated_total_cost_usd": 1.356,
+  "average_messages_per_session": 10.4,
+  "first_conversation_at": "2026-07-01T10:00:00Z",
+  "last_conversation_at": "2026-07-22T14:30:00Z"
+}
+```
+
+**Errors:**
+- `401` - Not authenticated
 
 ---
 
@@ -1764,14 +1948,20 @@ Send a simple message to Azure AI and return the response. For backend verificat
 | `GET` | `/v1/backups/{id}` | Yes | Get backup plan |
 | `GET` | `/v1/chat/health` | No | Chat service health |
 | `POST` | `/v1/chat/sessions` | Yes | Create chat session |
-| `GET` | `/v1/chat/sessions` | Yes | List chat sessions |
+| `GET` | `/v1/chat/sessions` | Yes | List chat sessions (search, filter) |
 | `GET` | `/v1/chat/sessions/{id}` | Yes | Get session with messages |
+| `PATCH` | `/v1/chat/sessions/{id}` | Yes | Update session (title, pin, archive) |
 | `POST` | `/v1/chat/sessions/{id}/messages` | Yes | Send message (triggers AI) |
 | `DELETE` | `/v1/chat/sessions/{id}` | Yes | Delete session |
+| `POST` | `/v1/chat/sessions/{id}/rebuild-memory` | Yes | Rebuild summary + facts |
+| `GET` | `/v1/chat/sessions/{id}/export` | Yes | Export session (JSON/MD/text) |
+| `GET` | `/v1/chat/stats` | Yes | Chat statistics |
 | `GET` | `/v1/ai/health` | No | AI health check |
 | `POST` | `/v1/ai/test` | Yes | Test AI integration |
+| `GET` | `/v1/ai/prompts` | No | List all AI prompts |
+| `POST` | `/v1/ai/prompts/{name}/test` | Yes | Test-render a prompt |
 
-**Total: 39 endpoints**
+**Total: 48 endpoints**
 
 ---
 

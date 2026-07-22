@@ -1,13 +1,19 @@
-"""AI test endpoint and AI health endpoint."""
+"""AI test endpoint, AI health endpoint, and prompt management endpoints."""
 
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_active_user, get_db_session
 from app.models.user import User
+from app.schemas.ai import PromptListResponse, PromptMetadata, PromptTestResponse
 from app.services.ai.client import get_ai_client
 from app.services.ai.health import check_ai_health
 from app.services.ai.models import AIHealthStatus
+from app.services.ai.prompt_loader import (
+    get_prompt_metadata,
+    list_prompts,
+    render_prompt,
+)
 
 router = APIRouter()
 
@@ -65,3 +71,55 @@ async def ai_test(
 )
 async def ai_health():
     return await check_ai_health()
+
+
+@router.get(
+    "/prompts",
+    summary="List all AI prompts",
+    description="Return metadata for all available prompt templates including version, description, and token estimates.",
+    tags=["AI"],
+    response_model=PromptListResponse,
+    responses={
+        200: {"description": "Prompt list returned"},
+    },
+)
+async def ai_list_prompts():
+    names = list_prompts()
+    items = []
+    for name in names:
+        try:
+            meta = get_prompt_metadata(name)
+            items.append(PromptMetadata(**meta))
+        except FileNotFoundError:
+            continue
+    return PromptListResponse(prompts=items)
+
+
+@router.post(
+    "/prompts/{prompt_name}/test",
+    summary="Test-render a prompt with variables",
+    description=(
+        "Render a prompt template with the provided variables and return the output. "
+        "Useful for debugging prompt templates without sending to AI."
+    ),
+    tags=["AI"],
+    response_model=PromptTestResponse,
+    responses={
+        200: {"description": "Rendered prompt returned"},
+        404: {"description": "Prompt not found"},
+    },
+)
+async def ai_test_prompt(
+    prompt_name: str,
+    request: Request,
+    current_user: User = Depends(get_current_active_user),
+):
+    body = await request.json()
+    variables = body.get("variables", {})
+    rendered = render_prompt(prompt_name, variables)
+    return PromptTestResponse(
+        name=prompt_name,
+        rendered=rendered,
+        char_count=len(rendered),
+        estimated_tokens=max(1, len(rendered) // 3),
+    )

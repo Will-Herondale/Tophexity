@@ -50,19 +50,27 @@ export default function ChatSidebar({ sessions, activeSessionId, onSelect, onCre
     });
 
   const handleTogglePin = async (session: ChatSession) => {
-    try {
-      const updated = await updateChatSession(session.id, { is_pinned: !session.is_pinned });
-      onSessionUpdated(updated);
-    } catch {}
     setMenuOpen(null);
+    const optimistic = { ...session, is_pinned: !session.is_pinned };
+    onSessionUpdated(optimistic);
+    try {
+      await updateChatSession(session.id, { is_pinned: !session.is_pinned });
+    } catch (err) {
+      console.error("Failed to toggle pin:", err);
+      onSessionUpdated(session);
+    }
   };
 
   const handleToggleArchive = async (session: ChatSession) => {
-    try {
-      const updated = await updateChatSession(session.id, { is_archived: !session.is_archived });
-      onSessionUpdated(updated);
-    } catch {}
     setMenuOpen(null);
+    const optimistic = { ...session, is_archived: !session.is_archived };
+    onSessionUpdated(optimistic);
+    try {
+      await updateChatSession(session.id, { is_archived: !session.is_archived });
+    } catch (err) {
+      console.error("Failed to toggle archive:", err);
+      onSessionUpdated(session);
+    }
   };
 
   const handleStartRename = (session: ChatSession) => {
@@ -72,13 +80,18 @@ export default function ChatSidebar({ sessions, activeSessionId, onSelect, onCre
   };
 
   const handleFinishRename = async (session: ChatSession) => {
-    if (renameValue.trim() && renameValue.trim() !== (session.title || "")) {
-      try {
-        const updated = await updateChatSession(session.id, { title: renameValue.trim() });
-        onSessionUpdated(updated);
-      } catch {}
-    }
+    const newTitle = renameValue.trim();
     setRenamingId(null);
+    if (newTitle && newTitle !== (session.title || "")) {
+      const optimistic = { ...session, title: newTitle };
+      onSessionUpdated(optimistic);
+      try {
+        await updateChatSession(session.id, { title: newTitle });
+      } catch (err) {
+        console.error("Failed to rename:", err);
+        onSessionUpdated(session);
+      }
+    }
   };
 
   return (
@@ -170,11 +183,12 @@ export default function ChatSidebar({ sessions, activeSessionId, onSelect, onCre
                 {/* Three-dot menu */}
                 <div className="relative" ref={menuOpen === session.id ? menuRef : undefined}>
                   <button
+                    onMouseDown={(e) => e.stopPropagation()}
                     onClick={(e) => {
                       e.stopPropagation();
                       setMenuOpen(menuOpen === session.id ? null : session.id);
                     }}
-                    className="hidden group-hover:block rounded p-1 text-text-muted hover:bg-accent/10 hover:text-text-secondary transition-colors"
+                    className="rounded p-1 text-text-muted hover:bg-accent/10 hover:text-text-secondary transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
                   >
                     <MoreHorizontal className="h-3.5 w-3.5" />
                   </button>

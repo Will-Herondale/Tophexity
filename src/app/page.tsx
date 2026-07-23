@@ -96,6 +96,148 @@ const footerCompany = [
 ];
 
 function DashboardMockup() {
+  const [activeSlide, setActiveSlide] = useState(0);
+  const totalSlides = 4;
+
+  useEffect(() => {
+    const timer = setInterval(() => setActiveSlide((p) => (p + 1) % totalSlides), 4000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const slides = [
+    /* Slide 0: Career Dashboard */
+    <div key="dash" className="p-6 md:p-8 h-full">
+      <div className="flex items-center gap-3 mb-5">
+        <div className="w-8 h-8 rounded-lg bg-accent/30 flex items-center justify-center">
+          <Sparkles className="w-4 h-4 text-accent" />
+        </div>
+        <div>
+          <p className="text-xs text-text-muted">Welcome back</p>
+          <p className="text-sm font-semibold font-[family-name:var(--font-display)]">Career Dashboard</p>
+        </div>
+      </div>
+      <div className="grid grid-cols-3 gap-3 mb-5">
+        {[
+          { label: "Match Score", value: "94%", color: "text-emerald-400" },
+          { label: "Skills Analyzed", value: "28", color: "text-accent" },
+          { label: "Careers Found", value: "12", color: "text-blue-400" },
+        ].map((s) => (
+          <div key={s.label} className="rounded-xl bg-surface/30 p-3">
+            <p className={`text-lg font-bold font-[family-name:var(--font-display)] ${s.color}`}>{s.value}</p>
+            <p className="text-[10px] text-text-muted mt-0.5">{s.label}</p>
+          </div>
+        ))}
+      </div>
+      <div className="space-y-2.5">
+        {[
+          { title: "Product Manager", score: 94 },
+          { title: "Data Analyst", score: 87 },
+          { title: "UX Strategist", score: 82 },
+        ].map((c) => (
+          <div key={c.title} className="rounded-xl bg-surface/20 p-3">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-medium">{c.title}</span>
+              <span className="text-xs text-accent font-bold">{c.score}%</span>
+            </div>
+            <div className="h-1.5 rounded-full bg-surface/60 overflow-hidden">
+              <div className="h-full rounded-full bg-gradient-to-r from-accent to-accent-light" style={{ width: `${c.score}%` }} />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>,
+
+    /* Slide 1: AI Recommendations */
+    <div key="rec" className="p-6 md:p-8 h-full">
+      <div className="flex items-center gap-3 mb-5">
+        <div className="w-8 h-8 rounded-lg bg-emerald-500/30 flex items-center justify-center">
+          <Brain className="w-4 h-4 text-emerald-400" />
+        </div>
+        <div>
+          <p className="text-xs text-text-muted">AI Analysis</p>
+          <p className="text-sm font-semibold font-[family-name:var(--font-display)]">Top Recommendations</p>
+        </div>
+      </div>
+      <div className="space-y-3">
+        {[
+          { title: "Full Stack Developer", match: 96, reason: "Strong coding + problem-solving fit" },
+          { title: "DevOps Engineer", match: 89, reason: "Matches your system design skills" },
+          { title: "Product Manager", match: 84, reason: "Great leadership & communication fit" },
+        ].map((r) => (
+          <div key={r.title} className="rounded-xl bg-surface/20 p-3.5">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-sm font-medium">{r.title}</span>
+              <span className="text-xs font-bold text-emerald-400">{r.match}%</span>
+            </div>
+            <p className="text-[11px] text-text-muted">{r.reason}</p>
+          </div>
+        ))}
+      </div>
+    </div>,
+
+    /* Slide 2: Skills Radar */
+    <div key="skills" className="p-6 md:p-8 h-full">
+      <div className="flex items-center gap-3 mb-5">
+        <div className="w-8 h-8 rounded-lg bg-amber-500/30 flex items-center justify-center">
+          <BarChart3 className="w-4 h-4 text-amber-400" />
+        </div>
+        <div>
+          <p className="text-xs text-text-muted">Your Profile</p>
+          <p className="text-sm font-semibold font-[family-name:var(--font-display)]">Skills Overview</p>
+        </div>
+      </div>
+      <div className="space-y-3">
+        {[
+          { skill: "JavaScript", level: "Advanced", pct: 88 },
+          { skill: "React", level: "Advanced", pct: 82 },
+          { skill: "Node.js", level: "Intermediate", pct: 70 },
+          { skill: "Python", level: "Intermediate", pct: 65 },
+          { skill: "System Design", level: "Beginner", pct: 45 },
+        ].map((s) => (
+          <div key={s.skill} className="flex items-center gap-3">
+            <span className="text-xs w-24 shrink-0 font-medium">{s.skill}</span>
+            <div className="flex-1 h-1.5 rounded-full bg-surface/60 overflow-hidden">
+              <div className="h-full rounded-full bg-gradient-to-r from-amber-500 to-amber-400" style={{ width: `${s.pct}%` }} />
+            </div>
+            <span className="text-[10px] text-text-muted w-8 text-right">{s.level}</span>
+          </div>
+        ))}
+      </div>
+    </div>,
+
+    /* Slide 3: Roadmap */
+    <div key="road" className="p-6 md:p-8 h-full">
+      <div className="flex items-center gap-3 mb-5">
+        <div className="w-8 h-8 rounded-lg bg-purple-500/30 flex items-center justify-center">
+          <Map className="w-4 h-4 text-purple-400" />
+        </div>
+        <div>
+          <p className="text-xs text-text-muted">Your Path</p>
+          <p className="text-sm font-semibold font-[family-name:var(--font-display)]">Career Roadmap</p>
+        </div>
+      </div>
+      <div className="relative pl-5 space-y-4">
+        <div className="absolute left-[7px] top-2 bottom-2 w-px bg-accent/20" />
+        {[
+          { title: "Build portfolio projects", tag: "Done", tagColor: "bg-emerald-500/20 text-emerald-400" },
+          { title: "Master system design basics", tag: "In Progress", tagColor: "bg-accent/20 text-accent" },
+          { title: "Contribute to open source", tag: "Next", tagColor: "bg-purple-500/20 text-purple-400" },
+          { title: "Apply to target roles", tag: "Upcoming", tagColor: "bg-surface/40 text-text-muted" },
+        ].map((step, i) => (
+          <div key={step.title} className="relative">
+            <div className={`absolute -left-[15px] top-1.5 w-2.5 h-2.5 rounded-full border-2 ${i === 0 ? "bg-emerald-400 border-emerald-400" : i === 1 ? "bg-accent border-accent animate-pulse" : "bg-background border-border"}`} />
+            <div className="rounded-xl bg-surface/20 p-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium">{step.title}</span>
+                <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${step.tagColor}`}>{step.tag}</span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>,
+  ];
+
   return (
     <div className="relative w-full max-w-3xl mx-auto">
       {/* Glow behind */}
@@ -121,56 +263,33 @@ function DashboardMockup() {
           </div>
         </div>
 
-        {/* Content */}
-        <div className="p-6 md:p-8">
-          {/* Top row */}
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-8 h-8 rounded-lg bg-accent/30 flex items-center justify-center">
-              <Sparkles className="w-4 h-4 text-accent" />
-            </div>
-            <div>
-              <p className="text-xs text-text-muted">Welcome back</p>
-              <p className="text-sm font-semibold font-[family-name:var(--font-display)]">Career Dashboard</p>
-            </div>
-          </div>
+        {/* Slide container */}
+        <div className="relative h-[340px] md:h-[360px]">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeSlide}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.5 }}
+              className="absolute inset-0"
+            >
+              {slides[activeSlide]}
+            </motion.div>
+          </AnimatePresence>
+        </div>
 
-          {/* Stats row */}
-          <div className="grid grid-cols-3 gap-3 mb-6">
-            {[
-              { label: "Match Score", value: "94%", color: "text-emerald-400" },
-              { label: "Skills Analyzed", value: "28", color: "text-accent" },
-              { label: "Careers Found", value: "12", color: "text-blue-400" },
-            ].map((s) => (
-              <div key={s.label} className="rounded-xl bg-surface/30 p-3">
-                <p className={`text-lg font-bold font-[family-name:var(--font-display)] ${s.color}`}>{s.value}</p>
-                <p className="text-[10px] text-text-muted mt-0.5">{s.label}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* Career match bars */}
-          <div className="space-y-3">
-            {[
-              { title: "Product Manager", score: 94 },
-              { title: "Data Analyst", score: 87 },
-              { title: "UX Strategist", score: 82 },
-            ].map((c, i) => (
-              <div key={c.title} className="rounded-xl bg-surface/20 p-3">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-medium">{c.title}</span>
-                  <span className="text-xs text-accent font-bold">{c.score}%</span>
-                </div>
-                <div className="h-1.5 rounded-full bg-surface/60 overflow-hidden">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${c.score}%` }}
-                    transition={{ duration: 1.5, delay: 1 + i * 0.2, ease: [0.22, 1, 0.36, 1] }}
-                    className="h-full rounded-full bg-gradient-to-r from-accent to-accent-light"
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
+        {/* Dot indicators */}
+        <div className="flex items-center justify-center gap-2 pb-4">
+          {slides.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setActiveSlide(i)}
+              className={`h-1.5 rounded-full transition-all duration-300 ${
+                i === activeSlide ? "w-6 bg-accent" : "w-1.5 bg-surface-foreground/20 hover:bg-surface-foreground/40"
+              }`}
+            />
+          ))}
         </div>
       </motion.div>
     </div>

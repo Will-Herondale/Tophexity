@@ -6,7 +6,7 @@
 
 - Azure CLI installed and authenticated
 - Azure Function Core Tools v4+
-- Python 3.9+
+- Python 3.11+
 - Access to Azure subscription
 
 ### Initial Deployment
@@ -30,26 +30,25 @@ az storage account create \
 
 # 5. Create Function App
 az functionapp create \
-  --name hack4hyd-ai \
+  --name tophexity-func \
   --resource-group hack4hyd-rg \
   --consumption-plan-location eastus \
   --runtime python \
-  --runtime-version 3.9 \
+  --runtime-version 3.11 \
   --functions-version 4 \
   --storage-account hack4hydstore
 
 # 6. Configure settings
 az functionapp config appsettings set \
-  --name hack4hyd-ai \
+  --name tophexity-func \
   --resource-group hack4hyd-rg \
   --settings \
-    "OPENAI_ENDPOINT=https://your-resource.openai.azure.com/" \
+    "OPENAI_ENDPOINT=https://tophex.cognitiveservices.azure.com/" \
     "OPENAI_API_KEY=your-api-key" \
-    "COSMOS_ENDPOINT=https://your-cosmos.documents.azure.com:443/" \
-    "COSMOS_KEY=your-cosmos-key"
+
 
 # 7. Deploy
-func azure functionapp publish hack4hyd-ai
+func azure functionapp publish tophexity-func
 ```
 
 ### Update Deployment
@@ -59,10 +58,10 @@ func azure functionapp publish hack4hyd-ai
 git pull origin main
 
 # Deploy updates
-func azure functionapp publish hack4hyd-ai
+func azure functionapp publish tophexity-func
 
 # Verify deployment
-curl https://hack4hyd-ai.azurewebsites.net/api/health
+curl https://tophexity-func.azurewebsites.net/api/health
 ```
 
 ### Deployment Slots
@@ -70,19 +69,19 @@ curl https://hack4hyd-ai.azurewebsites.net/api/health
 ```bash
 # Create staging slot
 az functionapp deployment slot create \
-  --name hack4hyd-ai \
+  --name tophexity-func \
   --resource-group hack4hyd-rg \
   --slot staging
 
 # Deploy to staging
-func azure functionapp publish hack4hyd-ai --slot staging
+func azure functionapp publish tophexity-func --slot staging
 
 # Test in staging
-curl https://hack4hyd-ai-staging.azurewebsites.net/api/health
+curl https://tophexity-func-staging.azurewebsites.net/api/health
 
 # Swap to production
 az functionapp deployment slot swap \
-  --name hack4hyd-ai \
+  --name tophexity-func \
   --resource-group hack4hyd-rg \
   --slot staging \
   --target-slot production
@@ -94,7 +93,7 @@ az functionapp deployment slot swap \
 
 ```bash
 # Check if service is running
-curl https://hack4hyd-ai.azurewebsites.net/api/health
+curl https://tophexity-func.azurewebsites.net/api/health
 
 # Response:
 {
@@ -108,13 +107,13 @@ curl https://hack4hyd-ai.azurewebsites.net/api/health
 
 ```bash
 # Check AI connectivity
-curl https://hack4hyd-ai.azurewebsites.net/api/health/ai
+curl https://tophexity-func.azurewebsites.net/api/health/ai
 
 # Response:
 {
   "status": "healthy",
   "ai_service": "connected",
-  "model": "gpt-4",
+  "model": "gpt-5",
   "latency_ms": 245
 }
 ```
@@ -123,7 +122,7 @@ curl https://hack4hyd-ai.azurewebsites.net/api/health/ai
 
 ```bash
 # Full system check
-curl https://hack4hyd-ai.azurewebsites.net/api/health/deep
+curl https://tophexity-func.azurewebsites.net/api/health/deep
 
 # Response:
 {
@@ -196,10 +195,8 @@ Authorization: Bearer <admin-token>
 |----------|-------------|---------|----------|
 | `OPENAI_ENDPOINT` | Azure OpenAI endpoint | - | Yes |
 | `OPENAI_API_KEY` | Azure OpenAI API key | - | Yes |
-| `OPENAI_DEPLOYMENT` | Model deployment name | gpt-4 | Yes |
-| `COSMOS_ENDPOINT` | Cosmos DB endpoint | - | Yes |
-| `COSMOS_KEY` | Cosmos DB key | - | Yes |
-| `COSMOS_DATABASE` | Database name | ai-platform | Yes |
+| `OPENAI_DEPLOYMENT` | Model deployment name | gpt-5 | Yes |
+
 | `REDIS_CONNECTION` | Redis connection string | - | No |
 | `ADMIN_API_KEY` | Admin API key | - | Yes |
 | `ENVIRONMENT` | Environment name | development | No |
@@ -217,7 +214,7 @@ Authorization: Bearer <admin-token>
   "Values": {
     "AzureWebJobsStorage": "UseDevelopmentStorage=true",
     "FUNCTIONS_WORKER_RUNTIME": "python",
-    "OPENAI_ENDPOINT": "https://your-dev.openai.azure.com/",
+    "OPENAI_ENDPOINT": "https://tophex.cognitiveservices.azure.com/",
     "OPENAI_API_KEY": "your-dev-key",
     "ENVIRONMENT": "development",
     "LOG_LEVEL": "DEBUG"
@@ -236,7 +233,7 @@ Authorization: Bearer <admin-token>
 ```bash
 # Enable Always On
 az functionapp config set \
-  --name hack4hyd-ai \
+  --name tophexity-func \
   --resource-group hack4hyd-rg \
   --always-on true
 ```
@@ -251,7 +248,7 @@ curl /api/admin/rate-limits
 
 # Increase limits if needed
 az functionapp config appsettings set \
-  --name hack4hyd-ai \
+  --name tophexity-func \
   --settings "RATE_LIMIT_BURST=200"
 ```
 
@@ -274,7 +271,7 @@ curl -X POST /api/admin/circuit-breaker/reset
 ```bash
 # Verify connection string
 az functionapp config appsettings list \
-  --name hack4hyd-ai \
+  --name tophexity-func \
   --resource-group hack4hyd-rg
 
 # Test connection
@@ -285,14 +282,14 @@ curl /api/admin/diagnostics/database
 
 ```bash
 # Stream live logs
-func log tail --name hack4hyd-ai
+func log tail --name tophexity-func
 
 # Download log files
-func log download --name hack4hyd-ai
+func log download --name tophexity-func
 
 # Query Application Insights
 az monitor app-insights query \
-  --app hack4hyd-ai \
+  --app tophexity-func \
   --analytics-query "traces | where severityLevel >= 3 | take 100"
 ```
 
@@ -304,7 +301,7 @@ az monitor app-insights query \
 # Configure auto-scaling
 az monitor autoscale create \
   --resource-group hack4hyd-rg \
-  --resource hack4hyd-ai \
+  --resource tophexity-func \
   --resource-type Microsoft.Web/sites \
   --min 1 --max 10 --count 2
 
@@ -328,19 +325,12 @@ az monitor autoscale rule create \
 ### Database Scaling
 
 ```bash
-# Scale Cosmos DB
-az cosmosdb update \
-  --name hack4hyd-cosmos \
+# Scale PostgreSQL
+az postgres flexible-server update \
+  --name hack4hyd-postgres \
   --resource-group hack4hyd-rg \
-  --locations regionName=eastus failoverPriority=0 \
-  --default-consistency-level Session
-
-# Enable autoscale
-az cosmosdb sql database update \
-  --account-name hack4hyd-cosmos \
-  --name ai-platform \
-  --resource-group hack4hyd-rg \
-  --max-throughput 10000
+  --sku-name Standard_D2s_v3 \
+  --tier GeneralPurpose
 ```
 
 ## Cost Optimization
@@ -392,15 +382,14 @@ ORDER BY date DESC;
 
 ```bash
 # Enable continuous backup
-az cosmosdb update \
-  --name hack4hyd-cosmos \
+az postgres flexible-server update \
+  --name hack4hyd-postgres \
   --resource-group hack4hyd-rg \
-  --backup-policy-type Continuous
+  --backup-retention 35
 
 # Manual backup
-az cosmosdb sql database backup \
-  --account-name hack4hyd-cosmos \
-  --name ai-platform \
+az postgres flexible-server backup create \
+  --name hack4hyd-postgres \
   --resource-group hack4hyd-rg
 ```
 
@@ -409,18 +398,17 @@ az cosmosdb sql database backup \
 1. **Data Recovery**
    ```bash
    # Restore from backup
-   az cosmosdb sql database restore \
-     --account-name hack4hyd-cosmos \
-     --name ai-platform \
+   az postgres flexible-server restore \
+     --name hack4hyd-postgres \
      --resource-group hack4hyd-rg \
-     --restore-timestamp 2026-07-23T00:00:00Z
+     --restore-time 2026-07-23T00:00:00Z
    ```
 
 2. **Configuration Recovery**
    ```bash
    # Export current settings
    az functionapp config appsettings list \
-     --name hack4hyd-ai \
+     --name tophexity-func \
      --resource-group hack4hyd-rg \
      --output table > settings-backup.txt
    ```

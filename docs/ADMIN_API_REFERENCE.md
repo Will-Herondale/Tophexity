@@ -40,7 +40,7 @@ Returns current system status and basic metrics.
 **Request:**
 ```bash
 curl -H "Authorization: Bearer $ADMIN_KEY" \
-  https://your-app.azurewebsites.net/api/admin/status
+  https://tophexity-func.azurewebsites.net/api/admin/status
 ```
 
 **Response (200 OK):**
@@ -73,7 +73,7 @@ Returns usage metrics for a specified time period.
 **Request:**
 ```bash
 curl -H "Authorization: Bearer $ADMIN_KEY" \
-  "https://your-app.azurewebsites.net/api/admin/metrics?period=24h&granularity=hour"
+  "https://tophexity-func.azurewebsites.net/api/admin/metrics?period=24h&granularity=hour"
 ```
 
 **Response (200 OK):**
@@ -131,7 +131,7 @@ Returns detailed system diagnostics.
 **Request:**
 ```bash
 curl -H "Authorization: Bearer $ADMIN_KEY" \
-  https://your-app.azurewebsites.net/api/admin/diagnostics
+  https://tophexity-func.azurewebsites.net/api/admin/diagnostics
 ```
 
 **Response (200 OK):**
@@ -141,8 +141,8 @@ curl -H "Authorization: Bearer $ADMIN_KEY" \
     "ai_service": {
       "status": "healthy",
       "latency_ms": 245,
-      "model": "gpt-4",
-      "endpoint": "https://your-resource.openai.azure.com/",
+      "model": "gpt-5",
+      "endpoint": "https://tophex.cognitiveservices.azure.com/",
       "last_error": null,
       "uptime_pct": 99.95
     },
@@ -172,7 +172,7 @@ curl -H "Authorization: Bearer $ADMIN_KEY" \
     }
   },
   "runtime": {
-    "python_version": "3.9.18",
+    "python_version": "3.11",
     "function_runtime": "4.0.0",
     "memory_used_mb": 456,
     "memory_limit_mb": 1536,
@@ -180,7 +180,7 @@ curl -H "Authorization: Bearer $ADMIN_KEY" \
   },
   "environment": {
     "region": "eastus",
-    "instance": "hack4hyd-ai",
+    "instance": "tophexity-func",
     "slot": "production"
   }
 }
@@ -247,12 +247,12 @@ curl -X POST \
       {"name": "data", "type": "string", "required": true}
     ],
     "model": {
-      "preferred": "gpt-4",
+      "preferred": "gpt-5",
       "temperature": 0.5,
       "max_tokens": 2048
     }
   }' \
-  https://your-app.azurewebsites.net/api/admin/prompts
+  https://tophexity-func.azurewebsites.net/api/admin/prompts
 ```
 
 **Response (201 Created):**
@@ -279,7 +279,7 @@ curl -X PUT \
     "content": "Updated prompt content...",
     "changes": "Improved accuracy for edge cases"
   }' \
-  https://your-app.azurewebsites.net/api/admin/prompts/data_analysis
+  https://tophexity-func.azurewebsites.net/api/admin/prompts/data_analysis
 ```
 
 **Response (200 OK):**
@@ -300,7 +300,7 @@ Delete a prompt and all its versions.
 ```bash
 curl -X DELETE \
   -H "Authorization: Bearer $ADMIN_KEY" \
-  https://your-app.azurewebsites.net/api/admin/prompts/data_analysis
+  https://tophexity-func.azurewebsites.net/api/admin/prompts/data_analysis
 ```
 
 **Response (200 OK):**
@@ -328,7 +328,7 @@ curl -X POST \
     "name": "general_chat",
     "version": "1.2.0"
   }' \
-  https://your-app.azurewebsites.net/api/admin/cache/invalidate
+  https://tophexity-func.azurewebsites.net/api/admin/cache/invalidate
 ```
 
 **Response (200 OK):**
@@ -378,7 +378,7 @@ Show current rate limit status across all users.
 **Request:**
 ```bash
 curl -H "Authorization: Bearer $ADMIN_KEY" \
-  https://your-app.azurewebsites.net/api/admin/rate-limits
+  https://tophexity-func.azurewebsites.net/api/admin/rate-limits
 ```
 
 **Response (200 OK):**
@@ -441,7 +441,7 @@ Delete a specific conversation.
 ```bash
 curl -X DELETE \
   -H "Authorization: Bearer $ADMIN_KEY" \
-  https://your-app.azurewebsites.net/api/admin/conversations/conv_abc123
+  https://tophexity-func.azurewebsites.net/api/admin/conversations/conv_abc123
 ```
 
 **Response (200 OK):**
@@ -481,7 +481,7 @@ Force reset the circuit breaker to closed state.
 ```bash
 curl -X POST \
   -H "Authorization: Bearer $ADMIN_KEY" \
-  https://your-app.azurewebsites.net/api/admin/circuit-breaker/reset
+  https://tophexity-func.azurewebsites.net/api/admin/circuit-breaker/reset
 ```
 
 **Response (200 OK):**

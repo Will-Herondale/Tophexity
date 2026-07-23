@@ -35,7 +35,7 @@
 ### AIClient
 The core AI client manages communication with Azure OpenAI services.
 
-- **Location**: `ai_client.py`
+- **Location**: `services/ai/client.py`
 - **Responsibilities**:
   - Manage API connections
   - Handle model selection
@@ -300,7 +300,7 @@ CLOSED ──────▶ OPEN ──────▶ HALF_OPEN
     │               │               │
     ▼               ▼               ▼
 ┌────────┐    ┌────────┐    ┌────────┐
-│Azure AI │    │CosmosDB│    │ Redis  │
+│Azure AI │    │PostgreSQL│   │ Redis  │
 │Service  │    │        │    │ Cache  │
 └────────┘    └────────┘    └────────┘
 ```

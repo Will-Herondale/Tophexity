@@ -67,7 +67,7 @@
   "authentication_valid": true,
   "latency_ms": 850.2,
   "model": "gpt-5",
-  "endpoint": "https://tophex.openai.azure.com/openai/v1",
+  "endpoint": "https://tophex.cognitiveservices.azure.com/openai/v1",
   "error": null
 }
 ```
@@ -81,7 +81,7 @@
   "authentication_valid": false,
   "latency_ms": 5000.0,
   "model": "gpt-5",
-  "endpoint": "https://tophex.openai.azure.com/openai/v1",
+  "endpoint": "https://tophex.cognitiveservices.azure.com/openai/v1",
   "error": "Connection refused"
 }
 ```

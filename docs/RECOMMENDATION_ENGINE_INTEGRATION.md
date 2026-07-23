@@ -359,7 +359,7 @@ When the user sends a chat message, generate an AI response.
 4. Your engine returns: `"Based on your profile, focus on Python, SQL, and statistics..."`
 5. Backend stores both messages and returns them
 
-**How to integrate:** The backend's `app/services/ai_client.py` needs to be updated to call your engine. See `docs/RECOMMENDATION_ENGINE_GUIDE.md` for the integration contract.
+**How to integrate:** The backend's `app/services/services/ai/client.py` needs to be updated to call your engine. See `docs/RECOMMENDATION_ENGINE_GUIDE.md` for the integration contract.
 
 ---
 

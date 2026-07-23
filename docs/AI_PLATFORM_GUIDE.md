@@ -193,7 +193,7 @@ Returns detailed diagnostics with error messages for troubleshooting.
 
 | Variable | Default | Description |
 |---|---|---|
-| `AI_ENDPOINT` | `https://tophex.openai.azure.com/openai/v1` | Azure OpenAI endpoint |
+| `AI_ENDPOINT` | `https://tophex.cognitiveservices.azure.com/openai/v1` | Azure OpenAI endpoint |
 | `AI_API_KEY` | `""` | Azure API key |
 | `AI_DEPLOYMENT_NAME` | `gpt-5` | Model deployment name |
 | `AI_API_VERSION` | `2024-12-01-preview` | API version |

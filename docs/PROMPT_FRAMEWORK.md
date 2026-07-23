@@ -63,7 +63,7 @@ prompts/
   "updated_at": "2026-07-23T00:00:00Z",
   "tags": ["chat", "general", "production"],
   "model": {
-    "preferred": "gpt-4",
+    "preferred": "gpt-5",
     "fallback": "gpt-35-turbo",
     "temperature": 0.7,
     "max_tokens": 2048
@@ -256,7 +256,7 @@ def select_prompt_version(user_id: str, prompt_name: str) -> str:
      "created_at": "2026-07-23T00:00:00Z",
      "tags": ["new", "specialized"],
      "model": {
-       "preferred": "gpt-4",
+       "preferred": "gpt-5",
        "temperature": 0.7,
        "max_tokens": 1024
      },
@@ -491,7 +491,7 @@ export PROMPT_DEBUG=true
       "checks": ["content_policy", "token_limit", "format"]
     },
     "execution": {
-      "model": "gpt-4",
+      "model": "gpt-5",
       "tokens_used": 892,
       "latency_ms": 1250
     }

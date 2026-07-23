@@ -38,8 +38,8 @@ Verifies connectivity to Azure OpenAI and measures response latency.
 {
   "status": "healthy",
   "ai_service": "connected",
-  "model": "gpt-4",
-  "deployment": "gpt-4-deployment",
+  "model": "gpt-5",
+  "deployment": "gpt-5",
   "latency_ms": 245,
   "last_error": null
 }
@@ -100,7 +100,7 @@ Provides detailed metrics for capacity planning and performance tuning.
 ```bash
 # Enable performance profiling in debug mode
 curl -H "Authorization: Bearer $ADMIN_KEY" \
-  "https://your-app.azurewebsites.net/api/admin/diagnostics/profile?duration=60"
+  "https://tophexity-func.azurewebsites.net/api/admin/diagnostics/profile?duration=60"
 ```
 
 Returns per-endpoint timing breakdown:
@@ -171,7 +171,7 @@ Authorization: Bearer <admin-key>
 ```bash
 # Log query for circuit breaker events
 az monitor app-insights query \
-  --app hack4hyd-ai \
+  --app tophexity-func \
   --analytics-query "
     traces
     | where message contains 'circuit_breaker'
@@ -310,7 +310,7 @@ LIMIT 20;
 **Errors in Last Hour:**
 ```bash
 az monitor app-insights query \
-  --app hack4hyd-ai \
+  --app tophexity-func \
   --analytics-query "
     traces
     | where severityLevel >= 3
@@ -322,7 +322,7 @@ az monitor app-insights query \
 **Slow Requests:**
 ```bash
 az monitor app-insights query \
-  --app hack4hyd-ai \
+  --app tophexity-func \
   --analytics-query "
     requests
     | where duration > 5s
@@ -335,7 +335,7 @@ az monitor app-insights query \
 **Security Events:**
 ```bash
 az monitor app-insights query \
-  --app hack4hyd-ai \
+  --app tophexity-func \
   --analytics-query "
     traces
     | where message contains 'security'
@@ -358,7 +358,7 @@ az monitor app-insights query \
   "duration_ms": 320,
   "tokens": {"input": 450, "output": 280},
   "metadata": {
-    "model": "gpt-4",
+    "model": "gpt-5",
     "prompt_version": "1.2.0"
   }
 }

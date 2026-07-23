@@ -1,6 +1,7 @@
 "use client";
 
 import type { ChatMessage } from "@/types/chat";
+import { Cpu, Clock } from "lucide-react";
 
 interface ChatMessageBubbleProps {
   message: ChatMessage;
@@ -19,9 +20,23 @@ export default function ChatMessageBubble({ message }: ChatMessageBubbleProps) {
         }`}
       >
         <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-        <p className={`mt-1 text-[10px] ${isUser ? "text-blue-200" : "text-[#5a5a6a]"}`}>
-          {new Date(message.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-        </p>
+        <div className="mt-1.5 flex items-center gap-3">
+          <p className={`text-[10px] ${isUser ? "text-blue-200" : "text-[#5a5a6a]"}`}>
+            {new Date(message.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+          </p>
+          {!isUser && message.model_used && (
+            <span className="flex items-center gap-1 text-[10px] text-[#5a5a6a]">
+              <Cpu className="h-2.5 w-2.5" />
+              {message.model_used}
+            </span>
+          )}
+          {!isUser && message.latency_ms && (
+            <span className="flex items-center gap-1 text-[10px] text-[#5a5a6a]">
+              <Clock className="h-2.5 w-2.5" />
+              {(message.latency_ms / 1000).toFixed(1)}s
+            </span>
+          )}
+        </div>
       </div>
     </div>
   );

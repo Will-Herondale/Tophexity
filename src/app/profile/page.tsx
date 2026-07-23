@@ -6,6 +6,7 @@ import type { Profile, ProfileUpdatePayload } from "@/types/profile";
 import { createEmptyProfile } from "@/types/profile";
 import ProfileView from "@/components/profile/ProfileView";
 import ProfileEdit from "@/components/profile/ProfileEdit";
+import ProfileVersionHistory from "@/components/profile/ProfileVersionHistory";
 import Button from "@/components/ui/Button";
 import { Edit3, Plus, History } from "lucide-react";
 
@@ -15,6 +16,7 @@ export default function ProfilePage() {
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [showVersions, setShowVersions] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -113,10 +115,19 @@ export default function ProfilePage() {
 
       {hasProfile && !editing && (
         <div className="mt-8">
-          <button className="flex items-center gap-2 text-sm text-[#5a5a6a] hover:text-[#8a8a9a]">
-            <History className="h-4 w-4" />
-            View profile version history
-          </button>
+          {!showVersions ? (
+            <button
+              onClick={() => setShowVersions(true)}
+              className="flex items-center gap-2 text-sm text-[#5a5a6a] hover:text-[#8a8a9a] transition-colors"
+            >
+              <History className="h-4 w-4" />
+              View profile version history
+            </button>
+          ) : (
+            <div className="rounded-2xl border border-[rgba(30,79,163,0.15)] bg-[#0d214f]/10 p-6">
+              <ProfileVersionHistory onClose={() => setShowVersions(false)} />
+            </div>
+          )}
         </div>
       )}
     </div>

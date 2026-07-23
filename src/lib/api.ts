@@ -6,7 +6,7 @@ import type { Recommendation, RecommendationListResponse, RecommendationCreatePa
 import type { Roadmap, RoadmapListResponse, RoadmapCreatePayload } from "@/types/roadmap";
 import type { BackupPlan, BackupPlanListResponse, BackupPlanCreatePayload } from "@/types/backup";
 import type { PortfolioItem, PortfolioItemCreatePayload, PortfolioItemUpdatePayload, PortfolioListResponse } from "@/types/portfolio";
-import type { ChatSession, ChatMessageCreatePayload } from "@/types/chat";
+import type { ChatSession, ChatMessageCreatePayload, ChatSessionUpdatePayload, ChatStats, ChatExportResponse, ChatRebuildMemoryResponse } from "@/types/chat";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://tophexity-func.azurewebsites.net";
 const API_PREFIX = "/v1";
@@ -261,6 +261,36 @@ export async function deleteChatSession(sessionId: string) {
 
 export async function testAi(message?: string) {
   const { data } = await api.post("/ai/test", { message });
+  return data;
+}
+
+export async function updateCareer(id: string, payload: Partial<{ title: string; description: string; average_salary: number; growth_outlook: string; demand_level: string; required_education: Record<string, string>; typical_skills: Record<string, string> }>): Promise<CareerDetail> {
+  const { data } = await api.put(`/careers/${id}`, payload);
+  return data;
+}
+
+export async function deleteCareer(id: string) {
+  const { data } = await api.delete(`/careers/${id}`);
+  return data;
+}
+
+export async function updateChatSession(sessionId: string, payload: ChatSessionUpdatePayload): Promise<ChatSession> {
+  const { data } = await api.patch(`/chat/sessions/${sessionId}`, payload);
+  return data;
+}
+
+export async function getChatStats(): Promise<ChatStats> {
+  const { data } = await api.get("/chat/stats");
+  return data;
+}
+
+export async function exportChatSession(sessionId: string, format: "json" | "markdown" | "text" = "json"): Promise<ChatExportResponse> {
+  const { data } = await api.get(`/chat/sessions/${sessionId}/export`, { params: { format } });
+  return data;
+}
+
+export async function rebuildChatMemory(sessionId: string): Promise<ChatRebuildMemoryResponse> {
+  const { data } = await api.post(`/chat/sessions/${sessionId}/rebuild-memory`);
   return data;
 }
 

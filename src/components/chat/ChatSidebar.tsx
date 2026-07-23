@@ -1,7 +1,9 @@
 "use client";
 
+import { useState, useRef, useEffect } from "react";
 import type { ChatSession } from "@/types/chat";
-import { Plus, MessageSquare, Trash2 } from "lucide-react";
+import { updateChatSession } from "@/lib/api";
+import { Plus, MessageSquare, Trash2, MoreHorizontal, Pin, PinOff, Archive, ArchiveRestore, Pencil, Search, X } from "lucide-react";
 
 interface ChatSidebarProps {
   sessions: ChatSession[];
@@ -9,55 +11,206 @@ interface ChatSidebarProps {
   onSelect: (id: string) => void;
   onCreate: () => void;
   onDelete: (id: string) => void;
+  onSessionUpdated: (session: ChatSession) => void;
 }
 
-export default function ChatSidebar({ sessions, activeSessionId, onSelect, onCreate, onDelete }: ChatSidebarProps) {
+export default function ChatSidebar({ sessions, activeSessionId, onSelect, onCreate, onDelete, onSessionUpdated }: ChatSidebarProps) {
+  const [search, setSearch] = useState("");
+  const [showArchived, setShowArchived] = useState(false);
+  const [menuOpen, setMenuOpen] = useState<string | null>(null);
+  const [renamingId, setRenamingId] = useState<string | null>(null);
+  const [renameValue, setRenameValue] = useState("");
+  const menuRef = useRef<HTMLDivElement>(null);
+  const renameInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (renamingId && renameInputRef.current) {
+      renameInputRef.current.focus();
+      renameInputRef.current.select();
+    }
+  }, [renamingId]);
+
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(null);
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  const filtered = sessions
+    .filter((s) => showArchived ? s.is_archived : !s.is_archived)
+    .filter((s) => search === "" || (s.title || "New Chat").toLowerCase().includes(search.toLowerCase()))
+    .sort((a, b) => {
+      if (a.is_pinned && !b.is_pinned) return -1;
+      if (!a.is_pinned && b.is_pinned) return 1;
+      return new Date(b.updated_at || b.created_at).getTime() - new Date(a.updated_at || a.created_at).getTime();
+    });
+
+  const handleTogglePin = async (session: ChatSession) => {
+    try {
+      const updated = await updateChatSession(session.id, { is_pinned: !session.is_pinned });
+      onSessionUpdated(updated);
+    } catch {}
+    setMenuOpen(null);
+  };
+
+  const handleToggleArchive = async (session: ChatSession) => {
+    try {
+      const updated = await updateChatSession(session.id, { is_archived: !session.is_archived });
+      onSessionUpdated(updated);
+    } catch {}
+    setMenuOpen(null);
+  };
+
+  const handleStartRename = (session: ChatSession) => {
+    setRenamingId(session.id);
+    setRenameValue(session.title || "");
+    setMenuOpen(null);
+  };
+
+  const handleFinishRename = async (session: ChatSession) => {
+    if (renameValue.trim() && renameValue.trim() !== (session.title || "")) {
+      try {
+        const updated = await updateChatSession(session.id, { title: renameValue.trim() });
+        onSessionUpdated(updated);
+      } catch {}
+    }
+    setRenamingId(null);
+  };
+
   return (
     <div className="flex h-full flex-col border-r border-[rgba(30,79,163,0.15)] bg-[#0d214f]/20">
-      <div className="border-b border-[rgba(30,79,163,0.15)] p-3">
+      {/* Header */}
+      <div className="border-b border-[rgba(30,79,163,0.15)] p-3 space-y-2">
         <button
           onClick={onCreate}
-          className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#1E4FA3] px-3 py-2.5 text-sm font-medium text-white hover:bg-[#1E4FA3]/80 transition-colors"
+          className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#1E4FA3] px-3 py-2.5 text-sm font-medium text-white hover:bg-[#2b63c9] transition-colors shadow-[0_0_15px_rgba(30,79,163,0.3)]"
         >
           <Plus className="h-4 w-4" />
           New Chat
         </button>
+
+        {/* Search */}
+        <div className="relative">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#5a5a6a]" />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search chats..."
+            className="w-full rounded-lg border border-[rgba(30,79,163,0.15)] bg-[#0a0a0f]/50 py-1.5 pl-8 pr-7 text-xs text-[#f0f0f0] placeholder:text-[#5a5a6a] focus:border-[#1E4FA3] focus:outline-none"
+          />
+          {search && (
+            <button onClick={() => setSearch("")} className="absolute right-2 top-1/2 -translate-y-1/2 text-[#5a5a6a] hover:text-[#8a8a9a]">
+              <X className="h-3 w-3" />
+            </button>
+          )}
+        </div>
+
+        {/* Archive filter */}
+        <button
+          onClick={() => setShowArchived(!showArchived)}
+          className={`flex items-center gap-1.5 rounded-md px-2 py-1 text-[10px] font-medium transition-colors ${
+            showArchived ? "bg-[#1E4FA3]/15 text-[#1E4FA3]" : "text-[#5a5a6a] hover:text-[#8a8a9a]"
+          }`}
+        >
+          <Archive className="h-3 w-3" />
+          {showArchived ? "Showing archived" : "Show archived"}
+        </button>
       </div>
 
+      {/* Session list */}
       <div className="flex-1 overflow-y-auto">
-        {sessions.length === 0 ? (
+        {filtered.length === 0 ? (
           <div className="p-4 text-center">
             <MessageSquare className="mx-auto h-8 w-8 text-[#5a5a6a]" />
-            <p className="mt-2 text-xs text-[#5a5a6a]">No conversations yet</p>
+            <p className="mt-2 text-xs text-[#5a5a6a]">
+              {search ? "No matching chats" : showArchived ? "No archived chats" : "No conversations yet"}
+            </p>
           </div>
         ) : (
           <div className="p-2 space-y-1">
-            {sessions.map((session) => (
+            {filtered.map((session) => (
               <div
                 key={session.id}
-                onClick={() => onSelect(session.id)}
+                onClick={() => { if (renamingId !== session.id) onSelect(session.id); }}
                 className={`group flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2.5 transition-colors ${
                   activeSessionId === session.id
                     ? "bg-[#1E4FA3]/15 text-[#f0f0f0] border border-[#1E4FA3]/30"
                     : "text-[#8a8a9a] hover:bg-[#0d214f]/40 hover:text-[#f0f0f0]"
                 }`}
               >
-                <MessageSquare className="h-4 w-4 flex-shrink-0" />
-                <div className="flex-1 truncate">
-                  <p className="text-sm font-medium truncate">{session.title || "New Chat"}</p>
+                {session.is_pinned ? (
+                  <Pin className="h-3.5 w-3.5 flex-shrink-0 text-[#1E4FA3]" />
+                ) : (
+                  <MessageSquare className="h-3.5 w-3.5 flex-shrink-0" />
+                )}
+                <div className="flex-1 min-w-0">
+                  {renamingId === session.id ? (
+                    <input
+                      ref={renameInputRef}
+                      value={renameValue}
+                      onChange={(e) => setRenameValue(e.target.value)}
+                      onBlur={() => handleFinishRename(session)}
+                      onKeyDown={(e) => { if (e.key === "Enter") handleFinishRename(session); if (e.key === "Escape") setRenamingId(null); }}
+                      className="w-full bg-[#0a0a0f]/80 rounded px-1.5 py-0.5 text-xs text-[#f0f0f0] border border-[#1E4FA3]/40 focus:outline-none"
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  ) : (
+                    <p className="text-sm font-medium truncate">{session.title || "New Chat"}</p>
+                  )}
                   <p className="text-[10px] text-[#5a5a6a]">
-                    {new Date(session.created_at).toLocaleDateString()}
+                    {new Date(session.updated_at || session.created_at).toLocaleDateString()}
                   </p>
                 </div>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDelete(session.id);
-                  }}
-                  className="hidden group-hover:block rounded p-1 text-[#5a5a6a] hover:bg-red-500/10 hover:text-red-400"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </button>
+
+                {/* Three-dot menu */}
+                <div className="relative" ref={menuOpen === session.id ? menuRef : undefined}>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setMenuOpen(menuOpen === session.id ? null : session.id);
+                    }}
+                    className="hidden group-hover:block rounded p-1 text-[#5a5a6a] hover:bg-[#1E4FA3]/10 hover:text-[#8a8a9a] transition-colors"
+                  >
+                    <MoreHorizontal className="h-3.5 w-3.5" />
+                  </button>
+
+                  {menuOpen === session.id && (
+                    <div className="absolute right-0 top-full z-50 mt-1 w-44 rounded-lg border border-[rgba(30,79,163,0.2)] bg-[#0d214f]/95 backdrop-blur-xl shadow-[0_8px_30px_rgba(0,0,0,0.4)] py-1">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handleStartRename(session); }}
+                        className="flex w-full items-center gap-2 px-3 py-2 text-xs text-[#8a8a9a] hover:bg-[#1E4FA3]/10 hover:text-[#f0f0f0] transition-colors"
+                      >
+                        <Pencil className="h-3.5 w-3.5" /> Rename
+                      </button>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handleTogglePin(session); }}
+                        className="flex w-full items-center gap-2 px-3 py-2 text-xs text-[#8a8a9a] hover:bg-[#1E4FA3]/10 hover:text-[#f0f0f0] transition-colors"
+                      >
+                        {session.is_pinned ? <PinOff className="h-3.5 w-3.5" /> : <Pin className="h-3.5 w-3.5" />}
+                        {session.is_pinned ? "Unpin" : "Pin"}
+                      </button>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handleToggleArchive(session); }}
+                        className="flex w-full items-center gap-2 px-3 py-2 text-xs text-[#8a8a9a] hover:bg-[#1E4FA3]/10 hover:text-[#f0f0f0] transition-colors"
+                      >
+                        {session.is_archived ? <ArchiveRestore className="h-3.5 w-3.5" /> : <Archive className="h-3.5 w-3.5" />}
+                        {session.is_archived ? "Restore" : "Archive"}
+                      </button>
+                      <div className="my-1 h-px bg-[rgba(30,79,163,0.15)]" />
+                      <button
+                        onClick={(e) => { e.stopPropagation(); onDelete(session.id); setMenuOpen(null); }}
+                        className="flex w-full items-center gap-2 px-3 py-2 text-xs text-red-400 hover:bg-red-500/10 transition-colors"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" /> Delete
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             ))}
           </div>

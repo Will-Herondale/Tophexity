@@ -9,6 +9,7 @@ import type { Recommendation } from "@/types/recommendation";
 import type { PortfolioItem } from "@/types/portfolio";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
+import ChatStatsCard from "@/components/chat/ChatStatsCard";
 import {
   User, Briefcase, Star, Map, FolderOpen, Shield, MessageSquare, ArrowRight,
 } from "lucide-react";
@@ -140,6 +141,8 @@ export default function DashboardPage() {
             </button>
           )}
         </Card>
+
+        <ChatStatsCard variant="dashboard" />
       </div>
     </div>
   );

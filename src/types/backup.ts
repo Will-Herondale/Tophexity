@@ -39,7 +39,7 @@ export interface BackupScenarioCreatePayload {
   career_id: string;
   scenario_name: string;
   description?: string;
-  transition_difficulty?: string;
+  transition_difficulty?: TransitionDifficulty;
   estimated_transition_months?: number;
   reasoning?: string;
 }

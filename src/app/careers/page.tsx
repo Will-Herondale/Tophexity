@@ -7,9 +7,12 @@ import CareerCard from "@/components/careers/CareerCard";
 import CareerDetailModal from "@/components/careers/CareerDetailModal";
 import CareerFilters, { type FilterState } from "@/components/careers/CareerFilters";
 import Button from "@/components/ui/Button";
-import { Briefcase } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import Link from "next/link";
+import { Briefcase, Shield } from "lucide-react";
 
 export default function CareersPage() {
+  const { user } = useAuth();
   const [careers, setCareers] = useState<Career[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -56,9 +59,19 @@ export default function CareersPage() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
-      <div className="mb-8">
-        <h1 className="font-[family-name:var(--font-display)] text-2xl font-bold text-[#f0f0f0]">Explore Careers</h1>
-        <p className="mt-1 text-sm text-[#8a8a9a]">{total > 0 ? `${total} careers available` : "Discover career paths"}</p>
+      <div className="mb-8 flex items-center justify-between">
+        <div>
+          <h1 className="font-[family-name:var(--font-display)] text-2xl font-bold text-[#f0f0f0]">Explore Careers</h1>
+          <p className="mt-1 text-sm text-[#8a8a9a]">{total > 0 ? `${total} careers available` : "Discover career paths"}</p>
+        </div>
+        {user && (
+          <Link href="/careers/admin">
+            <Button variant="outline" size="sm">
+              <Shield className="h-3.5 w-3.5 mr-1.5" />
+              Admin
+            </Button>
+          </Link>
+        )}
       </div>
 
       <div className="mb-6">

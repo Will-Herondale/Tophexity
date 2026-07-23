@@ -8,11 +8,10 @@ import type { BackupPlan, BackupPlanListResponse, BackupPlanCreatePayload } from
 import type { PortfolioItem, PortfolioItemCreatePayload, PortfolioItemUpdatePayload, PortfolioListResponse } from "@/types/portfolio";
 import type { ChatSession, ChatMessageCreatePayload, ChatSessionUpdatePayload, ChatStats, ChatExportResponse, ChatRebuildMemoryResponse } from "@/types/chat";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://tophexity-func.azurewebsites.net";
 const API_PREFIX = "/v1";
 
 const api = axios.create({
-  baseURL: `${API_BASE}${API_PREFIX}`,
+  baseURL: API_PREFIX,
   headers: { "Content-Type": "application/json" },
 });
 
@@ -68,7 +67,9 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    const url: string = originalRequest?.url || "";
+    const isAuthEndpoint = url.includes("/auth/login") || url.includes("/auth/register") || url.includes("/auth/refresh");
+    if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
@@ -84,7 +85,7 @@ api.interceptors.response.use(
         return Promise.reject(error);
       }
       try {
-        const { data } = await axios.post(`${API_BASE}${API_PREFIX}/auth/refresh`, {
+        const { data } = await axios.post(`${API_PREFIX}/auth/refresh`, {
           refresh_token: refreshToken,
         });
         setTokens(data);

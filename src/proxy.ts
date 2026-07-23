@@ -8,7 +8,7 @@ function getTokenFromCookie(request: NextRequest): string | null {
   return request.cookies.get("access_token")?.value || null;
 }
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const token = getTokenFromCookie(request);
 
@@ -30,5 +30,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/((?!api|v1|_next/static|_next/image|favicon.ico).*)"],
 };

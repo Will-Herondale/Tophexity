@@ -4,12 +4,14 @@ Only AIClient communicates with Azure AI.
 Nothing else should directly call Azure.
 """
 
+import time
 import uuid
 from functools import lru_cache
 
 from app.core.config import get_settings
 from app.core.logging import logger
 from app.services.ai.azure_foundry import AzureFoundryProvider
+from app.services.ai.circuit_breaker import CircuitOpenError, circuit_breaker
 from app.services.ai.exceptions import AIError, AIRateLimitError, AIServiceError
 from app.services.ai.models import AIRequest, AIResponse
 from app.services.ai.prompt_cache import prompt_cache
@@ -48,6 +50,15 @@ class AIClient:
         if not self.is_configured:
             raise AIServiceError("AI service not configured", status_code=503)
 
+        if not circuit_breaker.allow_request():
+            remaining = max(0.0, circuit_breaker.recovery_timeout - (
+                time.monotonic() - circuit_breaker._last_failure_time
+            ))
+            raise AIServiceError(
+                f"Circuit breaker open. Retry after {remaining:.0f}s",
+                status_code=503,
+            )
+
         rate_limiter.enforce(
             user_id=user_id, ip=ip, conversation_id=conversation_id,
         )
@@ -64,6 +75,7 @@ class AIClient:
 
         try:
             response = await retry_with_backoff(self.provider.complete, request)
+            circuit_breaker.record_success()
             track_usage(
                 prompt_tokens=response.token_usage.prompt_tokens,
                 completion_tokens=response.token_usage.completion_tokens,
@@ -76,8 +88,10 @@ class AIClient:
             )
             return response
         except AIRateLimitError:
+            circuit_breaker.record_failure()
             raise
         except AIError as e:
+            circuit_breaker.record_failure()
             track_usage(
                 prompt_tokens=0, completion_tokens=0,
                 model=settings.AI_DEPLOYMENT_NAME,
@@ -87,6 +101,11 @@ class AIClient:
                 status="error",
             )
             raise
+        except CircuitOpenError as e:
+            raise AIServiceError(str(e), status_code=503) from e
+        except Exception as e:
+            circuit_breaker.record_failure()
+            raise AIServiceError(str(e), status_code=503) from e
 
     async def generate(
         self,

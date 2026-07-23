@@ -11,6 +11,14 @@ from app.services.ai.exceptions import (
 )
 from app.services.ai.health import check_ai_health
 from app.services.ai.models import AIRequest, AIResponse, TokenUsage
+from app.services.ai.security import (
+    InputSanitizer,
+    JailbreakDetector,
+    PromptInjectionDetector,
+    SecretProtector,
+    SecurityCheckResult,
+    SecurityMiddleware,
+)
 
 __all__ = [
     "AIClient",
@@ -25,4 +33,10 @@ __all__ = [
     "AIValidationError",
     "AIRetryExhaustedError",
     "check_ai_health",
+    "InputSanitizer",
+    "JailbreakDetector",
+    "PromptInjectionDetector",
+    "SecretProtector",
+    "SecurityCheckResult",
+    "SecurityMiddleware",
 ]

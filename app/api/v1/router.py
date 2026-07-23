@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.api.v1 import ai, auth, backups, careers, chat, portfolio, recommendations, roadmaps, users
+from app.api.v1 import admin, ai, auth, backups, careers, chat, portfolio, recommendations, roadmaps, users
 
 api_router = APIRouter()
 
@@ -13,3 +13,4 @@ api_router.include_router(roadmaps.router, prefix="/roadmaps", tags=["Roadmaps"]
 api_router.include_router(backups.router, prefix="/backups", tags=["Backup Plans"])
 api_router.include_router(chat.router, prefix="/chat", tags=["Chat"])
 api_router.include_router(ai.router, prefix="/ai", tags=["AI"])
+api_router.include_router(admin.router, prefix="/admin", tags=["Admin"])

@@ -7,12 +7,21 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.v1.router import api_router
 from app.core.config import get_settings
 from app.core.logging import logger
+from app.core.structured_logging import setup_structured_logging
+from app.core.startup_validation import validate_on_startup
 from app.middleware.timing import RequestTimingMiddleware
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+    settings = get_settings()
+    setup_structured_logging(json_mode=settings.LOG_JSON_MODE)
     logger.info("Starting %s v%s", settings.APP_NAME, settings.APP_VERSION)
+
+    # Validate configuration
+    validate_on_startup()
+
+    # Initialize AI client
     from app.services.ai.client import get_ai_client
     client = get_ai_client()
     if client.is_configured:
@@ -20,7 +29,17 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
                      settings.AI_ENDPOINT, settings.AI_DEPLOYMENT_NAME)
     else:
         logger.warning("AI client not configured - AI endpoints will return 503")
+
+    # Warm prompt cache
+    from app.services.ai.prompt_cache import prompt_cache
+    from app.services.ai.prompt_loader import list_prompts
+    prompts = list_prompts()
+    for name in prompts:
+        prompt_cache.get(name)
+    logger.info("Prompt cache warmed: %d prompts loaded", len(prompts))
+
     yield
+
     logger.info("Shutting down %s", settings.APP_NAME)
 
 

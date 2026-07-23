@@ -1,0 +1,9 @@
+{
+  "version": "1.0.0",
+  "author": "Tophexity Team",
+  "date": "2026-07-22",
+  "description": "System-level identity and behavioral guidelines for the AI assistant",
+  "variables": [],
+  "dependencies": [],
+  "supported_models": ["gpt-5", "gpt-4o", "gpt-4o-mini"]
+}

@@ -38,6 +38,7 @@ class Settings(BaseSettings):
     AI_RATE_LIMIT_PER_USER_PER_MINUTE: int = 10
     AI_RATE_LIMIT_PER_IP_PER_MINUTE: int = 30
     AI_RATE_LIMIT_PER_CONVERSATION_PER_MINUTE: int = 15
+    AI_RATE_LIMIT_PER_USER_PER_DAY: int = 1000
 
     AI_SUMMARY_THRESHOLD_MESSAGES: int = 20
     AI_SUMMARY_KEEP_RECENT: int = 10
@@ -70,6 +71,19 @@ class Settings(BaseSettings):
     CORS_ORIGINS: list[str] = ["http://localhost:3000"]
 
     LOG_LEVEL: str = "INFO"
+    LOG_JSON_MODE: bool = False
+
+    # Circuit breaker
+    AI_CIRCUIT_BREAKER_THRESHOLD: int = 5
+    AI_CIRCUIT_BREAKER_TIMEOUT: float = 60.0
+
+    # Security
+    AI_MAX_INPUT_TOKENS: int = 8000
+    AI_PROMPT_INJECTION_ENABLED: bool = True
+    AI_JAILBREAK_DETECTION_ENABLED: bool = True
+
+    # Admin
+    ADMIN_API_ENABLED: bool = True
 
 
 def _load_api_key_into_env() -> None:

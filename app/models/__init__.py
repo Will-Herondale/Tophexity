@@ -21,6 +21,7 @@ from app.models.recommendation import Recommendation, RecommendationItem
 from app.models.roadmap import Roadmap, RoadmapStep
 from app.models.backup import BackupPlan, BackupScenario
 from app.models.chat import ChatMessage, ChatSession
+from app.models.ai_analytics import AIUsageLog, AIHealthSnapshot
 
 __all__ = [
     "User",
@@ -49,4 +50,6 @@ __all__ = [
     "BackupScenario",
     "ChatSession",
     "ChatMessage",
+    "AIUsageLog",
+    "AIHealthSnapshot",
 ]

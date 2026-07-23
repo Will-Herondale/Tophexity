@@ -16,6 +16,7 @@ from app.models.profile import Profile
 from app.models.recommendation import Recommendation
 from app.models.roadmap import Roadmap
 from app.models.user import User
+from app.services.ai.context_cache import context_cache
 from app.services.ai.prompt_cache import prompt_cache
 
 settings = get_settings()
@@ -50,12 +51,18 @@ class ContextBuilder:
         return int(budget * settings.AI_CONTEXT_BUDGET_MESSAGES_PCT * 0.6)
 
     async def load_profile(self) -> dict:
+        cached = context_cache.get(self.user.id, "profile")
+        if cached is not None:
+            self._profile = cached
+            return self._profile
+
         result = await self.db.execute(
             select(Profile).where(Profile.user_id == self.user.id)
         )
         profile = result.scalar_one_or_none()
         if not profile:
             self._profile = {}
+            context_cache.set(self.user.id, "profile", self._profile)
             return self._profile
         self._profile = {
             "full_name": profile.full_name,
@@ -69,9 +76,15 @@ class ContextBuilder:
             "skills": profile.skills,
             "interests": profile.interests,
         }
+        context_cache.set(self.user.id, "profile", self._profile)
         return self._profile
 
     async def load_portfolio(self) -> list[dict]:
+        cached = context_cache.get(self.user.id, "portfolio")
+        if cached is not None:
+            self._portfolio = cached
+            return self._portfolio
+
         result = await self.db.execute(
             select(PortfolioItem).where(
                 PortfolioItem.user_id == self.user.id,
@@ -89,9 +102,15 @@ class ContextBuilder:
             }
             for i in items
         ]
+        context_cache.set(self.user.id, "portfolio", self._portfolio)
         return self._portfolio
 
     async def load_latest_recommendation(self) -> dict | None:
+        cached = context_cache.get(self.user.id, "recommendation")
+        if cached is not None:
+            self._recommendation = cached
+            return self._recommendation
+
         result = await self.db.execute(
             select(Recommendation)
             .options(selectinload(Recommendation.items))
@@ -102,6 +121,7 @@ class ContextBuilder:
         rec = result.unique().scalar_one_or_none()
         if not rec:
             self._recommendation = None
+            context_cache.set(self.user.id, "recommendation", self._recommendation)
             return None
         self._recommendation = {
             "title": rec.title,
@@ -117,9 +137,15 @@ class ContextBuilder:
                 for i in rec.items
             ],
         }
+        context_cache.set(self.user.id, "recommendation", self._recommendation)
         return self._recommendation
 
     async def load_latest_roadmap(self) -> dict | None:
+        cached = context_cache.get(self.user.id, "roadmap")
+        if cached is not None:
+            self._roadmap = cached
+            return self._roadmap
+
         result = await self.db.execute(
             select(Roadmap)
             .options(selectinload(Roadmap.steps))
@@ -130,6 +156,7 @@ class ContextBuilder:
         rm = result.unique().scalar_one_or_none()
         if not rm:
             self._roadmap = None
+            context_cache.set(self.user.id, "roadmap", self._roadmap)
             return None
         self._roadmap = {
             "title": rm.title,
@@ -147,9 +174,15 @@ class ContextBuilder:
                 for s in rm.steps
             ],
         }
+        context_cache.set(self.user.id, "roadmap", self._roadmap)
         return self._roadmap
 
     async def load_latest_backup(self) -> dict | None:
+        cached = context_cache.get(self.user.id, "backup")
+        if cached is not None:
+            self._backup = cached
+            return self._backup
+
         result = await self.db.execute(
             select(BackupPlan)
             .options(selectinload(BackupPlan.scenarios))
@@ -160,6 +193,7 @@ class ContextBuilder:
         bp = result.unique().scalar_one_or_none()
         if not bp:
             self._backup = None
+            context_cache.set(self.user.id, "backup", self._backup)
             return None
         self._backup = {
             "title": bp.title,
@@ -176,6 +210,7 @@ class ContextBuilder:
                 for s in bp.scenarios
             ],
         }
+        context_cache.set(self.user.id, "backup", self._backup)
         return self._backup
 
     async def load_all(self) -> dict:
@@ -282,3 +317,8 @@ class ContextBuilder:
     def get_token_usage_report(self) -> dict:
         """Return token usage report from last build_context call."""
         return self._token_usage
+
+    @staticmethod
+    def invalidate_user_cache(user_id) -> int:
+        """Invalidate all cached context for a user. Call after mutations."""
+        return context_cache.invalidate(user_id)

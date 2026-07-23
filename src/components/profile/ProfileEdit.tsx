@@ -58,7 +58,22 @@ export default function ProfileEdit({ profile, onSave, onCancel }: ProfileEditPr
     e.preventDefault();
     setSaving(true);
     try {
-      await onSave(form);
+      const clean: ProfileUpdatePayload = {};
+      if (form.full_name) clean.full_name = form.full_name;
+      if (form.headline) clean.headline = form.headline;
+      if (form.bio) clean.bio = form.bio;
+      if (form.location) clean.location = form.location;
+      if (form.avatar_url) clean.avatar_url = form.avatar_url;
+      if (form.education_level) clean.education_level = form.education_level;
+      if (form.experience_level) clean.experience_level = form.experience_level;
+      if (form.years_experience != null) clean.years_experience = form.years_experience;
+      if (form.current_field) clean.current_field = form.current_field;
+      if (form.target_fields && form.target_fields.length > 0) clean.target_fields = form.target_fields;
+      if (form.interests && form.interests.length > 0) clean.interests = form.interests;
+      if (form.skills && Object.keys(form.skills).length > 0) clean.skills = form.skills;
+      if (form.previous_roles && form.previous_roles.length > 0) clean.previous_roles = form.previous_roles;
+      if (form.certifications && form.certifications.length > 0) clean.certifications = form.certifications;
+      await onSave(clean);
     } finally {
       setSaving(false);
     }

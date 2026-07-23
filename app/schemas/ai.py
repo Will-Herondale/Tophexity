@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 
 class PromptMetadata(BaseModel):
     name: str
-    version: int = 1
+    version: str = "1"
     description: str = ""
     char_count: int = 0
     estimated_tokens: int = 0

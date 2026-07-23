@@ -28,8 +28,8 @@ export default function BackupsPage() {
     <div className="mx-auto max-w-3xl px-4 py-8">
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold font-[family-name:var(--font-display)] text-[#f0f0f0]">Backup Plans</h1>
-          <p className="mt-1 text-sm text-[#8a8a9a]">Alternative career paths to keep your options open</p>
+          <h1 className="text-2xl font-bold font-[family-name:var(--font-display)] text-foreground">Backup Plans</h1>
+          <p className="mt-1 text-sm text-text-secondary">Alternative career paths to keep your options open</p>
         </div>
         <Button variant="outline" size="sm" onClick={() => setPage(page)}>
           <RefreshCw className="mr-1 h-4 w-4" /> Refresh
@@ -38,15 +38,15 @@ export default function BackupsPage() {
 
       {loading ? (
         <div className="flex min-h-[300px] items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#1E4FA3]/30 border-t-[#1E4FA3]" />
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-border-light border-t-accent" />
         </div>
       ) : plans.length === 0 ? (
-        <div className="rounded-xl border-2 border-dashed border-[rgba(30,79,163,0.15)] bg-[#0d214f]/30 p-12 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#0d214f]">
-            <Shield className="h-8 w-8 text-[#5a5a6a]" />
+        <div className="rounded-xl border-2 border-dashed border-border bg-surface/30 p-12 text-center">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-surface">
+            <Shield className="h-8 w-8 text-text-muted" />
           </div>
-          <h3 className="text-lg font-semibold font-[family-name:var(--font-display)] text-[#f0f0f0]">No backup plans yet</h3>
-          <p className="mt-2 text-sm text-[#8a8a9a]">Backup plans will appear here once the AI generates alternative career scenarios for you.</p>
+          <h3 className="text-lg font-semibold font-[family-name:var(--font-display)] text-foreground">No backup plans yet</h3>
+          <p className="mt-2 text-sm text-text-secondary">Backup plans will appear here once the AI generates alternative career scenarios for you.</p>
           <Button className="mt-6" onClick={() => router.push("/careers")}>Explore Careers</Button>
         </div>
       ) : (
@@ -59,7 +59,7 @@ export default function BackupsPage() {
           {totalPages > 1 && (
             <div className="mt-6 flex items-center justify-center gap-3">
               <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage(page - 1)}>Previous</Button>
-              <span className="text-sm text-[#8a8a9a]">Page {page} of {totalPages}</span>
+              <span className="text-sm text-text-secondary">Page {page} of {totalPages}</span>
               <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage(page + 1)}>Next</Button>
             </div>
           )}

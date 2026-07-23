@@ -35,15 +35,15 @@ export default function CareerDetailModal({ careerId, onClose }: CareerDetailMod
     <Modal isOpen onClose={onClose} title={career?.title || "Career Details"} size="lg">
       {loading ? (
         <div className="flex min-h-[200px] items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#1E4FA3]/30 border-t-[#1E4FA3]" />
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-accent/30 border-t-accent" />
         </div>
       ) : error ? (
         <p className="py-8 text-center text-sm text-red-400">{error}</p>
       ) : career ? (
         <div className="space-y-6">
           <div>
-            <p className="text-sm text-[#8a8a9a]">{career.description}</p>
-            <div className="mt-3 flex flex-wrap gap-4 text-sm text-[#8a8a9a]">
+            <p className="text-sm text-text-secondary">{career.description}</p>
+            <div className="mt-3 flex flex-wrap gap-4 text-sm text-text-secondary">
               {career.average_salary && (
                 <span className="flex items-center gap-1">
                   <DollarSign className="h-4 w-4" />
@@ -63,7 +63,7 @@ export default function CareerDetailModal({ careerId, onClose }: CareerDetailMod
             <Section title="Required Education" icon={<GraduationCap className="h-4 w-4" />}>
               <div className="flex flex-wrap gap-2">
                 {Object.entries(career.required_education).map(([key, val]) => (
-                  <span key={key} className="rounded-full bg-[#1E4FA3]/15 px-3 py-1 text-xs font-medium text-[#6aafff]">
+                  <span key={key} className="rounded-full bg-accent/15 px-3 py-1 text-xs font-medium text-accent-light">
                     <span className="capitalize">{key.replace("_", " ")}:</span> {val}
                   </span>
                 ))}
@@ -75,8 +75,8 @@ export default function CareerDetailModal({ careerId, onClose }: CareerDetailMod
             <Section title="Typical Skills" icon={<Wrench className="h-4 w-4" />}>
               <div className="flex flex-wrap gap-2">
                 {Object.entries(career.typical_skills).map(([key, val]) => (
-                  <span key={key} className="rounded-full bg-[#1E4FA3]/15 px-3 py-1 text-xs font-medium text-[#4a90e2]">
-                    {key} <span className="text-[#1E4FA3]">({val})</span>
+                  <span key={key} className="rounded-full bg-accent/15 px-3 py-1 text-xs font-medium text-accent">
+                    {key} <span className="text-accent">({val})</span>
                   </span>
                 ))}
               </div>
@@ -87,9 +87,9 @@ export default function CareerDetailModal({ careerId, onClose }: CareerDetailMod
             <Section title="Skills" icon={<BookOpen className="h-4 w-4" />}>
               <div className="flex flex-wrap gap-2">
                 {career.skills.map((skill) => (
-                  <span key={skill.id} className="rounded-full bg-[#1E4FA3]/15 px-3 py-1 text-xs font-medium text-[#4a90e2]">
+                  <span key={skill.id} className="rounded-full bg-accent/15 px-3 py-1 text-xs font-medium text-accent">
                     {skill.name}
-                    {skill.category && <span className="ml-1 text-[#1E4FA3]">({skill.category})</span>}
+                    {skill.category && <span className="ml-1 text-accent">({skill.category})</span>}
                   </span>
                 ))}
               </div>
@@ -100,10 +100,10 @@ export default function CareerDetailModal({ careerId, onClose }: CareerDetailMod
             <Section title="Relevant Degrees" icon={<GraduationCap className="h-4 w-4" />}>
               <div className="space-y-2">
                 {career.degrees.map((deg) => (
-                  <div key={deg.id} className="flex items-center gap-2 text-sm text-[#f0f0f0]">
+                  <div key={deg.id} className="flex items-center gap-2 text-sm text-foreground">
                     <span className="font-medium">{deg.name}</span>
-                    {deg.level && <span className="rounded bg-[#1E4FA3]/10 px-1.5 py-0.5 text-xs text-[#8a8a9a]">{deg.level}</span>}
-                    {deg.field && <span className="text-xs text-[#5a5a6a]">{deg.field}</span>}
+                    {deg.level && <span className="rounded bg-border px-1.5 py-0.5 text-xs text-text-secondary">{deg.level}</span>}
+                    {deg.field && <span className="text-xs text-text-muted">{deg.field}</span>}
                   </div>
                 ))}
               </div>
@@ -114,24 +114,24 @@ export default function CareerDetailModal({ careerId, onClose }: CareerDetailMod
             <Section title="Recommended Colleges" icon={<Landmark className="h-4 w-4" />}>
               <div className="grid gap-2 md:grid-cols-2">
                 {career.colleges.map((college) => (
-                  <div key={college.id} className="rounded-xl border border-[#1E4FA3]/10 p-3">
+                  <div key={college.id} className="rounded-xl border border-border p-3">
                     <div className="flex items-start justify-between">
                       <div>
-                        <p className="text-sm font-medium text-[#f0f0f0]">{college.name}</p>
+                        <p className="text-sm font-medium text-foreground">{college.name}</p>
                         {college.location && (
-                          <p className="flex items-center gap-1 text-xs text-[#8a8a9a]">
+                          <p className="flex items-center gap-1 text-xs text-text-secondary">
                             <MapPin className="h-3 w-3" /> {college.location}
                           </p>
                         )}
                       </div>
                       {college.ranking && (
-                        <span className="rounded bg-[#1E4FA3]/15 px-2 py-0.5 text-xs font-medium text-[#6aafff]">
+                        <span className="rounded bg-accent/15 px-2 py-0.5 text-xs font-medium text-accent-light">
                           #{college.ranking}
                         </span>
                       )}
                     </div>
                     {college.website && (
-                      <a href={college.website} target="_blank" rel="noopener noreferrer" className="mt-2 flex items-center gap-1 text-xs text-[#1E4FA3] hover:text-[#4a90e2]">
+                      <a href={college.website} target="_blank" rel="noopener noreferrer" className="mt-2 flex items-center gap-1 text-xs text-accent hover:text-accent-light">
                         <ExternalLink className="h-3 w-3" /> Website
                       </a>
                     )}
@@ -145,13 +145,13 @@ export default function CareerDetailModal({ careerId, onClose }: CareerDetailMod
             <Section title="Entrance Exams" icon={<BookOpen className="h-4 w-4" />}>
               <div className="space-y-2">
                 {career.exams.map((exam) => (
-                  <div key={exam.id} className="flex items-center justify-between rounded-xl border border-[#1E4FA3]/10 p-3">
+                  <div key={exam.id} className="flex items-center justify-between rounded-xl border border-border p-3">
                     <div>
-                      <p className="text-sm font-medium text-[#f0f0f0]">{exam.name}</p>
-                      {exam.description && <p className="text-xs text-[#8a8a9a]">{exam.description}</p>}
+                      <p className="text-sm font-medium text-foreground">{exam.name}</p>
+                      {exam.description && <p className="text-xs text-text-secondary">{exam.description}</p>}
                     </div>
                     {exam.website && (
-                      <a href={exam.website} target="_blank" rel="noopener noreferrer" className="text-xs text-[#1E4FA3] hover:text-[#4a90e2]">
+                      <a href={exam.website} target="_blank" rel="noopener noreferrer" className="text-xs text-accent hover:text-accent-light">
                         <ExternalLink className="h-4 w-4" />
                       </a>
                     )}
@@ -165,9 +165,9 @@ export default function CareerDetailModal({ careerId, onClose }: CareerDetailMod
             <Section title="Scholarships" icon={<Award className="h-4 w-4" />}>
               <div className="space-y-2">
                 {career.scholarships.map((sch) => (
-                  <div key={sch.id} className="rounded-xl border border-[#1E4FA3]/10 p-3">
-                    <p className="text-sm font-medium text-[#f0f0f0]">{sch.name}</p>
-                    {sch.description && <p className="text-xs text-[#8a8a9a]">{sch.description}</p>}
+                  <div key={sch.id} className="rounded-xl border border-border p-3">
+                    <p className="text-sm font-medium text-foreground">{sch.name}</p>
+                    {sch.description && <p className="text-xs text-text-secondary">{sch.description}</p>}
                     {sch.amount && <p className="mt-1 text-xs font-medium text-emerald-400">${sch.amount.toLocaleString()}</p>}
                   </div>
                 ))}
@@ -179,18 +179,18 @@ export default function CareerDetailModal({ careerId, onClose }: CareerDetailMod
             <Section title="Resources" icon={<ExternalLink className="h-4 w-4" />}>
               <div className="space-y-2">
                 {career.resources.map((res) => (
-                  <div key={res.id} className="flex items-center justify-between rounded-xl border border-[#1E4FA3]/10 p-3">
+                  <div key={res.id} className="flex items-center justify-between rounded-xl border border-border p-3">
                     <div>
-                      <p className="text-sm font-medium text-[#f0f0f0]">{res.title}</p>
-                      {res.description && <p className="text-xs text-[#8a8a9a]">{res.description}</p>}
+                      <p className="text-sm font-medium text-foreground">{res.title}</p>
+                      {res.description && <p className="text-xs text-text-secondary">{res.description}</p>}
                       {res.resource_type && (
-                        <span className="mt-1 inline-block rounded bg-[#1E4FA3]/10 px-1.5 py-0.5 text-[10px] text-[#8a8a9a]">
+                        <span className="mt-1 inline-block rounded bg-border px-1.5 py-0.5 text-[10px] text-text-secondary">
                           {res.resource_type}
                         </span>
                       )}
                     </div>
                     {res.url && (
-                      <a href={res.url} target="_blank" rel="noopener noreferrer" className="text-[#1E4FA3] hover:text-[#4a90e2]">
+                      <a href={res.url} target="_blank" rel="noopener noreferrer" className="text-accent hover:text-accent-light">
                         <ExternalLink className="h-4 w-4" />
                       </a>
                     )}
@@ -208,7 +208,7 @@ export default function CareerDetailModal({ careerId, onClose }: CareerDetailMod
 function Section({ title, icon, children }: { title: string; icon: React.ReactNode; children: React.ReactNode }) {
   return (
     <div>
-      <h4 className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-[#f0f0f0] font-[family-name:var(--font-display)]">
+      <h4 className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-foreground font-[family-name:var(--font-display)]">
         {icon} {title}
       </h4>
       {children}

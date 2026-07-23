@@ -37,8 +37,8 @@ export default function DashboardPage() {
   }, []);
 
   const quickLinks = [
-    { icon: <User className="h-5 w-5" />, label: "Profile", href: "/profile", color: "bg-[#1E4FA3]/20 text-[#4a90e2]" },
-    { icon: <Briefcase className="h-5 w-5" />, label: "Careers", href: "/careers", color: "bg-[#1E4FA3]/20 text-[#6aafff]" },
+    { icon: <User className="h-5 w-5" />, label: "Profile", href: "/profile", color: "bg-accent/20 text-accent" },
+    { icon: <Briefcase className="h-5 w-5" />, label: "Careers", href: "/careers", color: "bg-accent/20 text-accent-light" },
     { icon: <FolderOpen className="h-5 w-5" />, label: "Portfolio", href: "/portfolio", color: "bg-amber-500/15 text-amber-400" },
     { icon: <Star className="h-5 w-5" />, label: "Recommendations", href: "/recommendations", color: "bg-emerald-500/15 text-emerald-400" },
     { icon: <Map className="h-5 w-5" />, label: "Roadmaps", href: "/roadmaps", color: "bg-purple-500/15 text-purple-400" },
@@ -49,10 +49,10 @@ export default function DashboardPage() {
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
       <div className="mb-8">
-        <h1 className="font-[family-name:var(--font-display)] text-2xl font-bold text-[#f0f0f0]">
+        <h1 className="font-[family-name:var(--font-display)] text-2xl font-bold text-foreground">
           Welcome back{profile?.full_name ? `, ${profile.full_name}` : ""}!
         </h1>
-        <p className="mt-1 text-sm text-[#8a8a9a]">
+        <p className="mt-1 text-sm text-text-secondary">
           {profile
             ? profile.headline || "Manage your career journey"
             : "Complete your profile to get started"}
@@ -60,11 +60,11 @@ export default function DashboardPage() {
       </div>
 
       {!profile && (
-        <Card className="mb-6 border-[#1E4FA3]/30 bg-[#0d214f]/50">
+        <Card className="mb-6 border-border-light bg-surface/50">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-semibold text-[#f0f0f0]">Complete your profile</h3>
-              <p className="mt-1 text-xs text-[#8a8a9a]">
+              <h3 className="text-sm font-semibold text-foreground">Complete your profile</h3>
+              <p className="mt-1 text-xs text-text-secondary">
                 Tell us about yourself to get personalized career recommendations.
               </p>
             </div>
@@ -80,35 +80,35 @@ export default function DashboardPage() {
           <button
             key={link.href}
             onClick={() => router.push(link.href)}
-            className="flex flex-col items-center gap-2 rounded-2xl border border-[#1E4FA3]/10 bg-[#0d214f]/30 p-4 text-center transition-all hover:border-[#1E4FA3]/20 hover:bg-[#0d214f]/50"
+            className="flex flex-col items-center gap-2 rounded-2xl bg-surface/20 p-4 text-center transition-all hover:bg-surface/30"
           >
             <div className={`rounded-xl p-2.5 ${link.color}`}>{link.icon}</div>
-            <span className="text-sm font-medium text-[#f0f0f0]">{link.label}</span>
+            <span className="text-sm font-medium text-foreground">{link.label}</span>
           </button>
         ))}
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
-          <h3 className="mb-3 text-sm font-semibold text-[#f0f0f0] font-[family-name:var(--font-display)]">
+          <h3 className="mb-3 text-sm font-semibold text-foreground font-[family-name:var(--font-display)]">
             <Star className="mr-1 inline h-4 w-4 text-amber-400" />
             Recent Recommendations
           </h3>
           {recommendations.length === 0 ? (
-            <p className="text-xs text-[#5a5a6a]">No recommendations yet. Complete your profile to get started.</p>
+            <p className="text-xs text-text-muted">No recommendations yet. Complete your profile to get started.</p>
           ) : (
             <div className="space-y-2">
               {recommendations.map((rec) => (
                 <button
                   key={rec.id}
                   onClick={() => router.push(`/recommendations/${rec.id}`)}
-                  className="flex w-full items-center justify-between rounded-xl border border-[#1E4FA3]/10 p-3 text-left transition-colors hover:border-[#1E4FA3]/20 hover:bg-[#0d214f]/30"
+                  className="flex w-full items-center justify-between rounded-xl bg-surface/15 p-3 text-left transition-colors hover:bg-surface/30"
                 >
                   <div>
-                    <p className="text-sm font-medium text-[#f0f0f0]">{rec.title || "Career Recommendation"}</p>
-                    <p className="text-xs text-[#5a5a6a]">{rec.items.length} careers</p>
+                    <p className="text-sm font-medium text-foreground">{rec.title || "Career Recommendation"}</p>
+                    <p className="text-xs text-text-muted">{rec.items.length} careers</p>
                   </div>
-                  <ArrowRight className="h-4 w-4 text-[#5a5a6a]" />
+                  <ArrowRight className="h-4 w-4 text-text-muted" />
                 </button>
               ))}
             </div>
@@ -116,18 +116,18 @@ export default function DashboardPage() {
         </Card>
 
         <Card>
-          <h3 className="mb-3 text-sm font-semibold text-[#f0f0f0] font-[family-name:var(--font-display)]">
+          <h3 className="mb-3 text-sm font-semibold text-foreground font-[family-name:var(--font-display)]">
             <FolderOpen className="mr-1 inline h-4 w-4 text-amber-400" />
             Portfolio Items
           </h3>
           {portfolioItems.length === 0 ? (
-            <p className="text-xs text-[#5a5a6a]">No portfolio items yet. Start showcasing your work.</p>
+            <p className="text-xs text-text-muted">No portfolio items yet. Start showcasing your work.</p>
           ) : (
             <div className="space-y-2">
               {portfolioItems.map((item) => (
-                <div key={item.id} className="rounded-xl border border-[#1E4FA3]/10 p-3">
-                  <p className="text-sm font-medium text-[#f0f0f0]">{item.title}</p>
-                  <p className="text-xs text-[#5a5a6a] capitalize">{item.item_type.replace("_", " ")}</p>
+                <div key={item.id} className="rounded-xl bg-surface/15 p-3">
+                  <p className="text-sm font-medium text-foreground">{item.title}</p>
+                  <p className="text-xs text-text-muted capitalize">{item.item_type.replace("_", " ")}</p>
                 </div>
               ))}
             </div>
@@ -135,7 +135,7 @@ export default function DashboardPage() {
           {portfolioItems.length > 0 && (
             <button
               onClick={() => router.push("/portfolio")}
-              className="mt-3 text-xs font-medium text-[#1E4FA3] hover:text-[#4a90e2]"
+              className="mt-3 text-xs font-medium text-accent hover:text-accent-light"
             >
               View all →
             </button>

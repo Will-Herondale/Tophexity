@@ -89,7 +89,7 @@ export default function ChatExportModal({ sessionId, sessionTitle, isOpen, onClo
       <div className="space-y-4">
         {/* Format selector */}
         <div>
-          <p className="text-xs text-[#8a8a9a] mb-2">Format</p>
+          <p className="text-xs text-text-secondary mb-2">Format</p>
           <div className="flex gap-2">
             {FORMAT_OPTIONS.map((opt) => (
               <button
@@ -97,8 +97,8 @@ export default function ChatExportModal({ sessionId, sessionTitle, isOpen, onClo
                 onClick={() => { setFormat(opt.value); setExported(null); }}
                 className={`flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition-colors ${
                   format === opt.value
-                    ? "bg-[#1E4FA3]/20 text-[#1E4FA3] border border-[#1E4FA3]/30"
-                    : "text-[#8a8a9a] border border-[rgba(30,79,163,0.15)] hover:border-[rgba(30,79,163,0.3)]"
+                    ? "bg-accent/20 text-accent border border-border-light"
+                    : "text-text-secondary border border-border hover:border-border-light"
                 }`}
               >
                 <opt.icon className="h-3.5 w-3.5" />
@@ -116,8 +116,8 @@ export default function ChatExportModal({ sessionId, sessionTitle, isOpen, onClo
           </Button>
         ) : (
           <>
-            <div className="rounded-lg border border-[rgba(30,79,163,0.15)] bg-[#0a0a0f]/50 p-3 max-h-60 overflow-y-auto">
-              <pre className="text-xs text-[#8a8a9a] whitespace-pre-wrap font-mono">{exported}</pre>
+            <div className="rounded-lg border border-border bg-background/50 p-3 max-h-60 overflow-y-auto">
+              <pre className="text-xs text-text-secondary whitespace-pre-wrap font-mono">{exported}</pre>
             </div>
             <div className="flex gap-2">
               <Button onClick={handleCopy} variant="outline" className="flex-1">

@@ -8,6 +8,8 @@ export const EDUCATION_LEVELS = [
   { value: "bachelor", label: "Bachelor's Degree" },
   { value: "master", label: "Master's Degree" },
   { value: "phd", label: "PhD" },
+  { value: "diploma", label: "Diploma / Certificate Program" },
+  { value: "none", label: "No Formal Education" },
 ] as const;
 
 export type EducationLevel = (typeof EDUCATION_LEVELS)[number]["value"];
@@ -23,7 +25,24 @@ export const PORTFOLIO_ITEM_TYPES = [
   { value: "leadership", label: "Leadership" },
   { value: "volunteering", label: "Volunteering" },
   { value: "achievement", label: "Achievement" },
+  { value: "contract", label: "Contract Work" },
+  { value: "freelance", label: "Freelance Project" },
+  { value: "publication", label: "Publication" },
+  { value: "speaking", label: "Speaking / Conference" },
+  { value: "award", label: "Award / Recognition" },
+  { value: "open_source", label: "Open Source Contribution" },
+  { value: "consulting", label: "Consulting Engagement" },
 ] as const;
+
+export const EXPERIENCE_LEVELS = [
+  { value: "student", label: "Student (School / College)" },
+  { value: "entry", label: "Entry Level (0-2 years)" },
+  { value: "mid", label: "Mid Level (3-7 years)" },
+  { value: "senior", label: "Senior (8-15 years)" },
+  { value: "executive", label: "Executive (15+ years)" },
+] as const;
+
+export type ExperienceLevel = (typeof EXPERIENCE_LEVELS)[number]["value"];
 
 export type PortfolioItemType = (typeof PORTFOLIO_ITEM_TYPES)[number]["value"];
 

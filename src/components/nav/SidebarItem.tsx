@@ -25,8 +25,8 @@ export default function SidebarItem({ href, label, icon, collapsed = false }: Si
         collapsed ? "justify-center" : ""
       } ${
         isActive
-          ? "bg-[#1E4FA3]/10 text-[#1E4FA3] font-medium"
-          : "text-[#8a8a9a] hover:text-[#f0f0f0] hover:bg-[#1E4FA3]/5"
+          ? "bg-accent/10 text-accent font-medium"
+          : "text-text-secondary hover:text-foreground hover:bg-accent/5"
       }`}
     >
       <Icon className="h-5 w-5 flex-shrink-0" />

@@ -48,16 +48,16 @@ const stagger = {
 };
 
 const features = [
-  { icon: Brain, title: "Smart Discovery", desc: "AI analyzes your skills, interests, and values to surface career paths you never considered.", large: true, color: "#1E4FA3" },
+  { icon: Brain, title: "Smart Discovery", desc: "AI analyzes your skills, experience level, and interests to surface career paths you never considered.", large: true, color: "#1E4FA3" },
   { icon: BarChart3, title: "Deep Analysis", desc: "Comprehensive breakdown of each career including salary, growth, and market demand.", large: false, color: "#3B82F6" },
   { icon: Map, title: "Personalized Roadmaps", desc: "Step-by-step action plans with milestones and timelines tailored to your goals.", large: true, color: "#2563EB" },
   { icon: Shield, title: "Backup Plans", desc: "Intelligent contingency paths that keep you prepared for market shifts.", large: false, color: "#60A5FA" },
   { icon: TrendingUp, title: "Market Intelligence", desc: "Real-time labor market data and emerging roles so you stay ahead.", large: false, color: "#1E4FA3" },
-  { icon: Briefcase, title: "Portfolio Builder", desc: "AI-assisted portfolio and resume optimization for your best professional self.", large: false, color: "#3B82F6" },
+  { icon: Briefcase, title: "Portfolio Builder", desc: "Showcase projects, work experience, certifications, and achievements — for students and professionals alike.", large: false, color: "#3B82F6" },
 ];
 
 const steps = [
-  { num: "01", title: "Build Profile", desc: "Tell us about your skills, experience, and what drives you.", icon: Users },
+  { num: "01", title: "Build Profile", desc: "Tell us about your skills, background, and what drives you — student or professional.", icon: Users },
   { num: "02", title: "AI Analysis", desc: "Our engine processes your data against thousands of career models.", icon: Brain },
   { num: "03", title: "Compare Careers", desc: "Explore ranked matches with detailed insights and projections.", icon: Target },
   { num: "04", title: "Get Roadmap", desc: "Receive your personalized action plan to reach your ideal career.", icon: Rocket },
@@ -74,6 +74,7 @@ const categories = [
 
 const faqs = [
   { q: "How does the AI career matching work?", a: "Our AI engine analyzes your skills, work history, personality traits, values, and interests to generate career recommendations with confidence scores tailored to you." },
+  { q: "Is Tophexity just for students?", a: "No! Tophexity is designed for everyone — high school and college students exploring options, as well as working professionals looking to pivot, advance, or discover new paths. Your experience level shapes the recommendations you receive." },
   { q: "Is Tophexity free to use?", a: "Yes! Tophexity offers career discovery and basic analysis at no cost. Additional features like personalized roadmaps and backup planning are available as the platform grows." },
   { q: "How accurate are the career predictions?", a: "Our recommendations are based on real career data and skill-demand analysis. As you build a detailed profile, the AI gets more accurate at matching you with the right paths." },
   { q: "Can I use Tophexity if I'm changing careers?", a: "Absolutely. Career changers are one of our core audiences. The platform identifies your transferable skills and creates transition roadmaps that maximize your existing experience." },
@@ -98,25 +99,25 @@ function DashboardMockup() {
   return (
     <div className="relative w-full max-w-3xl mx-auto">
       {/* Glow behind */}
-      <div className="absolute inset-0 bg-[#1E4FA3]/15 blur-[60px] rounded-full" />
+      <div className="absolute inset-0 bg-accent/15 blur-[60px] rounded-full" />
 
       {/* Main card */}
       <motion.div
         initial={{ opacity: 0, y: 40, rotateX: 8 }}
         animate={{ opacity: 1, y: 0, rotateX: 0 }}
         transition={{ duration: 1, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
-        className="relative rounded-2xl border border-[rgba(30,79,163,0.2)] bg-[#0a0a0f]/80 backdrop-blur-xl overflow-hidden shadow-[0_0_80px_rgba(30,79,163,0.15)]"
+        className="relative rounded-2xl bg-background/80 backdrop-blur-xl overflow-hidden shadow-[0_0_80px_rgba(30,79,163,0.15)]"
         style={{ perspective: "1200px" }}
       >
         {/* Title bar */}
-        <div className="flex items-center gap-2 px-5 py-3 border-b border-[rgba(30,79,163,0.12)] bg-[#0d214f]/20">
+        <div className="flex items-center gap-2 px-5 py-3 border-b border-border/50 bg-surface/20">
           <div className="flex gap-1.5">
             <div className="w-3 h-3 rounded-full bg-red-500/60" />
             <div className="w-3 h-3 rounded-full bg-yellow-500/60" />
             <div className="w-3 h-3 rounded-full bg-green-500/60" />
           </div>
           <div className="flex-1 text-center">
-            <span className="text-[10px] text-[#5a5a6a] font-mono">tophexity.com/dashboard</span>
+            <span className="text-[10px] text-text-muted font-mono">tophexity.com/dashboard</span>
           </div>
         </div>
 
@@ -124,11 +125,11 @@ function DashboardMockup() {
         <div className="p-6 md:p-8">
           {/* Top row */}
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-8 h-8 rounded-lg bg-[#1E4FA3]/30 flex items-center justify-center">
-              <Sparkles className="w-4 h-4 text-[#1E4FA3]" />
+            <div className="w-8 h-8 rounded-lg bg-accent/30 flex items-center justify-center">
+              <Sparkles className="w-4 h-4 text-accent" />
             </div>
             <div>
-              <p className="text-xs text-[#5a5a6a]">Welcome back</p>
+              <p className="text-xs text-text-muted">Welcome back</p>
               <p className="text-sm font-semibold font-[family-name:var(--font-display)]">Career Dashboard</p>
             </div>
           </div>
@@ -137,12 +138,12 @@ function DashboardMockup() {
           <div className="grid grid-cols-3 gap-3 mb-6">
             {[
               { label: "Match Score", value: "94%", color: "text-emerald-400" },
-              { label: "Skills Analyzed", value: "28", color: "text-[#1E4FA3]" },
+              { label: "Skills Analyzed", value: "28", color: "text-accent" },
               { label: "Careers Found", value: "12", color: "text-blue-400" },
             ].map((s) => (
-              <div key={s.label} className="rounded-xl bg-[#0d214f]/40 border border-[rgba(30,79,163,0.12)] p-3">
+              <div key={s.label} className="rounded-xl bg-surface/30 p-3">
                 <p className={`text-lg font-bold font-[family-name:var(--font-display)] ${s.color}`}>{s.value}</p>
-                <p className="text-[10px] text-[#5a5a6a] mt-0.5">{s.label}</p>
+                <p className="text-[10px] text-text-muted mt-0.5">{s.label}</p>
               </div>
             ))}
           </div>
@@ -154,17 +155,17 @@ function DashboardMockup() {
               { title: "Data Analyst", score: 87 },
               { title: "UX Strategist", score: 82 },
             ].map((c, i) => (
-              <div key={c.title} className="rounded-xl bg-[#0d214f]/30 border border-[rgba(30,79,163,0.1)] p-3">
+              <div key={c.title} className="rounded-xl bg-surface/20 p-3">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-xs font-medium">{c.title}</span>
-                  <span className="text-xs text-[#1E4FA3] font-bold">{c.score}%</span>
+                  <span className="text-xs text-accent font-bold">{c.score}%</span>
                 </div>
-                <div className="h-1.5 rounded-full bg-[#0d214f]/60 overflow-hidden">
+                <div className="h-1.5 rounded-full bg-surface/60 overflow-hidden">
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${c.score}%` }}
                     transition={{ duration: 1.5, delay: 1 + i * 0.2, ease: [0.22, 1, 0.36, 1] }}
-                    className="h-full rounded-full bg-gradient-to-r from-[#1E4FA3] to-[#3B82F6]"
+                    className="h-full rounded-full bg-gradient-to-r from-accent to-accent-light"
                   />
                 </div>
               </div>
@@ -189,18 +190,18 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-[#f0f0f0] overflow-x-hidden">
+    <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
       {/* ─── Navbar ─── */}
       <nav
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
           scrolled
-            ? "bg-[#0a0a0f]/80 backdrop-blur-2xl border-b border-[rgba(30,79,163,0.1)] shadow-[0_4px_30px_rgba(0,0,0,0.3)]"
+            ? "bg-background/80 backdrop-blur-2xl border-b border-border shadow-[0_4px_30px_rgba(0,0,0,0.3)]"
             : "bg-transparent"
         }`}
       >
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="w-8 h-8 rounded-lg bg-[#1E4FA3] flex items-center justify-center shadow-[0_0_20px_rgba(30,79,163,0.4)] group-hover:shadow-[0_0_30px_rgba(30,79,163,0.6)] transition-shadow">
+            <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center shadow-[0_0_20px_rgba(30,79,163,0.4)] group-hover:shadow-[0_0_30px_rgba(30,79,163,0.6)] transition-shadow">
               <Sparkles className="w-4 h-4 text-white" />
             </div>
             <span className="text-lg font-bold font-[family-name:var(--font-display)] tracking-tight">
@@ -213,7 +214,7 @@ export default function HomePage() {
               <a
                 key={link}
                 href={`#${link.toLowerCase().replace(/\s+/g, "-")}`}
-                className="px-3 py-2 rounded-lg text-sm text-[#8a8a9a] hover:text-white hover:bg-[#0d214f]/50 transition-all duration-200"
+                className="px-3 py-2 rounded-lg text-sm text-text-secondary hover:text-white hover:bg-surface/50 transition-all duration-200"
               >
                 {link}
               </a>
@@ -224,7 +225,7 @@ export default function HomePage() {
             {user ? (
               <Link
                 href="/dashboard"
-                className="px-5 py-2 rounded-lg bg-[#1E4FA3] text-white text-sm font-medium hover:bg-[#2b63c9] transition-all shadow-[0_0_20px_rgba(30,79,163,0.3)] hover:shadow-[0_0_30px_rgba(30,79,163,0.5)]"
+                className="px-5 py-2 rounded-lg bg-accent text-white text-sm font-medium hover:bg-accent-light transition-all shadow-[0_0_20px_rgba(30,79,163,0.3)] hover:shadow-[0_0_30px_rgba(30,79,163,0.5)]"
               >
                 Dashboard
               </Link>
@@ -232,13 +233,13 @@ export default function HomePage() {
               <>
                 <Link
                   href="/login"
-                  className="px-4 py-2 rounded-lg text-sm text-[#8a8a9a] hover:text-white transition-colors"
+                  className="px-4 py-2 rounded-lg text-sm text-text-secondary hover:text-white transition-colors"
                 >
                   Sign In
                 </Link>
                 <Link
                   href="/register"
-                  className="px-5 py-2 rounded-lg bg-[#1E4FA3] text-white text-sm font-medium hover:bg-[#2b63c9] transition-all shadow-[0_0_20px_rgba(30,79,163,0.3)] hover:shadow-[0_0_30px_rgba(30,79,163,0.5)]"
+                  className="px-5 py-2 rounded-lg bg-accent text-white text-sm font-medium hover:bg-accent-light transition-all shadow-[0_0_20px_rgba(30,79,163,0.3)] hover:shadow-[0_0_30px_rgba(30,79,163,0.5)]"
                 >
                   Get Started
                 </Link>
@@ -248,7 +249,7 @@ export default function HomePage() {
 
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="md:hidden p-2 text-[#8a8a9a] hover:text-white transition-colors"
+            className="md:hidden p-2 text-text-secondary hover:text-white transition-colors"
           >
             {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
@@ -260,7 +261,7 @@ export default function HomePage() {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
-              className="md:hidden bg-[#0a0a0f]/95 backdrop-blur-2xl border-b border-[rgba(30,79,163,0.1)] overflow-hidden"
+              className="md:hidden bg-background/95 backdrop-blur-2xl border-b border-border overflow-hidden"
             >
               <div className="px-6 py-4 flex flex-col gap-1">
                 {["Features", "How It Works", "FAQ"].map((link) => (
@@ -268,17 +269,17 @@ export default function HomePage() {
                     key={link}
                     href={`#${link.toLowerCase().replace(/\s+/g, "-")}`}
                     onClick={() => setMobileOpen(false)}
-                    className="text-sm text-[#8a8a9a] hover:text-white transition-colors py-2.5 px-3 rounded-lg hover:bg-[#0d214f]/50"
+                    className="text-sm text-text-secondary hover:text-white transition-colors py-2.5 px-3 rounded-lg hover:bg-surface/50"
                   >
                     {link}
                   </a>
                 ))}
-                <div className="flex flex-col gap-2 pt-3 mt-1 border-t border-[rgba(30,79,163,0.1)]">
+                <div className="flex flex-col gap-2 pt-3 mt-1 border-t border-border">
                   {user ? (
                     <Link
                       href="/dashboard"
                       onClick={() => setMobileOpen(false)}
-                      className="px-4 py-2.5 rounded-lg bg-[#1E4FA3] text-white text-sm font-medium text-center"
+                      className="px-4 py-2.5 rounded-lg bg-accent text-white text-sm font-medium text-center"
                     >
                       Dashboard
                     </Link>
@@ -287,14 +288,14 @@ export default function HomePage() {
                       <Link
                         href="/login"
                         onClick={() => setMobileOpen(false)}
-                        className="px-4 py-2.5 rounded-lg text-sm text-[#8a8a9a] text-center"
+                        className="px-4 py-2.5 rounded-lg text-sm text-text-secondary text-center"
                       >
                         Sign In
                       </Link>
                       <Link
                         href="/register"
                         onClick={() => setMobileOpen(false)}
-                        className="px-4 py-2.5 rounded-lg bg-[#1E4FA3] text-white text-sm font-medium text-center"
+                        className="px-4 py-2.5 rounded-lg bg-accent text-white text-sm font-medium text-center"
                       >
                         Get Started
                       </Link>
@@ -314,13 +315,13 @@ export default function HomePage() {
 
         {/* Animated blobs */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-[10%] left-[15%] w-[500px] h-[500px] bg-[#1E4FA3]/15 rounded-full blur-[140px] animate-blob" />
-          <div className="absolute bottom-[15%] right-[10%] w-[400px] h-[400px] bg-[#3B82F6]/10 rounded-full blur-[120px] animate-blob-delay" />
-          <div className="absolute top-[40%] left-[50%] -translate-x-1/2 w-[600px] h-[300px] bg-[#2563EB]/8 rounded-full blur-[160px] animate-blob-delay-2" />
+          <div className="absolute top-[10%] left-[15%] w-[500px] h-[500px] bg-accent/15 rounded-full blur-[140px] animate-blob" />
+          <div className="absolute bottom-[15%] right-[10%] w-[400px] h-[400px] bg-accent/10 rounded-full blur-[120px] animate-blob-delay" />
+          <div className="absolute top-[40%] left-[50%] -translate-x-1/2 w-[600px] h-[300px] bg-accent/5 rounded-full blur-[160px] animate-blob-delay-2" />
         </div>
 
         {/* Radial fade overlay */}
-        <div className="absolute inset-0 bg-radial-[at_50%_40%] from-transparent via-transparent to-[#0a0a0f]/80 pointer-events-none" />
+        <div className="absolute inset-0 bg-radial-[at_50%_40%] from-transparent via-transparent to-background/80 pointer-events-none" />
 
         <div className="relative z-10 max-w-4xl mx-auto text-center mb-12 md:mb-16">
           {/* Badge */}
@@ -328,13 +329,13 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[rgba(30,79,163,0.25)] bg-[#0d214f]/40 backdrop-blur-sm mb-8 shadow-[0_0_20px_rgba(30,79,163,0.1)]"
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-surface/40 backdrop-blur-sm mb-8 shadow-[0_0_20px_rgba(30,79,163,0.1)]"
           >
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
             </span>
-            <span className="text-xs text-[#8a8a9a] font-medium tracking-wide uppercase">AI-Powered Career Intelligence</span>
+            <span className="text-xs text-text-secondary font-medium tracking-wide uppercase">AI-Powered Career Intelligence</span>
           </motion.div>
 
           {/* Headline */}
@@ -346,7 +347,7 @@ export default function HomePage() {
           >
             Discover Your
             <br />
-            <span className="bg-gradient-to-r from-[#1E4FA3] via-[#3B82F6] to-[#60A5FA] bg-clip-text text-transparent animate-gradient-text">
+            <span className="bg-gradient-to-r from-accent via-accent-light to-[#60A5FA] bg-clip-text text-transparent animate-gradient-text">
               Perfect Career
             </span>
           </motion.h1>
@@ -356,10 +357,10 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-            className="text-base md:text-lg text-[#8a8a9a] max-w-xl mx-auto mb-10 leading-relaxed"
+            className="text-base md:text-lg text-text-secondary max-w-xl mx-auto mb-10 leading-relaxed"
           >
-            Leverage advanced AI to analyze your unique skills, personality, and goals.
-            Get personalized career recommendations with actionable roadmaps.
+            Leverage advanced AI to analyze your unique skills, experience, and goals.
+            Whether you're a student exploring options or a professional planning your next move — get personalized career recommendations with actionable roadmaps.
           </motion.p>
 
           {/* CTAs */}
@@ -371,14 +372,14 @@ export default function HomePage() {
           >
             <Link
               href="/register"
-              className="group flex items-center gap-2.5 px-8 py-3.5 rounded-xl bg-[#1E4FA3] text-white font-semibold text-sm hover:bg-[#2b63c9] transition-all shadow-[0_0_30px_rgba(30,79,163,0.4)] hover:shadow-[0_0_50px_rgba(30,79,163,0.6)] hover:scale-[1.02] active:scale-[0.98]"
+              className="group flex items-center gap-2.5 px-8 py-3.5 rounded-xl bg-accent text-white font-semibold text-sm hover:bg-accent-light transition-all shadow-[0_0_30px_rgba(30,79,163,0.4)] hover:shadow-[0_0_50px_rgba(30,79,163,0.6)] hover:scale-[1.02] active:scale-[0.98]"
             >
               Start Your Journey
               <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
             </Link>
             <a
               href="#how-it-works"
-              className="flex items-center gap-2 px-8 py-3.5 rounded-xl border border-[rgba(30,79,163,0.25)] text-[#8a8a9a] text-sm font-medium hover:text-white hover:border-[rgba(30,79,163,0.5)] hover:bg-[#0d214f]/30 transition-all"
+              className="flex items-center gap-2 px-8 py-3.5 rounded-xl text-text-secondary text-sm font-medium hover:text-white hover:bg-surface/30 transition-all"
             >
               Learn More
             </a>
@@ -391,7 +392,7 @@ export default function HomePage() {
         </div>
 
         {/* Bottom fade */}
-        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#0a0a0f] to-transparent pointer-events-none" />
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent pointer-events-none" />
       </section>
 
       {/* ─── Features (Bento Grid) ─── */}
@@ -404,16 +405,16 @@ export default function HomePage() {
             transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
             className="text-center mb-16"
           >
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[rgba(30,79,163,0.2)] bg-[#0d214f]/30 mb-6">
-              <Layers className="w-3.5 h-3.5 text-[#1E4FA3]" />
-              <span className="text-xs text-[#8a8a9a] font-medium uppercase tracking-wider">Features</span>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface/30 mb-6">
+              <Layers className="w-3.5 h-3.5 text-accent" />
+              <span className="text-xs text-text-secondary font-medium uppercase tracking-wider">Features</span>
             </div>
             <h2 className="text-3xl md:text-5xl font-bold font-[family-name:var(--font-display)] tracking-tight mb-4">
               Everything You Need
               <br />
-              <span className="text-[#1E4FA3]">to Choose Wisely</span>
+              <span className="text-accent">to Choose Wisely</span>
             </h2>
-            <p className="text-[#8a8a9a] max-w-xl mx-auto leading-relaxed">
+            <p className="text-text-secondary max-w-xl mx-auto leading-relaxed">
               A complete toolkit designed to transform career uncertainty into confident, data-driven decisions.
             </p>
           </motion.div>
@@ -430,7 +431,7 @@ export default function HomePage() {
               <motion.div
                 key={f.title}
                 variants={fadeUp}
-                className={`glow-card group relative rounded-2xl border border-[rgba(30,79,163,0.12)] bg-[#0d214f]/20 hover:bg-[#0d214f]/40 transition-all duration-500 overflow-hidden ${
+                className={`glow-card group relative rounded-2xl bg-surface/20 hover:bg-surface/40 transition-all duration-500 overflow-hidden ${
                   f.large ? "md:col-span-1 lg:col-span-1 p-8" : "p-6"
                 }`}
               >
@@ -447,7 +448,7 @@ export default function HomePage() {
                   <h3 className="text-lg font-semibold font-[family-name:var(--font-display)] mb-2 tracking-tight">
                     {f.title}
                   </h3>
-                  <p className="text-sm text-[#8a8a9a] leading-relaxed">{f.desc}</p>
+                  <p className="text-sm text-text-secondary leading-relaxed">{f.desc}</p>
                 </div>
               </motion.div>
             ))}
@@ -458,7 +459,7 @@ export default function HomePage() {
       {/* ─── How It Works ─── */}
       <section id="how-it-works" className="py-28 px-6 relative">
         {/* Section bg */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0f] via-[#0d214f]/5 to-[#0a0a0f]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-surface/5 to-background" />
 
         <div className="relative max-w-7xl mx-auto">
           <motion.div
@@ -468,14 +469,14 @@ export default function HomePage() {
             transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
             className="text-center mb-20"
           >
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[rgba(30,79,163,0.2)] bg-[#0d214f]/30 mb-6">
-              <Rocket className="w-3.5 h-3.5 text-[#1E4FA3]" />
-              <span className="text-xs text-[#8a8a9a] font-medium uppercase tracking-wider">Process</span>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface/30 mb-6">
+              <Rocket className="w-3.5 h-3.5 text-accent" />
+              <span className="text-xs text-text-secondary font-medium uppercase tracking-wider">Process</span>
             </div>
             <h2 className="text-3xl md:text-5xl font-bold font-[family-name:var(--font-display)] tracking-tight mb-4">
-              How <span className="text-[#1E4FA3]">Tophexity</span> Works
+              How <span className="text-accent">Tophexity</span> Works
             </h2>
-            <p className="text-[#8a8a9a] max-w-xl mx-auto">
+            <p className="text-text-secondary max-w-xl mx-auto">
               Four simple steps from uncertainty to a clear, actionable career plan.
             </p>
           </motion.div>
@@ -500,19 +501,19 @@ export default function HomePage() {
                 <motion.div key={step.num} variants={fadeUp} className="relative text-center group">
                   {/* Step circle */}
                   <div className="relative inline-block mb-6">
-                    <div className="w-14 h-14 rounded-full bg-[#0a0a0f] border-2 border-[#1E4FA3]/50 flex items-center justify-center relative z-10 group-hover:border-[#1E4FA3] transition-colors duration-300">
-                      <step.icon className="w-5 h-5 text-[#1E4FA3] group-hover:text-[#3B82F6] transition-colors" />
+                    <div className="w-14 h-14 rounded-full bg-background ring-2 ring-accent/50 flex items-center justify-center relative z-10 group-hover:ring-accent transition-all duration-300">
+                      <step.icon className="w-5 h-5 text-accent group-hover:text-accent-light transition-colors" />
                     </div>
                     {/* Pulse ring on hover */}
-                    <div className="absolute inset-0 rounded-full border-2 border-[#1E4FA3]/20 opacity-0 group-hover:opacity-100 group-hover:animate-pulse-ring" />
+                    <div className="absolute inset-0 rounded-full ring-2 ring-accent/30 opacity-0 group-hover:opacity-100 group-hover:animate-pulse-ring" />
                     {/* Step number */}
-                    <div className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-[#1E4FA3] flex items-center justify-center z-20">
+                    <div className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-accent flex items-center justify-center z-20">
                       <span className="text-[10px] font-bold text-white">{step.num}</span>
                     </div>
                   </div>
 
                   <h3 className="text-base font-semibold font-[family-name:var(--font-display)] mb-2">{step.title}</h3>
-                  <p className="text-sm text-[#8a8a9a] leading-relaxed max-w-[220px] mx-auto">{step.desc}</p>
+                  <p className="text-sm text-text-secondary leading-relaxed max-w-[220px] mx-auto">{step.desc}</p>
                 </motion.div>
               ))}
             </motion.div>
@@ -530,14 +531,14 @@ export default function HomePage() {
             transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
             className="text-center mb-16"
           >
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[rgba(30,79,163,0.2)] bg-[#0d214f]/30 mb-6">
-              <Globe className="w-3.5 h-3.5 text-[#1E4FA3]" />
-              <span className="text-xs text-[#8a8a9a] font-medium uppercase tracking-wider">Explore</span>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface/30 mb-6">
+              <Globe className="w-3.5 h-3.5 text-accent" />
+              <span className="text-xs text-text-secondary font-medium uppercase tracking-wider">Explore</span>
             </div>
             <h2 className="text-3xl md:text-5xl font-bold font-[family-name:var(--font-display)] tracking-tight mb-4">
-              Explore <span className="text-[#1E4FA3]">Career Categories</span>
+              Explore <span className="text-accent">Career Categories</span>
             </h2>
-            <p className="text-[#8a8a9a] max-w-xl mx-auto">
+            <p className="text-text-secondary max-w-xl mx-auto">
               Dive deep into industry-specific insights and discover where your skills shine brightest.
             </p>
           </motion.div>
@@ -553,22 +554,22 @@ export default function HomePage() {
               <motion.div
                 key={cat.title}
                 variants={fadeScale}
-                className="glow-card group relative p-6 rounded-2xl border border-[rgba(30,79,163,0.1)] bg-[#0d214f]/15 hover:bg-[#0d214f]/30 transition-all duration-500 cursor-pointer overflow-hidden"
+                className="glow-card group relative p-6 rounded-2xl bg-surface/15 hover:bg-surface/30 transition-all duration-500 cursor-pointer overflow-hidden"
               >
                 {/* Gradient bg on hover */}
                 <div className={`absolute inset-0 bg-gradient-to-br ${cat.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
 
                 <div className="relative z-10">
                   <div className="flex items-start justify-between mb-5">
-                    <div className="w-11 h-11 rounded-xl bg-[#1E4FA3]/15 border border-[rgba(30,79,163,0.15)] flex items-center justify-center group-hover:bg-[#1E4FA3]/25 group-hover:scale-110 transition-all duration-300">
-                      <cat.icon className="w-5 h-5 text-[#1E4FA3]" />
+                    <div className="w-11 h-11 rounded-xl bg-accent/15 flex items-center justify-center group-hover:bg-accent/25 group-hover:scale-110 transition-all duration-300">
+                      <cat.icon className="w-5 h-5 text-accent" />
                     </div>
-                    <span className="text-xs font-mono text-[#1E4FA3] bg-[#1E4FA3]/10 px-2.5 py-1 rounded-md border border-[rgba(30,79,163,0.15)]">
+                    <span className="text-xs font-mono text-accent bg-accent/10 px-2.5 py-1 rounded-md">
                       {cat.count}
                     </span>
                   </div>
                   <h3 className="text-base font-semibold font-[family-name:var(--font-display)] mb-1.5">{cat.title}</h3>
-                  <p className="text-sm text-[#8a8a9a] leading-relaxed">{cat.desc}</p>
+                  <p className="text-sm text-text-secondary leading-relaxed">{cat.desc}</p>
                 </div>
               </motion.div>
             ))}
@@ -579,7 +580,7 @@ export default function HomePage() {
       {/* ─── Vision ─── */}
       <section className="py-28 px-6 relative overflow-hidden">
         <div className="absolute inset-0">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-[#1E4FA3]/8 rounded-full blur-[150px]" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-accent/8 rounded-full blur-[150px]" />
         </div>
 
         <div className="relative max-w-4xl mx-auto text-center">
@@ -589,8 +590,8 @@ export default function HomePage() {
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
           >
-            <div className="w-14 h-14 rounded-2xl bg-[#1E4FA3]/15 border border-[rgba(30,79,163,0.2)] flex items-center justify-center mx-auto mb-8">
-              <LineChart className="w-6 h-6 text-[#1E4FA3]" />
+            <div className="w-14 h-14 rounded-2xl bg-accent/15 flex items-center justify-center mx-auto mb-8">
+              <LineChart className="w-6 h-6 text-accent" />
             </div>
             <h2 className="text-3xl md:text-5xl font-bold font-[family-name:var(--font-display)] leading-tight tracking-tight mb-6">
               We propel careers forward with{" "}
@@ -598,7 +599,7 @@ export default function HomePage() {
                 precision built for today
               </span>
             </h2>
-            <p className="text-[#8a8a9a] text-lg max-w-2xl mx-auto leading-relaxed">
+            <p className="text-text-secondary text-lg max-w-2xl mx-auto leading-relaxed">
               Tophexity combines deep career intelligence with cutting-edge AI to deliver insights
               that traditional career counseling simply cannot match. Your next chapter starts here.
             </p>
@@ -616,14 +617,14 @@ export default function HomePage() {
             transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
             className="text-center mb-16"
           >
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[rgba(30,79,163,0.2)] bg-[#0d214f]/30 mb-6">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface/30 mb-6">
               <HelpIcon />
-              <span className="text-xs text-[#8a8a9a] font-medium uppercase tracking-wider">FAQ</span>
+              <span className="text-xs text-text-secondary font-medium uppercase tracking-wider">FAQ</span>
             </div>
             <h2 className="text-3xl md:text-5xl font-bold font-[family-name:var(--font-display)] tracking-tight mb-4">
-              Frequently Asked <span className="text-[#1E4FA3]">Questions</span>
+              Frequently Asked <span className="text-accent">Questions</span>
             </h2>
-            <p className="text-[#8a8a9a] max-w-xl mx-auto">
+            <p className="text-text-secondary max-w-xl mx-auto">
               Everything you need to know about Tophexity.
             </p>
           </motion.div>
@@ -636,10 +637,10 @@ export default function HomePage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: i * 0.05, ease: [0.22, 1, 0.36, 1] }}
-                className={`rounded-xl border transition-all duration-300 overflow-hidden ${
+                className={`rounded-xl transition-all duration-300 overflow-hidden ${
                   openFaq === i
-                    ? "border-[rgba(30,79,163,0.3)] bg-[#0d214f]/30 shadow-[0_0_30px_rgba(30,79,163,0.08)]"
-                    : "border-[rgba(30,79,163,0.1)] bg-[#0d214f]/15 hover:bg-[#0d214f]/25 hover:border-[rgba(30,79,163,0.2)]"
+                    ? "bg-surface/30 shadow-[0_0_30px_rgba(30,79,163,0.08)]"
+                    : "bg-surface/15 hover:bg-surface/25"
                 }`}
               >
                 <button
@@ -650,8 +651,8 @@ export default function HomePage() {
                     {faq.q}
                   </span>
                   <ChevronDown
-                    className={`w-4 h-4 text-[#8a8a9a] shrink-0 transition-transform duration-300 ${
-                      openFaq === i ? "rotate-180 text-[#1E4FA3]" : ""
+                    className={`w-4 h-4 text-text-secondary shrink-0 transition-transform duration-300 ${
+                      openFaq === i ? "rotate-180 text-accent" : ""
                     }`}
                   />
                 </button>
@@ -665,8 +666,8 @@ export default function HomePage() {
                       className="overflow-hidden"
                     >
                       <div className="px-5 pb-5">
-                        <div className="h-px bg-[rgba(30,79,163,0.15)] mb-4" />
-                        <p className="text-sm text-[#8a8a9a] leading-relaxed">{faq.a}</p>
+                        <div className="h-px bg-border/50 mb-4" />
+                        <p className="text-sm text-text-secondary leading-relaxed">{faq.a}</p>
                       </div>
                     </motion.div>
                   )}
@@ -688,29 +689,29 @@ export default function HomePage() {
             className="relative rounded-3xl overflow-hidden"
           >
             {/* Background layers */}
-            <div className="absolute inset-0 bg-gradient-to-br from-[#0d214f] via-[#1E4FA3]/20 to-[#0d214f]" />
+            <div className="absolute inset-0 bg-gradient-to-br from-surface via-accent/10 to-surface" />
             <div className="absolute inset-0 hero-grid opacity-50" />
-            <div className="absolute top-0 left-1/4 w-[300px] h-[300px] bg-[#1E4FA3]/20 rounded-full blur-[100px]" />
-            <div className="absolute bottom-0 right-1/4 w-[200px] h-[200px] bg-[#3B82F6]/15 rounded-full blur-[80px]" />
+            <div className="absolute top-0 left-1/4 w-[300px] h-[300px] bg-accent/20 rounded-full blur-[100px]" />
+            <div className="absolute bottom-0 right-1/4 w-[200px] h-[200px] bg-accent/15 rounded-full blur-[80px]" />
 
             {/* Border */}
-            <div className="absolute inset-0 rounded-3xl border border-[rgba(30,79,163,0.2)]" />
+            <div className="absolute inset-0 rounded-3xl border border-border/50" />
 
             <div className="relative z-10 px-8 py-16 md:px-16 md:py-20 text-center">
               <h2 className="text-3xl md:text-5xl font-bold font-[family-name:var(--font-display)] tracking-tight mb-4">
                 Ready to Find Your
                 <br />
-                <span className="bg-gradient-to-r from-[#1E4FA3] to-[#60A5FA] bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-accent to-[#60A5FA] bg-clip-text text-transparent">
                   Perfect Career?
                 </span>
               </h2>
-              <p className="text-[#8a8a9a] max-w-lg mx-auto mb-10 leading-relaxed">
+              <p className="text-text-secondary max-w-lg mx-auto mb-10 leading-relaxed">
                 Start building your career roadmap today with AI-powered intelligence.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Link
                   href="/register"
-                  className="group flex items-center gap-2.5 px-8 py-3.5 rounded-xl bg-white text-[#0a0a0f] font-semibold text-sm hover:bg-gray-100 transition-all shadow-[0_0_40px_rgba(255,255,255,0.1)] hover:shadow-[0_0_60px_rgba(255,255,255,0.15)] hover:scale-[1.02] active:scale-[0.98]"
+                  className="group flex items-center gap-2.5 px-8 py-3.5 rounded-xl bg-white text-background font-semibold text-sm hover:bg-gray-100 transition-all shadow-[0_0_40px_rgba(255,255,255,0.1)] hover:shadow-[0_0_60px_rgba(255,255,255,0.15)] hover:scale-[1.02] active:scale-[0.98]"
                 >
                   Get Started Free
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
@@ -728,18 +729,18 @@ export default function HomePage() {
       </section>
 
       {/* ─── Footer ─── */}
-      <footer className="border-t border-[rgba(30,79,163,0.1)] bg-[#0a0a0f]">
+      <footer className="border-t border-border/50 bg-background">
         <div className="max-w-7xl mx-auto px-6 py-16">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
             <div>
               <div className="flex items-center gap-2.5 mb-4">
-                <div className="w-7 h-7 rounded-md bg-[#1E4FA3] flex items-center justify-center">
+                <div className="w-7 h-7 rounded-md bg-accent flex items-center justify-center">
                   <Sparkles className="w-3.5 h-3.5 text-white" />
                 </div>
                 <span className="text-lg font-bold font-[family-name:var(--font-display)]">Tophexity</span>
               </div>
-              <p className="text-sm text-[#8a8a9a] leading-relaxed mb-6 max-w-xs">
-                AI-powered career intelligence platform helping professionals discover and navigate their ideal career paths.
+              <p className="text-sm text-text-secondary leading-relaxed mb-6 max-w-xs">
+                AI-powered career intelligence platform helping students and professionals discover and navigate their ideal career paths.
               </p>
             </div>
 
@@ -748,7 +749,7 @@ export default function HomePage() {
               <ul className="space-y-2.5">
                 {footerProduct.map((link) => (
                   <li key={link.label}>
-                    <Link href={link.href} className="text-sm text-[#8a8a9a] hover:text-white transition-colors duration-200">
+                    <Link href={link.href} className="text-sm text-text-secondary hover:text-white transition-colors duration-200">
                       {link.label}
                     </Link>
                   </li>
@@ -761,7 +762,7 @@ export default function HomePage() {
               <ul className="space-y-2.5">
                 {footerCompany.map((link) => (
                   <li key={link.label}>
-                    <a href={link.href} className="text-sm text-[#8a8a9a] hover:text-white transition-colors duration-200">
+                    <a href={link.href} className="text-sm text-text-secondary hover:text-white transition-colors duration-200">
                       {link.label}
                     </a>
                   </li>
@@ -770,13 +771,13 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="mt-12 pt-8 border-t border-[rgba(30,79,163,0.08)] flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-xs text-[#5a5a6a]">
+          <div className="mt-12 pt-8 border-t border-border/50 flex flex-col md:flex-row items-center justify-between gap-4">
+            <p className="text-xs text-text-muted">
               &copy; {new Date().getFullYear()} Tophexity. All rights reserved.
             </p>
             <div className="flex gap-6">
-              <a href="#" className="text-xs text-[#5a5a6a] hover:text-[#8a8a9a] transition-colors">Privacy</a>
-              <a href="#" className="text-xs text-[#5a5a6a] hover:text-[#8a8a9a] transition-colors">Terms</a>
+              <a href="#" className="text-xs text-text-muted hover:text-text-secondary transition-colors">Privacy</a>
+              <a href="#" className="text-xs text-text-muted hover:text-text-secondary transition-colors">Terms</a>
             </div>
           </div>
         </div>
@@ -787,7 +788,7 @@ export default function HomePage() {
 
 function HelpIcon() {
   return (
-    <svg className="w-3.5 h-3.5 text-[#1E4FA3]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg className="w-3.5 h-3.5 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="12" cy="12" r="10" />
       <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
       <line x1="12" y1="17" x2="12.01" y2="17" />

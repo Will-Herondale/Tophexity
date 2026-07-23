@@ -64,13 +64,13 @@ export default function PortfolioPage() {
 
       <div className="mb-6 flex flex-wrap gap-2">
         <button onClick={() => { setFilter(""); setPage(1); }}
-          className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${!filter ? "text-white" : "hover:bg-[#112a5e]"}`}
+          className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${!filter ? "text-white" : "hover:bg-surface/30"}`}
           style={{ backgroundColor: !filter ? "#1E4FA3" : "#0d214f", color: !filter ? "#ffffff" : "#8a8a9a" }}>
           All
         </button>
         {PORTFOLIO_ITEM_TYPES.map((type) => (
           <button key={type.value} onClick={() => { setFilter(type.value); setPage(1); }}
-            className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${filter === type.value ? "text-white" : "hover:bg-[#112a5e]"}`}
+            className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${filter === type.value ? "text-white" : "hover:bg-surface/30"}`}
             style={{ backgroundColor: filter === type.value ? "#1E4FA3" : "#0d214f", color: filter === type.value ? "#ffffff" : "#8a8a9a" }}>
             {type.label}
           </button>
@@ -79,7 +79,7 @@ export default function PortfolioPage() {
 
       {loading ? (
         <div className="flex min-h-[200px] items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#1E4FA3]/30 border-t-[#1E4FA3]" />
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-border-light border-t-accent" />
         </div>
       ) : items.length === 0 ? (
         <div className="rounded-xl border-2 border-dashed p-12 text-center" style={{ borderColor: "rgba(30, 79, 163, 0.15)", backgroundColor: "#0d214f" }}>

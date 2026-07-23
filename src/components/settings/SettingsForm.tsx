@@ -9,12 +9,15 @@ import { Save, Bell, Palette } from "lucide-react";
 
 export default function SettingsForm() {
   const { settings, updateSettings } = useSettings();
-  const [theme, setTheme] = useState(settings.theme);
   const [notifications, setNotifications] = useState(settings.notifications);
   const [saved, setSaved] = useState(false);
 
+  const handleThemeChange = (value: "light" | "dark" | "system") => {
+    updateSettings({ theme: value });
+  };
+
   const handleSave = () => {
-    updateSettings({ theme, notifications });
+    updateSettings({ notifications });
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
@@ -23,15 +26,15 @@ export default function SettingsForm() {
     <div className="space-y-6">
       <Card>
         <div className="flex items-center gap-2 mb-4">
-          <Palette className="h-4 w-4 text-[#5a5a6a]" />
-          <h3 className="text-sm font-semibold font-[family-name:var(--font-display)] text-[#f0f0f0]">Appearance</h3>
+          <Palette className="h-4 w-4 text-text-muted" />
+          <h3 className="text-sm font-semibold font-[family-name:var(--font-display)] text-foreground">Appearance</h3>
         </div>
         <div>
-          <label className="mb-1 block text-xs font-medium text-[#8a8a9a]">Theme</label>
+          <label className="mb-1 block text-xs font-medium text-text-secondary">Theme</label>
           <select
-            value={theme}
-            onChange={(e) => setTheme(e.target.value as "light" | "dark" | "system")}
-            className="w-full rounded-lg border border-[rgba(30,79,163,0.15)] bg-[#0d214f]/30 px-3 py-2 text-sm text-[#f0f0f0] focus:border-[#1E4FA3] focus:outline-none focus:ring-1 focus:ring-[#1E4FA3]"
+            value={settings.theme}
+            onChange={(e) => handleThemeChange(e.target.value as "light" | "dark" | "system")}
+            className="w-full rounded-lg border border-border bg-surface/30 px-3 py-2 text-sm text-foreground focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
           >
             <option value="light">Light</option>
             <option value="dark">Dark</option>
@@ -42,8 +45,8 @@ export default function SettingsForm() {
 
       <Card>
         <div className="flex items-center gap-2 mb-4">
-          <Bell className="h-4 w-4 text-[#5a5a6a]" />
-          <h3 className="text-sm font-semibold font-[family-name:var(--font-display)] text-[#f0f0f0]">Notifications</h3>
+          <Bell className="h-4 w-4 text-text-muted" />
+          <h3 className="text-sm font-semibold font-[family-name:var(--font-display)] text-foreground">Notifications</h3>
         </div>
         <div className="space-y-3">
           {[
@@ -56,9 +59,9 @@ export default function SettingsForm() {
                 type="checkbox"
                 checked={notifications[item.key]}
                 onChange={(e) => setNotifications({ ...notifications, [item.key]: e.target.checked })}
-                className="h-4 w-4 rounded border-[rgba(30,79,163,0.3)] bg-[#0d214f] text-[#1E4FA3] focus:ring-[#1E4FA3] focus:ring-offset-[#0a0a0f]"
+                className="h-4 w-4 rounded border-border-light bg-surface text-accent focus:ring-accent focus:ring-offset-background"
               />
-              <span className="text-sm text-[#f0f0f0]">{item.label}</span>
+              <span className="text-sm text-foreground">{item.label}</span>
             </label>
           ))}
         </div>

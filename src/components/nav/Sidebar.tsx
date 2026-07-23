@@ -26,19 +26,19 @@ export default function Sidebar() {
 
   return (
     <aside
-      className={`flex h-screen flex-col border-r border-[#1E4FA3]/10 bg-[#0d214f]/50 transition-all duration-200 ${
+      className={`flex h-screen flex-col border-r border-border/50 bg-surface/30 transition-all duration-200 ${
         collapsed ? "w-[72px]" : "w-64"
       }`}
     >
-      <div className={`flex items-center border-b border-[#1E4FA3]/10 p-4 ${collapsed ? "justify-center" : "justify-between"}`}>
+      <div className={`flex items-center border-b border-border/50 p-4 ${collapsed ? "justify-center" : "justify-between"}`}>
         {!collapsed && (
-          <span className="font-[family-name:var(--font-display)] text-lg font-bold text-[#1E4FA3]">
+          <span className="font-[family-name:var(--font-display)] text-lg font-bold text-accent">
             Tophexity
           </span>
         )}
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="rounded p-1 text-[#8a8a9a] hover:bg-[#1E4FA3]/10 hover:text-[#f0f0f0]"
+          className="rounded p-1 text-text-secondary hover:bg-accent/10 hover:text-foreground"
         >
           {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
         </button>
@@ -50,10 +50,10 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      <div className="border-t border-[#1E4FA3]/10 p-3">
+      <div className="border-t border-border p-3">
         <button
           onClick={cycleTheme}
-          className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-[#8a8a9a] hover:bg-[#1E4FA3]/5 hover:text-[#f0f0f0] transition-colors ${
+          className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-text-secondary hover:bg-accent/5 hover:text-foreground transition-colors ${
             collapsed ? "justify-center" : ""
           }`}
           title={`Theme: ${settings.theme}`}
@@ -63,11 +63,11 @@ export default function Sidebar() {
         </button>
 
         {!collapsed && user && (
-          <p className="my-2 truncate px-3 text-xs text-[#8a8a9a]">{user.email}</p>
+          <p className="my-2 truncate px-3 text-xs text-text-secondary">{user.email}</p>
         )}
         <button
           onClick={() => logout()}
-          className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-[#8a8a9a] hover:bg-red-900/20 hover:text-red-400 transition-colors ${
+          className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-text-secondary hover:bg-red-900/20 hover:text-red-400 transition-colors ${
             collapsed ? "justify-center" : ""
           }`}
         >

@@ -2,7 +2,24 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-@theme inline {
+@theme {
+  --color-background: #f8f9fc;
+  --color-foreground: #1a1a2e;
+  --color-surface: #ffffff;
+  --color-surface-light: #f0f2f5;
+  --color-accent: #1E4FA3;
+  --color-accent-light: #2b63c9;
+  --color-accent-dark: #163a7a;
+  --color-border: rgba(30, 79, 163, 0.12);
+  --color-border-light: rgba(30, 79, 163, 0.2);
+  --color-text-primary: #1a1a2e;
+  --color-text-secondary: #6b7280;
+  --color-text-muted: #9ca3af;
+  --font-display: "Space Grotesk", sans-serif;
+  --font-body: "Inter", sans-serif;
+}
+
+html.dark {
   --color-background: #0a0a0f;
   --color-foreground: #f0f0f0;
   --color-surface: #0d214f;
@@ -15,8 +32,6 @@
   --color-text-primary: #f0f0f0;
   --color-text-secondary: #8a8a9a;
   --color-text-muted: #5a5a6a;
-  --font-display: "Space Grotesk", sans-serif;
-  --font-body: "Inter", sans-serif;
 }
 
 * {
@@ -37,7 +52,7 @@ body {
 
 ::selection {
   background: rgba(30, 79, 163, 0.4);
-  color: #f0f0f0;
+  color: var(--color-foreground);
 }
 
 ::-webkit-scrollbar {
@@ -45,23 +60,23 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #0a0a0f;
+  background: var(--color-background);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1E4FA3;
+  background: var(--color-accent);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #2b63c9;
+  background: var(--color-accent-light);
 }
 
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus {
-  -webkit-box-shadow: 0 0 0px 1000px #0d214f inset;
-  -webkit-text-fill-color: #f0f0f0;
+  -webkit-box-shadow: 0 0 0px 1000px var(--color-surface) inset;
+  -webkit-text-fill-color: var(--color-foreground);
   transition: background-color 5000s ease-in-out 0s;
 }
 
@@ -80,8 +95,8 @@ input:-webkit-autofill:focus {
 /* ─── Grid Pattern ─── */
 .hero-grid {
   background-image:
-    linear-gradient(rgba(30, 79, 163, 0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(30, 79, 163, 0.06) 1px, transparent 1px);
+    linear-gradient(var(--color-border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-border) 1px, transparent 1px);
   background-size: 60px 60px;
   mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, black 30%, transparent 80%);
   -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, black 30%, transparent 80%);

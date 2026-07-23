@@ -74,8 +74,7 @@ export default function PortfolioItemForm({ item, onSave, onClose }: PortfolioIt
           <select
             value={itemType}
             onChange={(e) => setItemType(e.target.value as PortfolioItemType)}
-            className="w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#1E4FA3]"
-            style={{ borderColor: "rgba(30, 79, 163, 0.15)", backgroundColor: "#0d214f", color: "#f0f0f0" }}
+            className="w-full rounded-lg border border-border bg-surface/30 px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-accent"
           >
             {PORTFOLIO_ITEM_TYPES.map((type) => (
               <option key={type.value} value={type.value}>
@@ -86,13 +85,12 @@ export default function PortfolioItemForm({ item, onSave, onClose }: PortfolioIt
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium" style={{ color: "#8a8a9a" }}>Description</label>
+          <label className="mb-1 block text-sm font-medium text-text-secondary">Description</label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={3}
-            className="w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#1E4FA3]"
-            style={{ borderColor: "rgba(30, 79, 163, 0.15)", backgroundColor: "#0d214f", color: "#f0f0f0" }}
+            className="w-full rounded-lg border border-border bg-surface/30 px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-accent"
             placeholder="What did you do? What did you learn?"
           />
         </div>
@@ -128,8 +126,7 @@ export default function PortfolioItemForm({ item, onSave, onClose }: PortfolioIt
                 }
               }}
               placeholder="Type a skill..."
-              className="w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#1E4FA3]"
-              style={{ borderColor: "rgba(30, 79, 163, 0.15)", backgroundColor: "#0d214f", color: "#f0f0f0" }}
+              className="w-full rounded-lg border border-border bg-surface/30 px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-accent"
             />
             {skillInput && suggestions.length > 0 && (
               <div className="absolute top-full left-0 z-10 mt-1 max-h-32 w-full overflow-y-auto rounded-lg border shadow-lg" style={{ borderColor: "rgba(30, 79, 163, 0.15)", backgroundColor: "#0d214f" }}>

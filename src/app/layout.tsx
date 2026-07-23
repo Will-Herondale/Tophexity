@@ -29,9 +29,16 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${spaceGrotesk.variable} ${inter.variable} h-full antialiased dark`}
+      className={`${spaceGrotesk.variable} ${inter.variable} h-full antialiased`}
     >
-      <body className="min-h-full bg-[#0a0a0f] text-[#f0f0f0]">
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=JSON.parse(localStorage.getItem("tophexity_settings")||"{}").theme;if(t==="dark"){document.documentElement.classList.add("dark")}else if(t==="light"){document.documentElement.classList.add("light")}else if(t==="system"||!t){if(window.matchMedia("(prefers-color-scheme:dark)").matches){document.documentElement.classList.add("dark")}else{document.documentElement.classList.add("light")}}}catch(e){document.documentElement.classList.add("dark")}})()`,
+          }}
+        />
+      </head>
+      <body className="min-h-full bg-background text-foreground">
         <Providers>
           <AppShell>{children}</AppShell>
         </Providers>

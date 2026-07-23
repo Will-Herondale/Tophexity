@@ -103,22 +103,22 @@ export default function ChatArea({ session }: ChatAreaProps) {
 
   if (!session) {
     return (
-      <div className="flex h-full items-center justify-center bg-[#0a0a0f]">
+      <div className="flex h-full items-center justify-center bg-background">
         <div className="text-center">
-          <p className="text-lg font-semibold font-[family-name:var(--font-display)] text-[#f0f0f0]">Career Guidance Chat</p>
-          <p className="mt-1 text-sm text-[#8a8a9a]">Select a conversation or start a new one</p>
+          <p className="text-lg font-semibold font-[family-name:var(--font-display)] text-foreground">Career Guidance Chat</p>
+          <p className="mt-1 text-sm text-text-secondary">Select a conversation or start a new one</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex h-full flex-col bg-[#0a0a0f]">
+    <div className="flex h-full flex-col bg-background">
       {/* Header bar */}
-      <div className="flex items-center justify-between border-b border-[rgba(30,79,163,0.15)] px-4 py-2.5">
+      <div className="flex items-center justify-between border-b border-border/50 px-4 py-2.5">
         <div className="flex items-center gap-2 min-w-0">
           <p className="text-sm font-medium font-[family-name:var(--font-display)] truncate">{session.title || "New Chat"}</p>
-          {session.is_pinned && <span className="text-[10px] text-[#1E4FA3] bg-[#1E4FA3]/10 px-1.5 py-0.5 rounded">Pinned</span>}
+          {session.is_pinned && <span className="text-[10px] text-accent bg-accent/10 px-1.5 py-0.5 rounded">Pinned</span>}
         </div>
         <div className="flex items-center gap-1.5">
           {rebuildMsg && (
@@ -127,7 +127,7 @@ export default function ChatArea({ session }: ChatAreaProps) {
           <button
             onClick={handleRebuildMemory}
             disabled={rebuilding}
-            className="flex items-center gap-1 rounded-md px-2 py-1.5 text-[10px] text-[#8a8a9a] hover:bg-[#0d214f]/40 hover:text-[#f0f0f0] transition-colors disabled:opacity-50"
+            className="flex items-center gap-1 rounded-md px-2 py-1.5 text-[10px] text-text-secondary hover:bg-surface/40 hover:text-foreground transition-colors disabled:opacity-50"
             title="Rebuild memory"
           >
             {rebuilding ? <Loader2 className="h-3 w-3 animate-spin" /> : <Brain className="h-3 w-3" />}
@@ -135,7 +135,7 @@ export default function ChatArea({ session }: ChatAreaProps) {
           </button>
           <button
             onClick={() => setExportOpen(true)}
-            className="flex items-center gap-1 rounded-md px-2 py-1.5 text-[10px] text-[#8a8a9a] hover:bg-[#0d214f]/40 hover:text-[#f0f0f0] transition-colors"
+            className="flex items-center gap-1 rounded-md px-2 py-1.5 text-[10px] text-text-secondary hover:bg-surface/40 hover:text-foreground transition-colors"
             title="Export chat"
           >
             <Download className="h-3 w-3" />
@@ -148,11 +148,11 @@ export default function ChatArea({ session }: ChatAreaProps) {
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {loadingSession ? (
           <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-6 w-6 animate-spin text-[#1E4FA3]" />
+            <Loader2 className="h-6 w-6 animate-spin text-accent" />
           </div>
         ) : messages.length === 0 ? (
           <div className="flex h-full items-center justify-center">
-            <p className="text-sm text-[#5a5a6a]">Send a message to start the conversation</p>
+            <p className="text-sm text-text-muted">Send a message to start the conversation</p>
           </div>
         ) : (
           messages.map((msg) => <ChatMessageBubble key={msg.id} message={msg} />)
@@ -161,8 +161,8 @@ export default function ChatArea({ session }: ChatAreaProps) {
       </div>
 
       {/* Input */}
-      <div className="border-t border-[rgba(30,79,163,0.15)] p-4">
-        <div className="flex gap-2">
+      <div className="border-t border-border/50 p-4">
+        <div className="flex gap-2 items-end">
           <input
             type="text"
             value={input}
@@ -170,12 +170,12 @@ export default function ChatArea({ session }: ChatAreaProps) {
             onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
             placeholder="Ask about careers..."
             disabled={sending}
-            className="flex-1 rounded-lg border border-[rgba(30,79,163,0.15)] bg-[#0d214f]/30 px-4 py-2.5 text-sm text-[#f0f0f0] placeholder:text-[#5a5a6a] focus:border-[#1E4FA3] focus:outline-none focus:ring-1 focus:ring-[#1E4FA3] disabled:opacity-50"
+            className="flex-1 rounded-2xl bg-surface/30 px-4 py-3 text-sm text-foreground placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-accent/30 disabled:opacity-50"
           />
           <button
             onClick={handleSend}
             disabled={!input.trim() || sending}
-            className="rounded-lg bg-[#1E4FA3] px-4 py-2.5 text-sm font-medium text-white hover:bg-[#2b63c9] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="flex h-11 w-11 items-center justify-center rounded-full bg-accent text-white hover:bg-accent-light disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
           </button>

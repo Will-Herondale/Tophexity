@@ -25,11 +25,11 @@ export default function RoadmapsPage() {
   }, [page]);
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8" style={{ backgroundColor: "#0a0a0f" }}>
+    <div className="mx-auto max-w-3xl px-4 py-8 bg-background">
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="font-[family-name:var(--font-display)] text-2xl font-bold" style={{ color: "#f0f0f0" }}>Learning Roadmaps</h1>
-          <p className="mt-1 text-sm" style={{ color: "#8a8a9a" }}>Step-by-step plans for your career path</p>
+          <h1 className="font-[family-name:var(--font-display)] text-2xl font-bold text-foreground">Learning Roadmaps</h1>
+          <p className="mt-1 text-sm text-text-secondary">Step-by-step plans for your career path</p>
         </div>
         <Button variant="outline" size="sm" onClick={() => setPage(page)}>
           <RefreshCw className="mr-1 h-4 w-4" /> Refresh
@@ -38,15 +38,15 @@ export default function RoadmapsPage() {
 
       {loading ? (
         <div className="flex min-h-[300px] items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#1E4FA3]/30 border-t-[#1E4FA3]" />
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-border-light border-t-accent" />
         </div>
       ) : roadmaps.length === 0 ? (
-        <div className="rounded-xl border-2 border-dashed p-12 text-center" style={{ borderColor: "rgba(30, 79, 163, 0.15)", backgroundColor: "#0d214f" }}>
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full" style={{ backgroundColor: "#112a5e" }}>
-            <Map className="h-8 w-8" style={{ color: "#5a5a6a" }} />
+        <div className="rounded-xl border-2 border-dashed border-border bg-surface p-12 text-center">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-surface/80">
+            <Map className="h-8 w-8 text-text-muted" />
           </div>
-          <h3 className="text-lg font-semibold font-[family-name:var(--font-display)]" style={{ color: "#f0f0f0" }}>No roadmaps yet</h3>
-          <p className="mt-2 text-sm" style={{ color: "#8a8a9a" }}>Roadmaps will appear here once the AI generates personalized learning paths for you.</p>
+          <h3 className="text-lg font-semibold font-[family-name:var(--font-display)] text-foreground">No roadmaps yet</h3>
+          <p className="mt-2 text-sm text-text-secondary">Roadmaps will appear here once the AI generates personalized learning paths for you.</p>
           <Button className="mt-6" onClick={() => router.push("/careers")}>Explore Careers</Button>
         </div>
       ) : (
@@ -59,7 +59,7 @@ export default function RoadmapsPage() {
           {totalPages > 1 && (
             <div className="mt-6 flex items-center justify-center gap-3">
               <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage(page - 1)}>Previous</Button>
-              <span className="text-sm" style={{ color: "#8a8a9a" }}>Page {page} of {totalPages}</span>
+              <span className="text-sm text-text-secondary">Page {page} of {totalPages}</span>
               <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage(page + 1)}>Next</Button>
             </div>
           )}

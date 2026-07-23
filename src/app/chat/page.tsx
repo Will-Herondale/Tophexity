@@ -51,7 +51,7 @@ export default function ChatPage() {
   const activeSession = sessions.find((s) => s.id === activeSessionId) || null;
 
   return (
-    <div className="flex h-[calc(100vh-4rem)]">
+    <div className="flex h-full">
       {/* Sidebar */}
       <div className="w-72 flex-shrink-0 flex flex-col">
         <div className="flex-1 overflow-hidden">
@@ -65,7 +65,7 @@ export default function ChatPage() {
           />
         </div>
         {/* Stats in sidebar */}
-        <div className="border-t border-[rgba(30,79,163,0.15)] p-2">
+        <div className="border-t border-border p-2">
           <ChatStatsCard variant="sidebar" />
         </div>
       </div>
@@ -78,7 +78,7 @@ export default function ChatPage() {
       {/* Delete confirmation modal */}
       {deleteConfirm && (
         <Modal isOpen onClose={() => setDeleteConfirm(null)} title="Delete Conversation">
-          <p className="text-sm text-[#8a8a9a]">Are you sure you want to delete this conversation? This cannot be undone.</p>
+          <p className="text-sm text-text-secondary">Are you sure you want to delete this conversation? This cannot be undone.</p>
           <div className="mt-6 flex justify-end gap-3">
             <Button variant="outline" onClick={() => setDeleteConfirm(null)}>Cancel</Button>
             <Button variant="danger" onClick={handleDeleteSession}>Delete</Button>

@@ -16,12 +16,12 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         disabled={disabled || isLoading}
         className={clsx(
-          "inline-flex items-center justify-center rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none focus:ring-offset-[#0a0a0f]",
+          "inline-flex items-center justify-center rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none focus:ring-offset-background",
           {
-            "bg-[#1E4FA3] text-white hover:bg-[#2b63c9] focus:ring-[#1E4FA3]/50": variant === "primary",
-            "bg-[#1E4FA3]/10 text-[#f0f0f0] hover:bg-[#1E4FA3]/20 focus:ring-[#1E4FA3]/50": variant === "secondary",
-            "border border-[#1E4FA3]/30 bg-transparent text-[#f0f0f0] hover:bg-[#1E4FA3]/10 focus:ring-[#1E4FA3]/50": variant === "outline",
-            "text-[#8a8a9a] hover:text-[#f0f0f0] hover:bg-[#1E4FA3]/5 focus:ring-[#1E4FA3]/50": variant === "ghost",
+            "bg-accent text-white hover:bg-accent-light focus:ring-accent/50": variant === "primary",
+            "bg-accent/10 text-foreground hover:bg-accent/20 focus:ring-accent/50": variant === "secondary",
+            "border border-border-light bg-transparent text-foreground hover:bg-accent/10 focus:ring-accent/50": variant === "outline",
+            "text-text-secondary hover:text-foreground hover:bg-accent/5 focus:ring-accent/50": variant === "ghost",
             "bg-red-600 text-white hover:bg-red-700 focus:ring-red-500": variant === "danger",
           },
           {

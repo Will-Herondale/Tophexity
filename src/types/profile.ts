@@ -1,3 +1,19 @@
+export interface PreviousRole {
+  title: string;
+  company: string;
+  start_date: string | null;
+  end_date: string | null;
+  description: string | null;
+}
+
+export interface Certification {
+  name: string;
+  issuer: string;
+  date_obtained: string | null;
+  expiry_date: string | null;
+  credential_url: string | null;
+}
+
 export interface Profile {
   id: string;
   user_id: string;
@@ -8,10 +24,13 @@ export interface Profile {
   avatar_url: string | null;
   education_level: string | null;
   years_experience: number | null;
+  experience_level: string | null;
   current_field: string | null;
   target_fields: string[] | null;
   skills: Record<string, string> | null;
   interests: string[] | null;
+  previous_roles: PreviousRole[] | null;
+  certifications: Certification[] | null;
   created_at: string;
   updated_at: string;
 }
@@ -24,10 +43,13 @@ export interface ProfileCreatePayload {
   avatar_url?: string | null;
   education_level?: string | null;
   years_experience?: number | null;
+  experience_level?: string | null;
   current_field?: string | null;
   target_fields?: string[] | null;
   skills?: Record<string, string> | null;
   interests?: string[] | null;
+  previous_roles?: PreviousRole[] | null;
+  certifications?: Certification[] | null;
 }
 
 export type ProfileUpdatePayload = ProfileCreatePayload;
@@ -49,10 +71,13 @@ export function createEmptyProfile(): Profile {
     avatar_url: null,
     education_level: null,
     years_experience: null,
+    experience_level: null,
     current_field: null,
     target_fields: null,
     skills: null,
     interests: null,
+    previous_roles: null,
+    certifications: null,
     created_at: "",
     updated_at: "",
   };

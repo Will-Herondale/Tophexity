@@ -69,7 +69,7 @@ export default function ProfileVersionHistory({ onClose }: ProfileVersionHistory
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="h-6 w-6 animate-spin rounded-full border-4 border-[#1E4FA3]/30 border-t-[#1E4FA3]" />
+        <div className="h-6 w-6 animate-spin rounded-full border-4 border-border-light border-t-accent" />
       </div>
     );
   }
@@ -77,18 +77,17 @@ export default function ProfileVersionHistory({ onClose }: ProfileVersionHistory
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold font-[family-name:var(--font-display)] text-[#f0f0f0] flex items-center gap-2">
-          <Clock className="h-4 w-4 text-[#1E4FA3]" />
+        <h3 className="text-sm font-semibold font-[family-name:var(--font-display)] text-foreground flex items-center gap-2">
+          <Clock className="h-4 w-4 text-accent" />
           Profile History ({versions.length} versions)
         </h3>
-        <button onClick={onClose} className="text-xs text-[#5a5a6a] hover:text-[#8a8a9a]">Close</button>
+        <button onClick={onClose} className="text-xs text-text-muted hover:text-text-secondary">Close</button>
       </div>
 
       {versions.length === 0 ? (
-        <p className="text-xs text-[#5a5a6a] text-center py-8">No version history yet.</p>
+        <p className="text-xs text-text-muted text-center py-8">No version history yet.</p>
       ) : (
         <div className="relative space-y-3">
-          {/* Timeline line */}
           <div className="absolute left-[11px] top-4 bottom-4 w-px bg-[rgba(30,79,163,0.2)]" />
 
           {[...versions].reverse().map((version, idx) => {
@@ -98,11 +97,10 @@ export default function ProfileVersionHistory({ onClose }: ProfileVersionHistory
 
             return (
               <div key={version.id} className="relative pl-8">
-                {/* Timeline dot */}
                 <div className={`absolute left-0 top-2 w-[22px] h-[22px] rounded-full border-2 flex items-center justify-center z-10 ${
                   idx === 0
-                    ? "bg-[#1E4FA3] border-[#1E4FA3]"
-                    : "bg-[#0a0a0f] border-[rgba(30,79,163,0.3)]"
+                    ? "bg-accent border-accent"
+                    : "bg-background border-border-light"
                 }`}>
                   <span className="text-[8px] font-bold text-white">{version.version_number}</span>
                 </div>
@@ -110,24 +108,24 @@ export default function ProfileVersionHistory({ onClose }: ProfileVersionHistory
                 <div
                   className={`rounded-xl border transition-all cursor-pointer ${
                     isExpanded
-                      ? "border-[rgba(30,79,163,0.3)] bg-[#0d214f]/20"
-                      : "border-[rgba(30,79,163,0.1)] bg-[#0d214f]/10 hover:bg-[#0d214f]/20"
+                      ? "border-border-light bg-surface/20"
+                      : "border-border bg-surface/10 hover:bg-surface/20"
                   }`}
                   onClick={() => toggleExpand(version.id)}
                 >
                   <div className="flex items-center justify-between px-4 py-3">
                     <div className="flex items-center gap-3">
-                      {isExpanded ? <ChevronDown className="h-3.5 w-3.5 text-[#8a8a9a]" /> : <ChevronRight className="h-3.5 w-3.5 text-[#8a8a9a]" />}
+                      {isExpanded ? <ChevronDown className="h-3.5 w-3.5 text-text-secondary" /> : <ChevronRight className="h-3.5 w-3.5 text-text-secondary" />}
                       <div>
-                        <p className="text-xs font-medium text-[#f0f0f0]">Version {version.version_number}</p>
-                        <p className="text-[10px] text-[#5a5a6a]">
+                        <p className="text-xs font-medium text-foreground">Version {version.version_number}</p>
+                        <p className="text-[10px] text-text-muted">
                           {changedFields.size} field{changedFields.size !== 1 ? "s" : ""} changed
                         </p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
                       {idx > 0 && (
-                        <span className="flex items-center gap-1 text-[10px] text-[#1E4FA3]">
+                        <span className="flex items-center gap-1 text-[10px] text-accent">
                           <ArrowLeftRight className="h-2.5 w-2.5" />
                           {changedFields.size} diff
                         </span>
@@ -136,19 +134,19 @@ export default function ProfileVersionHistory({ onClose }: ProfileVersionHistory
                   </div>
 
                   {isExpanded && (
-                    <div className="border-t border-[rgba(30,79,163,0.1)] px-4 py-3 space-y-2">
+                    <div className="border-t border-border px-4 py-3 space-y-2">
                       {Object.entries(version.snapshot || {}).map(([key, value]) => {
                         const isChanged = changedFields.has(key);
                         const prevValue = prevVersion?.snapshot?.[key];
                         return (
-                          <div key={key} className={`rounded-lg px-3 py-2 text-xs ${isChanged ? "bg-[#1E4FA3]/10 border border-[#1E4FA3]/20" : "bg-[#0a0a0f]/30"}`}>
+                          <div key={key} className={`rounded-lg px-3 py-2 text-xs ${isChanged ? "bg-accent/10 border border-border-light" : "bg-background/30"}`}>
                             <div className="flex items-center justify-between">
-                              <span className="text-[#8a8a9a] font-medium">{FIELD_LABELS[key] || key}</span>
-                              {isChanged && <span className="text-[9px] text-[#1E4FA3]">changed</span>}
+                              <span className="text-text-secondary font-medium">{FIELD_LABELS[key] || key}</span>
+                              {isChanged && <span className="text-[9px] text-accent">changed</span>}
                             </div>
-                            <p className="text-[#f0f0f0] mt-0.5">{renderValue(value)}</p>
+                            <p className="text-foreground mt-0.5">{renderValue(value)}</p>
                             {isChanged && prevValue !== undefined && (
-                              <p className="text-[10px] text-[#5a5a6a] mt-1 line-through">
+                              <p className="text-[10px] text-text-muted mt-1 line-through">
                                 was: {renderValue(prevValue)}
                               </p>
                             )}

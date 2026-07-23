@@ -48,17 +48,17 @@ export default function LoginForm() {
   return (
     <div className="w-full max-w-md">
       <div className="mb-2 text-center">
-        <h2 className="font-[family-name:var(--font-display)] text-sm font-semibold uppercase tracking-widest text-[#1E4FA3]">
+        <h2 className="font-[family-name:var(--font-display)] text-sm font-semibold uppercase tracking-widest text-accent">
           {APP_NAME}
         </h2>
       </div>
 
-      <div className="rounded-2xl border border-[#1E4FA3]/10 bg-[#0d214f]/30 p-8 shadow-2xl shadow-black/20 backdrop-blur-sm">
+      <div className="rounded-2xl border border-border bg-surface/30 p-8 shadow-2xl shadow-black/20 backdrop-blur-sm">
         <div className="mb-8 text-center">
-          <h1 className="font-[family-name:var(--font-display)] text-2xl font-bold text-[#f0f0f0]">
+          <h1 className="font-[family-name:var(--font-display)] text-2xl font-bold text-foreground">
             Sign in to your account
           </h1>
-          <p className="mt-2 text-sm text-[#8a8a9a]">Welcome back! Please enter your credentials.</p>
+          <p className="mt-2 text-sm text-text-secondary">Welcome back! Please enter your credentials.</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -75,7 +75,7 @@ export default function LoginForm() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="border-[#1E4FA3]/15 bg-[#0a0a0f]/50 text-[#f0f0f0] placeholder:text-[#5a5a6a] focus:border-[#1E4FA3] focus:ring-[#1E4FA3]/30"
+            className="border-border bg-background/50 text-foreground placeholder:text-text-muted focus:border-accent focus:ring-accent/30"
           />
 
           <Input
@@ -85,7 +85,7 @@ export default function LoginForm() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="border-[#1E4FA3]/15 bg-[#0a0a0f]/50 text-[#f0f0f0] placeholder:text-[#5a5a6a] focus:border-[#1E4FA3] focus:ring-[#1E4FA3]/30"
+            className="border-border bg-background/50 text-foreground placeholder:text-text-muted focus:border-accent focus:ring-accent/30"
           />
 
           <Button type="submit" className="w-full" disabled={loading}>
@@ -106,17 +106,17 @@ export default function LoginForm() {
         <div className="mt-6">
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-[#1E4FA3]/10" />
+              <div className="w-full border-t border-border" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="bg-transparent px-3 text-[#8a8a9a]">or continue with</span>
+              <span className="bg-transparent px-3 text-text-secondary">or continue with</span>
             </div>
           </div>
 
           <div className="mt-4 grid grid-cols-2 gap-3">
             <button
               disabled
-              className="flex cursor-not-allowed items-center justify-center gap-2 rounded-lg border border-[#1E4FA3]/10 bg-[#0a0a0f]/50 px-4 py-2.5 text-sm text-[#5a5a6a] transition-colors"
+              className="flex cursor-not-allowed items-center justify-center gap-2 rounded-lg border border-border bg-background/50 px-4 py-2.5 text-sm text-text-muted transition-colors"
               title="Coming soon"
             >
               <svg className="h-5 w-5" viewBox="0 0 24 24">
@@ -130,7 +130,7 @@ export default function LoginForm() {
 
             <button
               disabled
-              className="flex cursor-not-allowed items-center justify-center gap-2 rounded-lg border border-[#1E4FA3]/10 bg-[#0a0a0f]/50 px-4 py-2.5 text-sm text-[#5a5a6a] transition-colors"
+              className="flex cursor-not-allowed items-center justify-center gap-2 rounded-lg border border-border bg-background/50 px-4 py-2.5 text-sm text-text-muted transition-colors"
               title="Coming soon"
             >
               <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
@@ -142,9 +142,9 @@ export default function LoginForm() {
         </div>
       </div>
 
-      <p className="mt-6 text-center text-sm text-[#8a8a9a]">
+      <p className="mt-6 text-center text-sm text-text-secondary">
         Don&apos;t have an account?{" "}
-        <Link href="/register" className="font-medium text-[#1E4FA3] transition-colors hover:text-[#2b63c9]">
+        <Link href="/register" className="font-medium text-accent transition-colors hover:text-accent-light">
           Create one
         </Link>
       </p>

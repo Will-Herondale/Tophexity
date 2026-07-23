@@ -30,7 +30,7 @@ export default function RecommendationDetailPage() {
   if (loading) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#1E4FA3]/30 border-t-[#1E4FA3]" />
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-border-light border-t-accent" />
       </div>
     );
   }
@@ -38,15 +38,15 @@ export default function RecommendationDetailPage() {
   if (!rec) return null;
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8" style={{ backgroundColor: "#0a0a0f" }}>
-      <button onClick={() => router.push("/recommendations")} className="mb-6 flex items-center gap-2 text-sm transition-colors hover:text-[#f0f0f0]" style={{ color: "#8a8a9a" }}>
+    <div className="mx-auto max-w-3xl px-4 py-8 bg-background">
+      <button onClick={() => router.push("/recommendations")} className="mb-6 flex items-center gap-2 text-sm transition-colors hover:text-foreground text-text-secondary">
         <ArrowLeft className="h-4 w-4" /> Back to Recommendations
       </button>
 
       <div className="mb-8">
-        <h1 className="font-[family-name:var(--font-display)] text-2xl font-bold" style={{ color: "#f0f0f0" }}>{rec.title || "Career Recommendation"}</h1>
-        {rec.summary && <p className="mt-2 text-sm" style={{ color: "#8a8a9a" }}>{rec.summary}</p>}
-        <p className="mt-1 text-xs" style={{ color: "#5a5a6a" }}>Generated on {new Date(rec.created_at).toLocaleDateString()}</p>
+        <h1 className="font-[family-name:var(--font-display)] text-2xl font-bold text-foreground">{rec.title || "Career Recommendation"}</h1>
+        {rec.summary && <p className="mt-2 text-sm text-text-secondary">{rec.summary}</p>}
+        <p className="mt-1 text-xs text-text-muted">Generated on {new Date(rec.created_at).toLocaleDateString()}</p>
       </div>
 
       <div className="space-y-4">
@@ -58,10 +58,10 @@ export default function RecommendationDetailPage() {
       </div>
 
       {rec.items.length === 0 && (
-        <div className="rounded-xl border-2 border-dashed p-12 text-center" style={{ borderColor: "rgba(30, 79, 163, 0.15)", backgroundColor: "#0d214f" }}>
-          <Star className="mx-auto mb-4 h-8 w-8" style={{ color: "#5a5a6a" }} />
-          <h3 className="text-lg font-semibold font-[family-name:var(--font-display)]" style={{ color: "#f0f0f0" }}>No career matches</h3>
-          <p className="mt-2 text-sm" style={{ color: "#8a8a9a" }}>This recommendation has no ranked items yet.</p>
+        <div className="rounded-xl border-2 border-dashed border-border bg-surface p-12 text-center">
+          <Star className="mx-auto mb-4 h-8 w-8 text-text-muted" />
+          <h3 className="text-lg font-semibold font-[family-name:var(--font-display)] text-foreground">No career matches</h3>
+          <p className="mt-2 text-sm text-text-secondary">This recommendation has no ranked items yet.</p>
         </div>
       )}
 
@@ -82,17 +82,17 @@ function RankedItem({ item, onViewDetails }: { item: RecommendationItem; onViewD
   return (
     <Card>
       <div className="flex items-start gap-4">
-        <div className="flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold" style={{ backgroundColor: "#1E4FA3", color: "#ffffff" }}>
+        <div className="flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold bg-accent text-white">
           #{item.rank}
         </div>
         <div className="flex-1">
           <div className="flex items-start justify-between">
             <div>
-              <h3 className="text-base font-semibold font-[family-name:var(--font-display)]" style={{ color: "#f0f0f0" }}>
+              <h3 className="text-base font-semibold font-[family-name:var(--font-display)] text-foreground">
                 {item.career?.title || "Career"}
               </h3>
               {item.career?.description && (
-                <p className="mt-1 text-xs line-clamp-2" style={{ color: "#8a8a9a" }}>{item.career.description}</p>
+                <p className="mt-1 text-xs line-clamp-2 text-text-secondary">{item.career.description}</p>
               )}
             </div>
             <span className={`ml-3 rounded-full px-3 py-1 text-sm font-bold`} style={scoreStyle}>
@@ -100,7 +100,7 @@ function RankedItem({ item, onViewDetails }: { item: RecommendationItem; onViewD
             </span>
           </div>
           {item.reasoning && (
-            <p className="mt-2 text-sm" style={{ color: "#8a8a9a" }}>{item.reasoning}</p>
+            <p className="mt-2 text-sm text-text-secondary">{item.reasoning}</p>
           )}
           <div className="mt-3 flex gap-2">
             <Button size="sm" onClick={() => onViewDetails(item.career_id)}>

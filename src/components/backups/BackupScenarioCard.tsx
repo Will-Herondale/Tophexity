@@ -20,27 +20,27 @@ export default function BackupScenarioCard({ scenario }: BackupScenarioCardProps
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <div className="flex items-center gap-2">
-            <h4 className="text-sm font-semibold font-[family-name:var(--font-display)] text-[#f0f0f0]">{scenario.scenario_name}</h4>
+            <h4 className="text-sm font-semibold font-[family-name:var(--font-display)] text-foreground">{scenario.scenario_name}</h4>
             {scenario.transition_difficulty && (
-              <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${difficultyColors[scenario.transition_difficulty] || "bg-[#0d214f] text-[#8a8a9a] border border-[rgba(30,79,163,0.15)]"}`}>
+              <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${difficultyColors[scenario.transition_difficulty] || "bg-surface text-text-secondary border border-border"}`}>
                 {scenario.transition_difficulty}
               </span>
             )}
           </div>
           {scenario.career?.title && (
-            <p className="mt-1 flex items-center gap-1 text-xs text-[#1E4FA3]">
+            <p className="mt-1 flex items-center gap-1 text-xs text-accent">
               <ArrowRight className="h-3 w-3" />
               {scenario.career.title}
             </p>
           )}
           {scenario.description && (
-            <p className="mt-2 text-xs text-[#8a8a9a]">{scenario.description}</p>
+            <p className="mt-2 text-xs text-text-secondary">{scenario.description}</p>
           )}
           {scenario.reasoning && (
-            <p className="mt-2 text-xs text-[#5a5a6a] italic">&ldquo;{scenario.reasoning}&rdquo;</p>
+            <p className="mt-2 text-xs text-text-muted italic">&ldquo;{scenario.reasoning}&rdquo;</p>
           )}
           {scenario.estimated_transition_months && (
-            <span className="mt-2 inline-flex items-center gap-1 text-xs text-[#5a5a6a]">
+            <span className="mt-2 inline-flex items-center gap-1 text-xs text-text-muted">
               <Clock className="h-3 w-3" /> ~{scenario.estimated_transition_months} months to transition
             </span>
           )}

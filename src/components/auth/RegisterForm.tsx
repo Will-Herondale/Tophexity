@@ -62,22 +62,22 @@ export default function RegisterForm() {
   };
 
   const inputClass =
-    "border-[#1E4FA3]/15 bg-[#0a0a0f]/50 text-[#f0f0f0] placeholder:text-[#5a5a6a] focus:border-[#1E4FA3] focus:ring-[#1E4FA3]/30";
+    "border-border bg-background/50 text-foreground placeholder:text-text-muted focus:border-accent focus:ring-accent/30";
 
   return (
     <div className="w-full max-w-md">
       <div className="mb-2 text-center">
-        <h2 className="font-[family-name:var(--font-display)] text-sm font-semibold uppercase tracking-widest text-[#1E4FA3]">
+        <h2 className="font-[family-name:var(--font-display)] text-sm font-semibold uppercase tracking-widest text-accent">
           {APP_NAME}
         </h2>
       </div>
 
-      <div className="rounded-2xl border border-[#1E4FA3]/10 bg-[#0d214f]/30 p-8 shadow-2xl shadow-black/20 backdrop-blur-sm">
+      <div className="rounded-2xl border border-border bg-surface/30 p-8 shadow-2xl shadow-black/20 backdrop-blur-sm">
         <div className="mb-8 text-center">
-          <h1 className="font-[family-name:var(--font-display)] text-2xl font-bold text-[#f0f0f0]">
+          <h1 className="font-[family-name:var(--font-display)] text-2xl font-bold text-foreground">
             Create your account
           </h1>
-          <p className="mt-2 text-sm text-[#8a8a9a]">Get started with your career journey.</p>
+          <p className="mt-2 text-sm text-text-secondary">Get started with your career journey.</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -139,9 +139,9 @@ export default function RegisterForm() {
         </form>
       </div>
 
-      <p className="mt-6 text-center text-sm text-[#8a8a9a]">
+      <p className="mt-6 text-center text-sm text-text-secondary">
         Already have an account?{" "}
-        <Link href="/login" className="font-medium text-[#1E4FA3] transition-colors hover:text-[#2b63c9]">
+        <Link href="/login" className="font-medium text-accent transition-colors hover:text-accent-light">
           Sign in
         </Link>
       </p>

@@ -1,4 +1,5 @@
 from fastapi import HTTPException, status
+from sqlalchemy.exc import IntegrityError
 
 
 class AppException(HTTPException):
@@ -29,3 +30,19 @@ class BadRequestException(AppException):
 class ConflictException(AppException):
     def __init__(self, detail: str = "Conflict") -> None:
         super().__init__(status_code=status.HTTP_409_CONFLICT, detail=detail)
+
+
+async def safe_flush(session) -> None:
+    """Flush the session, converting IntegrityError to a user-friendly ConflictException."""
+    try:
+        await session.flush()
+    except IntegrityError as e:
+        await session.rollback()
+        orig = str(e.orig).lower() if e.orig else ""
+        if "unique" in orig or "duplicate" in orig:
+            raise ConflictException(detail="A record with this data already exists")
+        if "foreign key" in orig:
+            raise BadRequestException(detail="Referenced record does not exist")
+        if "not null" in orig:
+            raise BadRequestException(detail="Required field is missing")
+        raise ConflictException(detail="Data integrity error")

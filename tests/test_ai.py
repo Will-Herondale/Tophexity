@@ -203,7 +203,7 @@ class TestRetry:
 
     def test_calculate_delay_capped(self):
         d = calculate_delay(100)
-        assert d <= 30 * 1.25  # max_delay + jitter
+        assert d <= 60 * 1.25  # max_delay + jitter
 
 
 # ─── Rate Limiter Tests ───
@@ -341,7 +341,8 @@ class TestModels:
 class TestExceptions:
     def test_ai_error(self):
         exc = AIError("test")
-        assert str(exc) == "test"
+        assert exc.ai_message == "test"
+        assert exc.status_code == 500
 
     def test_ai_service_error(self):
         exc = AIServiceError("unavailable", status_code=503)

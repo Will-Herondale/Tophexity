@@ -43,7 +43,7 @@ async def main(req: func.HttpRequest) -> func.HttpResponse:
                 url=path_and_query,
                 headers=headers,
                 content=body if body else None,
-                timeout=30.0,
+                timeout=120.0,
             )
             resp_headers = dict(response.headers)
             resp_headers.pop("content-length", None)
@@ -57,7 +57,7 @@ async def main(req: func.HttpRequest) -> func.HttpResponse:
         except Exception as e:
             logging.error("Error bridging to FastAPI: %s", str(e))
             return func.HttpResponse(
-                body=f'{{"detail": "Internal server error: {str(e)}"}}',
+                body='{"detail": "Internal server error"}',
                 status_code=500,
                 mimetype="application/json",
             )

@@ -12,7 +12,7 @@ from app.schemas.roadmap import (
     RoadmapListResponse,
     RoadmapResponse,
 )
-from app.utils.exceptions import NotFoundException
+from app.utils.exceptions import NotFoundException, safe_flush
 
 
 async def create_roadmap(
@@ -27,7 +27,7 @@ async def create_roadmap(
         status="active",
     )
     db.add(roadmap)
-    await db.flush()
+    await safe_flush(db)
     for step_data in data.steps:
         step = RoadmapStep(
             roadmap_id=roadmap.id,
@@ -38,7 +38,7 @@ async def create_roadmap(
             resources=step_data.resources,
         )
         db.add(step)
-    await db.flush()
+    await safe_flush(db)
     result = await db.execute(
         select(Roadmap)
         .options(selectinload(Roadmap.steps))

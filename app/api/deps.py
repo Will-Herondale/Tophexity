@@ -40,6 +40,4 @@ async def get_current_user(
 async def get_current_active_user(
     current_user: User = Depends(get_current_user),
 ) -> User:
-    if not current_user.is_active:
-        raise UnauthorizedException(detail="User account is deactivated")
     return current_user

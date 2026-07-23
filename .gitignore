@@ -20,3 +20,10 @@ alembic/versions/*.pyc
 *.swp
 *.swo
 api_key.txt
+*.bak
+deploy*.zip
+db_dump.*
+to_fix/
+-w
+.deployment_zip/
+local.settings.json

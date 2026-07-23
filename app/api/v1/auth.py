@@ -4,9 +4,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.deps import get_current_active_user, get_db_session
 from app.models.user import User
 from app.schemas.auth import (
+    ForgotPasswordRequest,
     LoginRequest,
     RefreshRequest,
     RegisterRequest,
+    ResetPasswordRequest,
     TokenResponse,
     UserResponse,
 )
@@ -88,3 +90,36 @@ async def logout(current_user: User = Depends(get_current_active_user)):
 )
 async def get_current_user_info(current_user: User = Depends(get_current_active_user)):
     return UserResponse.model_validate(current_user)
+
+
+@router.post(
+    "/forgot-password",
+    response_model=MessageResponse,
+    summary="Request password reset",
+    description="Submit an email address to receive a password reset token. Returns a success message regardless of whether the email exists.",
+    responses={
+        422: {"description": "Validation error"},
+    },
+)
+async def forgot_password(
+    data: ForgotPasswordRequest, db: AsyncSession = Depends(get_db_session)
+):
+    await auth_service.forgot_password(db, data.email)
+    return MessageResponse(message="If the email exists, a reset link has been sent")
+
+
+@router.post(
+    "/reset-password",
+    response_model=MessageResponse,
+    summary="Reset password with token",
+    description="Set a new password using the reset token received via email. Token expires after 15 minutes.",
+    responses={
+        400: {"description": "Invalid or expired token"},
+        422: {"description": "Validation error"},
+    },
+)
+async def reset_password(
+    data: ResetPasswordRequest, db: AsyncSession = Depends(get_db_session)
+):
+    await auth_service.reset_password(db, data.token, data.new_password)
+    return MessageResponse(message="Password has been reset successfully")

@@ -3,14 +3,22 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.security import (
     create_access_token,
+    create_password_reset_token,
     create_refresh_token,
+    decode_password_reset_token,
     decode_token,
     get_password_hash,
     verify_password,
 )
 from app.models.user import User
-from app.schemas.auth import LoginRequest, RegisterRequest, TokenResponse, UserResponse
+from app.schemas.auth import (
+    LoginRequest,
+    RegisterRequest,
+    TokenResponse,
+    UserResponse,
+)
 from app.utils.exceptions import BadRequestException, ConflictException, UnauthorizedException
+from app.utils.exceptions import safe_flush
 
 
 async def register_user(
@@ -26,7 +34,7 @@ async def register_user(
         is_verified=False,
     )
     db.add(user)
-    await db.flush()
+    await safe_flush(db)
     return UserResponse.model_validate(user)
 
 
@@ -64,5 +72,21 @@ async def refresh_tokens(db: AsyncSession, refresh_token: str) -> TokenResponse:
     )
 
 
-async def get_user_response(db: AsyncSession, user: User) -> UserResponse:
-    return UserResponse.model_validate(user)
+async def forgot_password(db: AsyncSession, email: str) -> str:
+    result = await db.execute(select(User).where(User.email == email))
+    user = result.scalar_one_or_none()
+    if not user or not user.is_active:
+        return "If the email exists, a reset link has been sent"
+    return create_password_reset_token(user.id)
+
+
+async def reset_password(db: AsyncSession, token: str, new_password: str) -> None:
+    user_id = decode_password_reset_token(token)
+    if not user_id:
+        raise BadRequestException(detail="Invalid or expired reset token")
+    result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalar_one_or_none()
+    if not user or not user.is_active:
+        raise BadRequestException(detail="Invalid or expired reset token")
+    user.hashed_password = get_password_hash(new_password)
+    await safe_flush(db)

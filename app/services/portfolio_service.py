@@ -14,6 +14,7 @@ from app.schemas.portfolio import (
     PortfolioListResponse,
 )
 from app.utils.exceptions import NotFoundException
+from app.utils.exceptions import safe_flush
 
 
 async def create_portfolio_item(
@@ -21,7 +22,7 @@ async def create_portfolio_item(
 ) -> PortfolioItemResponse:
     item = PortfolioItem(user_id=user.id, **data.model_dump())
     db.add(item)
-    await db.flush()
+    await safe_flush(db)
     return PortfolioItemResponse.model_validate(item)
 
 
@@ -82,7 +83,7 @@ async def update_portfolio_item(
         raise NotFoundException(detail="Portfolio item not found")
     for field, value in data.model_dump(exclude_unset=True).items():
         setattr(item, field, value)
-    await db.flush()
+    await safe_flush(db)
     return PortfolioItemResponse.model_validate(item)
 
 
@@ -100,4 +101,4 @@ async def delete_portfolio_item(
     if not item:
         raise NotFoundException(detail="Portfolio item not found")
     item.deleted_at = datetime.now(timezone.utc)
-    await db.flush()
+    await safe_flush(db)

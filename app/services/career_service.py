@@ -14,7 +14,7 @@ from app.schemas.career import (
     CareerCreate, CareerDetailResponse, CareerImportRequest,
     CareerImportResponse, CareerListResponse, CareerResponse, CareerUpdate,
 )
-from app.utils.exceptions import BadRequestException, NotFoundException
+from app.utils.exceptions import BadRequestException, NotFoundException, safe_flush
 
 
 async def import_careers(
@@ -40,7 +40,7 @@ async def import_careers(
             typical_skills=career_data.typical_skills,
         )
         db.add(career)
-        await db.flush()
+        await safe_flush(db)
         if career_data.skills:
             for s in career_data.skills:
                 skill_result = await db.execute(
@@ -50,7 +50,7 @@ async def import_careers(
                 if not skill:
                     skill = Skill(name=s.name, category=s.category)
                     db.add(skill)
-                    await db.flush()
+                    await safe_flush(db)
                 cs = CareerSkill(
                     career_id=career.id,
                     skill_id=skill.id,
@@ -67,7 +67,7 @@ async def import_careers(
                 if not degree:
                     degree = Degree(name=d.name, level=d.level, field=d.field)
                     db.add(degree)
-                    await db.flush()
+                    await safe_flush(db)
                 cd = CareerDegree(
                     career_id=career.id,
                     degree_id=degree.id,
@@ -83,7 +83,7 @@ async def import_careers(
                 if not college:
                     college = College(name=c.name, location=c.location)
                     db.add(college)
-                    await db.flush()
+                    await safe_flush(db)
                 cc = CareerCollege(
                     career_id=career.id,
                     college_id=college.id,
@@ -99,7 +99,7 @@ async def import_careers(
                 if not exam:
                     exam = EntranceExam(name=e.name, description=e.description)
                     db.add(exam)
-                    await db.flush()
+                    await safe_flush(db)
                 ce = CareerEntranceExam(
                     career_id=career.id,
                     exam_id=exam.id,
@@ -117,7 +117,7 @@ async def import_careers(
                         name=s.name, description=s.description, amount=s.amount
                     )
                     db.add(scholarship)
-                    await db.flush()
+                    await safe_flush(db)
                 cs = CareerScholarship(
                     career_id=career.id,
                     scholarship_id=scholarship.id,
@@ -132,7 +132,7 @@ async def import_careers(
                     description=r.description,
                 )
                 db.add(res)
-                await db.flush()
+                await safe_flush(db)
                 cr = CareerResource(
                     career_id=career.id,
                     resource_id=res.id,
@@ -140,7 +140,7 @@ async def import_careers(
                 db.add(cr)
         imported += 1
         created_careers.append(career)
-    await db.flush()
+    await safe_flush(db)
     return CareerImportResponse(
         imported=imported,
         skipped=skipped,
@@ -257,7 +257,7 @@ async def update_career(
         raise NotFoundException(detail="Career not found")
     for field, value in data.model_dump(exclude_unset=True).items():
         setattr(career, field, value)
-    await db.flush()
+    await safe_flush(db)
     return CareerResponse.model_validate(career)
 
 
@@ -270,4 +270,4 @@ async def delete_career(db: AsyncSession, career_id: UUID) -> None:
     for junction_model in [CareerSkill, CareerDegree, CareerCollege, CareerEntranceExam, CareerScholarship, CareerResource]:
         await db.execute(sa_delete(junction_model).where(junction_model.career_id == career_id))
     await db.delete(career)
-    await db.flush()
+    await safe_flush(db)

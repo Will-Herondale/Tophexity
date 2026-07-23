@@ -223,6 +223,56 @@ async function login(email, password) {
 
 ---
 
+## 3b. Forgot Password (No Auth)
+
+**Endpoint:** `POST /v1/auth/forgot-password`
+
+**When to call:** When user clicks "Forgot password?" on the login page.
+
+```javascript
+async function forgotPassword(email) {
+  const response = await fetch(`${BASE_URL}/v1/auth/forgot-password`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email }),
+  });
+
+  const data = await response.json();
+  // Always shows success to prevent email enumeration
+  showNotification('If the email exists, a reset link has been sent', 'info');
+  return data;
+}
+```
+
+---
+
+## 3c. Reset Password (No Auth)
+
+**Endpoint:** `POST /v1/auth/reset-password`
+
+**When to call:** When user submits a new password from the reset password page (token in URL query params).
+
+```javascript
+async function resetPassword(token, newPassword) {
+  const response = await fetch(`${BASE_URL}/v1/auth/reset-password`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token, new_password: newPassword }),
+  });
+
+  if (response.status === 400) {
+    showNotification('Invalid or expired reset token', 'error');
+    return false;
+  }
+
+  const data = await response.json();
+  showNotification('Password reset successfully', 'success');
+  return true;
+}
+```
+
+---
+
 ## 4. Dashboard (Requires Auth)
 
 **Authentication:** Yes
@@ -673,6 +723,8 @@ async function deleteChatSession(sessionId) {
 | Landing Page | `GET /health` | No |
 | Registration | `POST /v1/auth/register` | No |
 | Login | `POST /v1/auth/login` | No |
+| Forgot Password | `POST /v1/auth/forgot-password` | No |
+| Reset Password | `POST /v1/auth/reset-password` | No |
 | Dashboard | `GET /v1/auth/me`, `GET /v1/users/profile`, `GET /v1/recommendations/history`, `GET /v1/roadmaps/history`, `GET /v1/backups/history` | Yes |
 | Profile Setup/Edit | `POST /v1/users/profile`, `GET /v1/users/profile`, `PUT /v1/users/profile`, `GET /v1/users/profile/versions` | Yes |
 | Career Explorer | `GET /v1/careers` | No |

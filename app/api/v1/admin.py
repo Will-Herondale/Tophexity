@@ -7,7 +7,7 @@ import uuid as _uuid
 from datetime import datetime, timezone, timedelta
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy import select, func, case
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -27,13 +27,14 @@ from app.services.ai.prompt_loader import (
     prompt_exists,
 )
 from app.services.ai.rate_limiter import rate_limiter
+from app.utils.exceptions import BadRequestException, ForbiddenException, NotFoundException
 
 router = APIRouter()
 
 
 def require_admin(current_user: User = Depends(get_current_active_user)) -> User:
     if current_user.role != UserRole.ADMIN:
-        raise HTTPException(status_code=403, detail="Admin access required")
+        raise ForbiddenException(detail="Admin access required")
     return current_user
 
 
@@ -153,7 +154,7 @@ async def get_prompt_detail(
     admin: User = Depends(require_admin),
 ) -> dict[str, Any]:
     if not prompt_exists(name):
-        raise HTTPException(status_code=404, detail=f"Prompt '{name}' not found")
+        raise NotFoundException(detail=f"Prompt '{name}' not found")
 
     meta = get_prompt_metadata(name)
     cache_version = prompt_cache.get_version(name)
@@ -183,7 +184,7 @@ async def invalidate_prompt_cache(
     admin: User = Depends(require_admin),
 ) -> dict[str, str]:
     if not prompt_exists(name):
-        raise HTTPException(status_code=404, detail=f"Prompt '{name}' not found")
+        raise NotFoundException(detail=f"Prompt '{name}' not found")
     prompt_cache.invalidate(name)
     logger.info("Admin '%s' invalidated cache for prompt '%s'", admin.email, name)
     return {"status": "ok", "message": f"Cache invalidated for prompt '{name}'"}
@@ -219,7 +220,7 @@ async def list_all_conversations(
         try:
             parsed_user_id = _uuid.UUID(user_id)
         except ValueError:
-            raise HTTPException(status_code=400, detail="Invalid user_id format")
+            raise BadRequestException(detail="Invalid user_id format")
 
     offset = (page - 1) * page_size
 
@@ -319,7 +320,7 @@ async def rebuild_all_summaries(
     await db.commit()
 
     return {
-        "status": "ok",
+        "status": "completed" if failed == 0 else "completed_with_errors",
         "rebuilt": rebuilt,
         "failed": failed,
         "skipped": skipped,

@@ -12,7 +12,7 @@ from app.schemas.recommendation import (
     RecommendationListResponse,
     RecommendationResponse,
 )
-from app.utils.exceptions import NotFoundException
+from app.utils.exceptions import NotFoundException, safe_flush
 
 
 async def create_recommendation(
@@ -25,7 +25,7 @@ async def create_recommendation(
         status="completed",
     )
     db.add(recommendation)
-    await db.flush()
+    await safe_flush(db)
     for item_data in data.items:
         item = RecommendationItem(
             recommendation_id=recommendation.id,
@@ -35,7 +35,7 @@ async def create_recommendation(
             rank=item_data.rank,
         )
         db.add(item)
-    await db.flush()
+    await safe_flush(db)
     result = await db.execute(
         select(Recommendation)
         .options(selectinload(Recommendation.items))

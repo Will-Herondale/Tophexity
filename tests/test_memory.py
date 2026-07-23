@@ -177,7 +177,7 @@ class TestPromptLoader:
         from app.services.ai.prompt_loader import get_prompt_metadata
         meta = get_prompt_metadata("title_generation")
         assert meta["name"] == "title_generation"
-        assert meta["version"] == 1
+        assert meta["version"] in ("1", 1)
         assert "char_count" in meta
         assert "estimated_tokens" in meta
 

@@ -29,6 +29,7 @@ from app.services.ai.summarizer import (
     validate_summary,
 )
 from app.utils.exceptions import NotFoundException
+from app.utils.exceptions import safe_flush
 
 settings = get_settings()
 
@@ -182,7 +183,7 @@ class ConversationManager:
         )
         self.db.add(user_msg)
         self.db.add(assistant_msg)
-        await self.db.flush()
+        await safe_flush(self.db)
         return user_msg, assistant_msg
 
     async def generate_title(self, session: ChatSession, first_message: str) -> str | None:
@@ -257,7 +258,7 @@ class ConversationManager:
         # Re-run fact extraction
         await self.maybe_extract_facts(session, len(messages))
 
-        await self.db.flush()
+        await safe_flush(self.db)
 
         facts = (session.session_data or {}).get("facts", [])
         return {

@@ -214,19 +214,22 @@ class ContextBuilder:
         return self._backup
 
     async def load_all(self) -> dict:
-        """Load all user context data."""
-        await self.load_profile()
-        await self.load_portfolio()
-        await self.load_latest_recommendation()
-        await self.load_latest_roadmap()
-        await self.load_latest_backup()
-        return {
-            "profile": self._profile,
-            "portfolio": self._portfolio,
-            "latest_recommendation": self._recommendation,
-            "latest_roadmap": self._roadmap,
-            "latest_backup": self._backup,
-        }
+        """Load all user context data. Individual failures are non-fatal."""
+        results = {}
+        loaders = [
+            ("profile", self.load_profile),
+            ("portfolio", self.load_portfolio),
+            ("latest_recommendation", self.load_latest_recommendation),
+            ("latest_roadmap", self.load_latest_roadmap),
+            ("latest_backup", self.load_latest_backup),
+        ]
+        for key, loader in loaders:
+            try:
+                results[key] = await loader()
+            except Exception as e:
+                logger.warning("Context load failed for %s: %s", key, str(e)[:200])
+                results[key] = {} if key == "profile" else [] if key == "portfolio" else None
+        return results
 
     def build_system_prompt(self, prompt_name: str = "system") -> str:
         """Load the system prompt and append user context."""

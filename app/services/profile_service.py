@@ -5,6 +5,7 @@ from app.models.profile import Profile, ProfileVersion
 from app.models.user import User
 from app.schemas.profile import ProfileCreate, ProfileResponse, ProfileUpdate, ProfileVersionResponse
 from app.utils.exceptions import ConflictException, NotFoundException
+from app.utils.exceptions import safe_flush
 
 
 async def create_profile(
@@ -15,14 +16,14 @@ async def create_profile(
         raise ConflictException(detail="Profile already exists")
     profile = Profile(user_id=user.id, **data.model_dump(exclude_unset=True))
     db.add(profile)
-    await db.flush()
+    await safe_flush(db)
     version = ProfileVersion(
         profile_id=profile.id,
         version_number=1,
         snapshot=data.model_dump(),
     )
     db.add(version)
-    await db.flush()
+    await safe_flush(db)
     return ProfileResponse.model_validate(profile)
 
 
@@ -44,7 +45,7 @@ async def update_profile(
     update_data = data.model_dump(exclude_unset=True)
     for field, value in update_data.items():
         setattr(profile, field, value)
-    await db.flush()
+    await safe_flush(db)
     snapshot = {}
     for col in Profile.__table__.columns:
         if col.name not in ("id", "user_id", "created_at", "updated_at"):
@@ -62,7 +63,7 @@ async def update_profile(
         snapshot=snapshot,
     )
     db.add(version)
-    await db.flush()
+    await safe_flush(db)
     return ProfileResponse.model_validate(profile)
 
 

@@ -279,6 +279,75 @@ Get the authenticated user's account information.
 
 ---
 
+### `POST /v1/auth/forgot-password`
+
+Request a password reset token for an email address. Always returns success regardless of whether the email exists (prevents email enumeration).
+
+**Auth required:** No
+
+**Request body:**
+
+| Field    | Type   | Required | Constraints    |
+|----------|--------|----------|----------------|
+| `email`  | string | Yes      | Valid email format |
+
+**Request example:**
+
+```json
+{
+  "email": "user@example.com"
+}
+```
+
+**Response 200:**
+
+```json
+{
+  "message": "If the email exists, a reset link has been sent"
+}
+```
+
+**Errors:**
+- `422` - Validation error
+
+---
+
+### `POST /v1/auth/reset-password`
+
+Reset a user's password using a valid reset token (obtained via forgot-password). Tokens expire after 15 minutes.
+
+**Auth required:** No
+
+**Request body:**
+
+| Field          | Type   | Required | Constraints              |
+|----------------|--------|----------|--------------------------|
+| `token`        | string | Yes      | Valid reset token        |
+| `new_password` | string | Yes      | Min 8, max 128 characters|
+
+**Request example:**
+
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiJ9...",
+  "new_password": "newSecurePassword123"
+}
+```
+
+**Response 200:**
+
+```json
+{
+  "message": "Password has been reset successfully"
+}
+```
+
+**Errors:**
+- `400` - Invalid or expired token
+- `422` - Validation error
+
+---
+
 ## 3. Users / Profile
 
 **Prefix:** `/v1/users`  

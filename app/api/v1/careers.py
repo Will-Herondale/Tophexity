@@ -49,7 +49,9 @@ async def import_careers(
     response_model=CareerListResponse,
     summary="Search and filter careers",
     description="Search careers by text, filter by skill, degree level, demand level, and salary range. Returns paginated results sorted by title.",
-    responses={},
+    responses={
+        422: {"description": "Validation error"},
+    },
 )
 async def search_careers(
     search: str | None = Query(None, description="Full-text search in title and description"),

@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_active_user, get_db_session
+from app.core.logging import logger
 from app.models.user import User
 from app.schemas.chat import (
     ChatExportResponse,
@@ -21,6 +22,7 @@ from app.schemas.common import MessageResponse
 from app.services import chat_service
 from app.services.ai.client import get_ai_client
 from app.services.ai.conversation_manager import ConversationManager
+from app.services.ai.exceptions import AIError
 
 router = APIRouter()
 
@@ -142,52 +144,58 @@ async def add_messages(
     if user_msgs:
         client = get_ai_client()
         if client.is_configured:
-            conv_manager = ConversationManager(db, current_user)
-            session_obj = await conv_manager.get_session(session_id)
+            try:
+                conv_manager = ConversationManager(db, current_user)
+                session_obj = await conv_manager.get_session(session_id)
 
-            # Generate title for first message
-            if session_obj.title is None and user_msgs:
-                await conv_manager.generate_title(session_obj, user_msgs[0].content)
+                # Generate title for first message
+                if session_obj.title is None and user_msgs:
+                    await conv_manager.generate_title(session_obj, user_msgs[0].content)
 
-            last_user_msg = user_msgs[-1].content
-            ai_messages = await conv_manager.build_ai_messages(
-                session_obj, last_user_msg, prompt_name="chat",
-            )
+                last_user_msg = user_msgs[-1].content
+                ai_messages = await conv_manager.build_ai_messages(
+                    session_obj, last_user_msg, prompt_name="chat",
+                )
 
-            response = await client.chat(
-                messages=ai_messages,
-                user_id=str(current_user.id),
-                conversation_id=str(session_id),
-                ip=request.client.host if request.client else None,
-            )
+                response = await client.chat(
+                    messages=ai_messages,
+                    user_id=str(current_user.id),
+                    conversation_id=str(session_id),
+                    ip=request.client.host if request.client else None,
+                )
 
-            # Store assistant response with AI metadata
-            assistant_stored = await chat_service.add_message_with_metadata(
-                db, current_user, session_id,
-                role="assistant",
-                content=response.content,
-                token_count=response.token_usage.total_tokens,
-                model_used=response.model,
-                latency_ms=response.latency_ms,
-                request_id=response.request_id,
-                message_data={
-                    "finish_reason": response.finish_reason,
-                    "prompt_tokens": response.token_usage.prompt_tokens,
-                    "completion_tokens": response.token_usage.completion_tokens,
-                },
-            )
-            stored.append(assistant_stored)
+                # Store assistant response with AI metadata
+                assistant_stored = await chat_service.add_message_with_metadata(
+                    db, current_user, session_id,
+                    role="assistant",
+                    content=response.content,
+                    token_count=response.token_usage.total_tokens,
+                    model_used=response.model,
+                    latency_ms=response.latency_ms,
+                    request_id=response.request_id,
+                    message_data={
+                        "finish_reason": response.finish_reason,
+                        "prompt_tokens": response.token_usage.prompt_tokens,
+                        "completion_tokens": response.token_usage.completion_tokens,
+                    },
+                )
+                stored.append(assistant_stored)
 
-            # Update session metadata
-            total_msg_count = len(session_obj.messages) + len(messages)
-            await conv_manager.update_session_metadata(
-                session_obj,
-                total_tokens=response.token_usage.total_tokens,
-                prompt_tokens=response.token_usage.prompt_tokens,
-                completion_tokens=response.token_usage.completion_tokens,
-                model=response.model,
-            )
-            await conv_manager.maybe_extract_facts(session_obj, total_msg_count)
+                # Update session metadata
+                total_msg_count = len(session_obj.messages) + len(messages)
+                await conv_manager.update_session_metadata(
+                    session_obj,
+                    total_tokens=response.token_usage.total_tokens,
+                    prompt_tokens=response.token_usage.prompt_tokens,
+                    completion_tokens=response.token_usage.completion_tokens,
+                    model=response.model,
+                )
+                await conv_manager.maybe_extract_facts(session_obj, total_msg_count)
+            except AIError:
+                raise
+            except Exception as e:
+                logger.error("AI response generation failed for session %s: %s", session_id, str(e)[:300])
+                raise AIError(message="AI response generation failed", status_code=503)
 
     return stored
 
@@ -228,7 +236,13 @@ async def rebuild_memory(
 ):
     conv_manager = ConversationManager(db, current_user)
     session_obj = await conv_manager.get_session(session_id)
-    result = await conv_manager.rebuild_memory(session_obj)
+    try:
+        result = await conv_manager.rebuild_memory(session_obj)
+    except AIError:
+        raise
+    except Exception as e:
+        logger.error("Memory rebuild failed for session %s: %s", session_id, str(e)[:300])
+        raise AIError(message="Memory rebuild failed", status_code=503)
     return MemoryRebuildResponse(
         session_id=session_id,
         summary=result["summary"],

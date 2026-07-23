@@ -11,6 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.logging import logger
 from app.models.ai_analytics import AIUsageLog, AIHealthSnapshot
+from app.utils.exceptions import safe_flush
 
 
 class AnalyticsService:
@@ -63,7 +64,7 @@ class AnalyticsService:
             meta=meta,
         )
         db.add(log_entry)
-        await db.flush()
+        await safe_flush(db)
         logger.debug(
             "Logged AI request %s: model=%s tokens=%d cost=%.6f latency=%.1fms",
             request_id, model, total_tokens, estimated_cost_usd, latency_ms,
@@ -94,7 +95,7 @@ class AnalyticsService:
             error=error,
         )
         db.add(snapshot)
-        await db.flush()
+        await safe_flush(db)
         logger.debug("Recorded health snapshot: status=%s", status)
 
     async def get_summary(
@@ -275,7 +276,7 @@ class AnalyticsService:
         count = len(old_logs)
         for log_entry in old_logs:
             await db.delete(log_entry)
-        await db.flush()
+        await safe_flush(db)
         logger.info("Cleaned up %d AI usage logs older than %d days", count, days)
         return count
 

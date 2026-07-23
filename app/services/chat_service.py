@@ -17,7 +17,7 @@ from app.schemas.chat import (
     ChatSessionResponse,
     ChatSessionUpdate,
 )
-from app.utils.exceptions import BadRequestException, NotFoundException
+from app.utils.exceptions import BadRequestException, NotFoundException, safe_flush
 
 
 async def create_chat_session(
@@ -25,7 +25,7 @@ async def create_chat_session(
 ) -> ChatSessionResponse:
     session = ChatSession(user_id=user.id, title=data.title)
     db.add(session)
-    await db.flush()
+    await safe_flush(db)
     return ChatSessionResponse.model_validate(session)
 
 
@@ -49,7 +49,7 @@ async def add_messages(
         )
         db.add(msg)
         created.append(msg)
-    await db.flush()
+    await safe_flush(db)
     return [ChatMessageResponse.model_validate(m) for m in created]
 
 
@@ -86,7 +86,7 @@ async def add_message_with_metadata(
         message_data=message_data or {},
     )
     db.add(msg)
-    await db.flush()
+    await safe_flush(db)
     return ChatMessageResponse.model_validate(msg)
 
 
@@ -133,7 +133,7 @@ async def update_chat_session(
         session.is_archived = data.is_archived
         session.archived_at = now if data.is_archived else None
 
-    await db.flush()
+    await safe_flush(db)
     return ChatSessionResponse.model_validate(session)
 
 
@@ -194,7 +194,7 @@ async def delete_chat_session(
     for msg in msg_result.scalars().all():
         await db.delete(msg)
     await db.delete(session)
-    await db.flush()
+    await safe_flush(db)
 
 
 async def export_chat_session(

@@ -7,6 +7,7 @@ from app.api.deps import get_current_active_user, get_db_session
 from app.models.user import User
 from app.schemas.ai import PromptListResponse, PromptMetadata, PromptTestResponse
 from app.services.ai.client import get_ai_client
+from app.services.ai.exceptions import AIError
 from app.services.ai.health import check_ai_health
 from app.services.ai.models import AIHealthStatus
 from app.services.ai.prompt_loader import (
@@ -41,11 +42,16 @@ async def ai_test(
     message = body.get("message", "Hello, this is a test message.")
 
     client = get_ai_client()
-    response = await client.chat(
-        messages=[{"role": "user", "content": message}],
-        user_id=str(current_user.id),
-        ip=request.client.host if request.client else None,
-    )
+    try:
+        response = await client.chat(
+            messages=[{"role": "user", "content": message}],
+            user_id=str(current_user.id),
+            ip=request.client.host if request.client else None,
+        )
+    except AIError:
+        raise
+    except Exception as e:
+        raise AIError(message=f"AI test failed: {str(e)[:200]}", status_code=503)
 
     return {
         "response": response.content,

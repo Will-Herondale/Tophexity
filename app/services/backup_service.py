@@ -12,7 +12,7 @@ from app.schemas.backup import (
     BackupPlanListResponse,
     BackupPlanResponse,
 )
-from app.utils.exceptions import NotFoundException
+from app.utils.exceptions import NotFoundException, safe_flush
 
 
 async def create_backup_plan(
@@ -25,7 +25,7 @@ async def create_backup_plan(
         status="active",
     )
     db.add(plan)
-    await db.flush()
+    await safe_flush(db)
     for scenario_data in data.scenarios:
         scenario = BackupScenario(
             backup_plan_id=plan.id,
@@ -37,7 +37,7 @@ async def create_backup_plan(
             reasoning=scenario_data.reasoning,
         )
         db.add(scenario)
-    await db.flush()
+    await safe_flush(db)
     result = await db.execute(
         select(BackupPlan)
         .options(selectinload(BackupPlan.scenarios))

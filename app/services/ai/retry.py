@@ -6,6 +6,7 @@ import random
 from app.core.config import get_settings
 from app.core.logging import logger
 from app.services.ai.exceptions import (
+    AIError,
     AIRetryExhaustedError,
     AIServiceError,
     AITimeoutError,
@@ -29,6 +30,17 @@ def is_retryable_error(exc: Exception) -> bool:
         ]
         return any(kw in msg for kw in retryable_keywords)
     return False
+
+
+def _get_original_status_code(exc: Exception) -> int:
+    """Extract status code from original exception for the retry-exhausted error."""
+    if isinstance(exc, AIServiceError):
+        return exc.status_code
+    if isinstance(exc, AITimeoutError):
+        return 504
+    if isinstance(exc, AIError):
+        return exc.status_code
+    return 503
 
 
 def calculate_delay(attempt: int) -> float:
@@ -68,6 +80,8 @@ async def retry_with_backoff(
 
     if last_exception:
         raise AIRetryExhaustedError(
-            message=str(last_exception), attempts=retries + 1
+            message=str(last_exception),
+            attempts=retries + 1,
+            original_status_code=_get_original_status_code(last_exception),
         )
     raise AIServiceError("Unexpected retry error")

@@ -6,7 +6,7 @@ import { getRecommendationsHistory } from "@/lib/api";
 import type { Recommendation } from "@/types/recommendation";
 import RecommendationCard from "@/components/recommendations/RecommendationCard";
 import Button from "@/components/ui/Button";
-import { Star, RefreshCw } from "lucide-react";
+import { Star, RefreshCw, Sparkles } from "lucide-react";
 
 export default function RecommendationsPage() {
   const router = useRouter();
@@ -33,10 +33,16 @@ export default function RecommendationsPage() {
           <h1 className="font-[family-name:var(--font-display)] text-2xl font-bold text-foreground">Recommendations</h1>
           <p className="mt-1 text-sm text-text-secondary">Your AI-powered career matches</p>
         </div>
-        <Button variant="outline" size="sm" onClick={() => setPage(page)}>
-          <RefreshCw className="mr-1 h-4 w-4" />
-          Refresh
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={() => setPage(page)}>
+            <RefreshCw className="mr-1 h-4 w-4" />
+            Refresh
+          </Button>
+          <Button size="sm" onClick={() => router.push("/chat?recommend=true")}>
+            <Sparkles className="mr-1 h-4 w-4" />
+            Get AI Recommendations
+          </Button>
+        </div>
       </div>
 
       {loading ? (
@@ -45,16 +51,22 @@ export default function RecommendationsPage() {
         </div>
       ) : recommendations.length === 0 ? (
         <div className="rounded-xl border-2 border-dashed border-border bg-surface p-12 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-surface/80">
-            <Star className="h-8 w-8 text-text-muted" />
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-accent/10">
+            <Star className="h-8 w-8 text-accent" />
           </div>
           <h3 className="text-lg font-semibold font-[family-name:var(--font-display)] text-foreground">No recommendations yet</h3>
           <p className="mt-2 text-sm text-text-secondary">
-            Complete your profile and our AI will generate personalized career recommendations for you.
+            Complete your profile and let our AI generate personalized career recommendations for you.
           </p>
-          <Button className="mt-6" onClick={() => router.push("/profile")}>
-            Complete Your Profile
-          </Button>
+          <div className="mt-6 flex items-center justify-center gap-3">
+            <Button variant="outline" onClick={() => router.push("/profile")}>
+              Complete Your Profile
+            </Button>
+            <Button onClick={() => router.push("/chat?recommend=true")}>
+              <Sparkles className="mr-1.5 h-4 w-4" />
+              Get AI Recommendations
+            </Button>
+          </div>
         </div>
       ) : (
         <>

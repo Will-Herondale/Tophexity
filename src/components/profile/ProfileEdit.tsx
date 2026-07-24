@@ -85,16 +85,12 @@ export default function ProfileEdit({ profile, onSave, onCancel }: ProfileEditPr
       if (form.experience_level) clean.experience_level = form.experience_level;
       if (form.years_experience != null) clean.years_experience = form.years_experience;
       if (form.current_field) clean.current_field = form.current_field;
-      if (form.target_fields && form.target_fields.length > 0) {
-        const tf: Record<string, string> = {};
-        form.target_fields.forEach((f) => { tf[f] = "interested"; });
-        clean.target_fields = tf;
-      }
-      if (form.interests && form.interests.length > 0) {
-        const intr: Record<string, string> = {};
-        form.interests.forEach((i) => { intr[i] = "interested"; });
-        clean.interests = intr;
-      }
+      const tf: Record<string, string> = {};
+      form.target_fields.forEach((f) => { tf[f] = "interested"; });
+      clean.target_fields = tf;
+      const intr: Record<string, string> = {};
+      form.interests.forEach((i) => { intr[i] = "interested"; });
+      clean.interests = intr;
       if (form.skills && Object.keys(form.skills).length > 0) clean.skills = form.skills;
       if (form.previous_roles && form.previous_roles.length > 0) clean.previous_roles = form.previous_roles;
       if (form.certifications && form.certifications.length > 0) clean.certifications = form.certifications;

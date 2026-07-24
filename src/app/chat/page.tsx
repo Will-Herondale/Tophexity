@@ -37,6 +37,7 @@ function ChatContent() {
   const searchParams = useSearchParams();
   const careerParam = searchParams.get("career");
   const compareParam = searchParams.get("compare");
+  const recommendParam = searchParams.get("recommend");
 
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
@@ -56,7 +57,7 @@ function ChatContent() {
   }, [fetchSessions]);
 
   useEffect(() => {
-    if (!careerParam && !compareParam) return;
+    if (!careerParam && !compareParam && !recommendParam) return;
     if (activeSessionId) return;
 
     let cancelled = false;
@@ -86,6 +87,14 @@ function ChatContent() {
             setActiveSessionId(session.id);
             setInitialMessage(contextMessage);
           }
+        } else if (recommendParam) {
+          contextMessage = "Based on my profile, please generate personalized career recommendations. Analyze my skills, experience, education, interests, and target fields. For each recommendation, provide: the career title, why it's a good match (with a match score out of 100), and detailed reasoning. Rank them from best to least good fit.";
+          const session = await createChatSession("Career Recommendations");
+          if (!cancelled) {
+            setSessions((prev) => [session, ...prev]);
+            setActiveSessionId(session.id);
+            setInitialMessage(contextMessage);
+          }
         }
       } catch {} finally {
         if (!cancelled) setPrefillLoading(false);
@@ -94,7 +103,7 @@ function ChatContent() {
 
     setup();
     return () => { cancelled = true; };
-  }, [careerParam, compareParam, activeSessionId]);
+  }, [careerParam, compareParam, recommendParam, activeSessionId]);
 
   const handleCreateSession = async () => {
     try {

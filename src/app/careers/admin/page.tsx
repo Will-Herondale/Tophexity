@@ -9,12 +9,59 @@ import Button from "@/components/ui/Button";
 import Modal from "@/components/ui/Modal";
 import {
   ArrowLeft, Upload, Search, Edit3, Trash2, Loader2, Plus, X,
-  Briefcase, DollarSign, TrendingUp, BarChart3,
+  Briefcase, DollarSign, TrendingUp, BarChart3, Lock,
 } from "lucide-react";
 import { VALID_DEMAND_LEVELS, VALID_GROWTH_OUTLOOKS } from "@/lib/constants";
 
+const ADMIN_SECRET = "BEFOREGTA6";
+
 export default function CareersAdminPage() {
   const router = useRouter();
+
+  const [unlocked, setUnlocked] = useState(false);
+  const [codeInput, setCodeInput] = useState("");
+  const [codeError, setCodeError] = useState(false);
+
+  useEffect(() => {
+    if (sessionStorage.getItem("admin_unlocked") === "1") setUnlocked(true);
+  }, []);
+
+  const handleUnlock = () => {
+    if (codeInput === ADMIN_SECRET) {
+      sessionStorage.setItem("admin_unlocked", "1");
+      setUnlocked(true);
+      setCodeError(false);
+    } else {
+      setCodeError(true);
+      setCodeInput("");
+    }
+  };
+
+  if (!unlocked) {
+    return (
+      <div className="mx-auto flex min-h-screen max-w-sm items-center justify-center px-4">
+        <Card className="w-full text-center">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-accent/10">
+            <Lock className="h-6 w-6 text-accent" />
+          </div>
+          <h2 className="font-[family-name:var(--font-display)] text-lg font-bold text-foreground">Admin Access</h2>
+          <p className="mt-1 mb-4 text-sm text-text-secondary">Enter the secret code to continue.</p>
+          <input
+            type="password"
+            value={codeInput}
+            onChange={(e) => { setCodeInput(e.target.value); setCodeError(false); }}
+            onKeyDown={(e) => e.key === "Enter" && handleUnlock()}
+            placeholder="Secret code"
+            autoFocus
+            className="mb-3 w-full rounded-lg border border-border bg-background/50 px-3 py-2.5 text-sm text-foreground text-center tracking-widest placeholder:text-text-muted focus:border-accent focus:outline-none"
+          />
+          {codeError && <p className="mb-3 text-xs text-red-400">Incorrect code. Try again.</p>}
+          <Button onClick={handleUnlock} className="w-full">Unlock</Button>
+          <button onClick={() => router.push("/careers")} className="mt-3 text-xs text-text-muted hover:text-foreground transition-colors">Back to Careers</button>
+        </Card>
+      </div>
+    );
+  }
 
   // List state
   const [careers, setCareers] = useState<Career[]>([]);

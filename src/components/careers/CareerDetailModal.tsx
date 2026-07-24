@@ -206,9 +206,18 @@ export default function CareerDetailModal({ careerId, onClose }: CareerDetailMod
 }
 
 function normalizeUrl(url: string): string {
-  if (/^https?:\/\//i.test(url)) return url;
+  if (/^https?:\/\//i.test(url)) {
+    try {
+      const u = new URL(url);
+      if (u.hostname === "search") {
+        u.hostname = "www.google.com";
+        return u.toString();
+      }
+    } catch {}
+    return url;
+  }
   if (/^www\./i.test(url)) return `https://${url}`;
-  if (/^search\?q=/i.test(url)) return `https://www.google.com/${url}`;
+  if (/^search[/?]/i.test(url)) return `https://www.google.com/${url}`;
   return `https://${url}`;
 }
 

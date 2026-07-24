@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { getProfile, createProfile, updateProfile } from "@/lib/api";
 import type { Profile, ProfileUpdatePayload } from "@/types/profile";
 import { createEmptyProfile } from "@/types/profile";
@@ -8,9 +9,17 @@ import ProfileView from "@/components/profile/ProfileView";
 import ProfileEdit from "@/components/profile/ProfileEdit";
 import ProfileVersionHistory from "@/components/profile/ProfileVersionHistory";
 import Button from "@/components/ui/Button";
-import { Edit3, Plus, History } from "lucide-react";
+import { Edit3, Plus, History, Sparkles } from "lucide-react";
+
+function isProfileComplete(p: Profile): boolean {
+  const hasSkills = p.skills && Object.keys(p.skills).length > 0;
+  const hasTargets = p.target_fields && Object.keys(p.target_fields).length > 0;
+  const hasInterests = p.interests && Object.keys(p.interests).length > 0;
+  return !!(p.full_name && (hasSkills || hasTargets || hasInterests));
+}
 
 export default function ProfilePage() {
+  const router = useRouter();
   const [profile, setProfile] = useState<Profile>(createEmptyProfile());
   const [hasProfile, setHasProfile] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -35,17 +44,22 @@ export default function ProfilePage() {
   const handleSave = async (payload: ProfileUpdatePayload) => {
     setMessage(null);
     try {
+      let updatedProfile: Profile;
       if (hasProfile) {
-        const updated = await updateProfile(payload);
-        setProfile(updated);
-        setMessage({ type: "success", text: "Profile updated successfully" });
+        updatedProfile = await updateProfile(payload);
+        setProfile(updatedProfile);
       } else {
-        const created = await createProfile(payload);
-        setProfile(created);
+        updatedProfile = await createProfile(payload);
+        setProfile(updatedProfile);
         setHasProfile(true);
-        setMessage({ type: "success", text: "Profile created successfully" });
       }
       setEditing(false);
+      if (isProfileComplete(updatedProfile)) {
+        setMessage({ type: "success", text: "Profile complete! Generating your career recommendations..." });
+        setTimeout(() => router.push("/chat?recommend=true"), 1500);
+      } else {
+        setMessage({ type: "success", text: "Profile updated successfully" });
+      }
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { detail?: string | Array<{ msg: string }> } } };
       const detail = axiosErr.response?.data?.detail;
@@ -98,7 +112,18 @@ export default function ProfilePage() {
           onCancel={() => setEditing(false)}
         />
       ) : hasProfile ? (
-        <ProfileView profile={profile} />
+        <div className="space-y-6">
+          <ProfileView profile={profile} />
+          {isProfileComplete(profile) && (
+            <div className="rounded-xl border border-accent/20 bg-accent/5 p-4 text-center">
+              <p className="mb-3 text-sm text-text-secondary">Your profile looks complete! Ready for AI-powered career recommendations.</p>
+              <Button onClick={() => router.push("/chat?recommend=true")}>
+                <Sparkles className="mr-1.5 h-4 w-4" />
+                Get AI Recommendations
+              </Button>
+            </div>
+          )}
+        </div>
       ) : (
         <div className="rounded-2xl border-2 border-dashed border-border bg-surface/30 p-12 text-center">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-accent/20">

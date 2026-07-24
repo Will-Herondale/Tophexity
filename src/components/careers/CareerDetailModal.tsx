@@ -210,14 +210,16 @@ function normalizeUrl(url: string): string {
     try {
       const u = new URL(url);
       if (u.hostname === "search") {
-        u.hostname = "www.google.com";
-        return u.toString();
+        return `https://www.google.com/search${u.search}`;
       }
     } catch {}
     return url;
   }
   if (/^www\./i.test(url)) return `https://${url}`;
-  if (/^search[/?]/i.test(url)) return `https://www.google.com/${url}`;
+  if (/^search[/?]/i.test(url)) {
+    const qs = url.replace(/^search[/?]/i, "?");
+    return `https://www.google.com/search${qs}`;
+  }
   return `https://${url}`;
 }
 

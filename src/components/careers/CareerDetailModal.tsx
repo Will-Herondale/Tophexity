@@ -190,7 +190,7 @@ export default function CareerDetailModal({ careerId, onClose }: CareerDetailMod
                       )}
                     </div>
                     {res.url && (
-                      <a href={res.url} target="_blank" rel="noopener noreferrer" className="text-accent hover:text-accent-light">
+                      <a href={normalizeUrl(res.url)} target="_blank" rel="noopener noreferrer" className="text-accent hover:text-accent-light">
                         <ExternalLink className="h-4 w-4" />
                       </a>
                     )}
@@ -203,6 +203,13 @@ export default function CareerDetailModal({ careerId, onClose }: CareerDetailMod
       ) : null}
     </Modal>
   );
+}
+
+function normalizeUrl(url: string): string {
+  if (/^https?:\/\//i.test(url)) return url;
+  if (/^www\./i.test(url)) return `https://${url}`;
+  if (/^search\?q=/i.test(url)) return `https://www.google.com/${url}`;
+  return `https://${url}`;
 }
 
 function Section({ title, icon, children }: { title: string; icon: React.ReactNode; children: React.ReactNode }) {

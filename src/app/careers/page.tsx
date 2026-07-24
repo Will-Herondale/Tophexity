@@ -48,7 +48,11 @@ export default function CareersPage() {
 
     getCareers(params)
       .then((data) => {
-        if (!cancelled) { setCareers(data.items); setTotalPages(data.total_pages); setTotal(data.total); }
+        if (!cancelled) {
+          const seen = new Set<string>();
+          const unique = data.items.filter((c) => { if (seen.has(c.id)) return false; seen.add(c.id); return true; });
+          setCareers(unique); setTotalPages(data.total_pages); setTotal(data.total);
+        }
       })
       .catch(() => {})
       .finally(() => { if (!cancelled) setLoading(false); });

@@ -48,7 +48,9 @@ export default function CareersAdminPage() {
       const params: CareerSearchParams = { page, page_size: 20, sort_by: "title", sort_order: "asc" };
       if (searchTerm) params.search = searchTerm;
       const data = await getCareers(params);
-      setCareers(data.items || []);
+      const seen = new Set<string>();
+      const unique = (data.items || []).filter((c) => { if (seen.has(c.id)) return false; seen.add(c.id); return true; });
+      setCareers(unique);
       setTotal(data.total || 0);
     } catch {} finally {
       setLoading(false);

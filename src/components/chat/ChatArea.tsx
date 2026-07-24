@@ -9,6 +9,7 @@ import { Send, Loader2, Brain, Download, CheckCircle, RotateCcw, Clock } from "l
 
 interface ChatAreaProps {
   session: ChatSession | null;
+  initialMessage?: string;
 }
 
 const THINKING_TIPS = [
@@ -19,9 +20,10 @@ const THINKING_TIPS = [
   "This may take a moment for detailed prompts...",
 ];
 
-export default function ChatArea({ session }: ChatAreaProps) {
+export default function ChatArea({ session, initialMessage }: ChatAreaProps) {
   const [allMessages, setAllMessages] = useState<Record<string, ChatMessage[]>>({});
   const [input, setInput] = useState("");
+  const initialMessageApplied = useRef(false);
   const [sending, setSending] = useState(false);
   const [loadingSession, setLoadingSession] = useState(false);
   const [rebuilding, setRebuilding] = useState(false);
@@ -55,6 +57,13 @@ export default function ChatArea({ session }: ChatAreaProps) {
       .finally(() => { if (!cancelled) setLoadingSession(false); });
     return () => { cancelled = true; };
   }, [session?.id]);
+
+  useEffect(() => {
+    if (initialMessage && !initialMessageApplied.current) {
+      setInput(initialMessage);
+      initialMessageApplied.current = true;
+    }
+  }, [initialMessage]);
 
   const stopTimer = useCallback(() => {
     if (timerRef.current) {

@@ -4,14 +4,17 @@ import { useState, useEffect } from "react";
 import type { CareerDetail } from "@/types/career";
 import { getCareerById } from "@/lib/api";
 import Modal from "@/components/ui/Modal";
-import { DollarSign, GraduationCap, MapPin, ExternalLink, BookOpen, Award, Landmark, Wrench, Info } from "lucide-react";
+import { DollarSign, GraduationCap, MapPin, ExternalLink, BookOpen, Award, Landmark, Wrench, Info, Heart, Sparkles } from "lucide-react";
 
 interface CareerDetailModalProps {
   careerId: string;
   onClose: () => void;
+  isFavorited?: boolean;
+  onToggleFavorite?: (id: string) => void;
+  onAskAI?: (careerId: string, careerTitle: string) => void;
 }
 
-export default function CareerDetailModal({ careerId, onClose }: CareerDetailModalProps) {
+export default function CareerDetailModal({ careerId, onClose, isFavorited, onToggleFavorite, onAskAI }: CareerDetailModalProps) {
   const [career, setCareer] = useState<CareerDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -55,6 +58,30 @@ export default function CareerDetailModal({ careerId, onClose }: CareerDetailMod
               )}
               {career.growth_outlook && (
                 <span className="capitalize">{career.growth_outlook.replace("_", " ")} growth</span>
+              )}
+            </div>
+            <div className="mt-4 flex items-center gap-2">
+              {onToggleFavorite && (
+                <button
+                  onClick={() => onToggleFavorite(careerId)}
+                  className={`flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs font-medium transition-colors ${
+                    isFavorited
+                      ? "border-accent/40 bg-accent/10 text-accent"
+                      : "border-border bg-background/50 text-text-secondary hover:border-accent hover:text-accent"
+                  }`}
+                >
+                  <Heart className={`h-3.5 w-3.5 ${isFavorited ? "fill-accent" : ""}`} />
+                  {isFavorited ? "Saved" : "Save"}
+                </button>
+              )}
+              {onAskAI && (
+                <button
+                  onClick={() => onAskAI(careerId, career.title)}
+                  className="flex items-center gap-1.5 rounded-xl border border-border bg-background/50 px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:border-accent hover:text-accent"
+                >
+                  <Sparkles className="h-3.5 w-3.5" />
+                  Ask AI
+                </button>
               )}
             </div>
           </div>

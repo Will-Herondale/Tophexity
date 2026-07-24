@@ -13,6 +13,7 @@ const API_PREFIX = "/v1";
 const api = axios.create({
   baseURL: API_PREFIX,
   headers: { "Content-Type": "application/json" },
+  timeout: 300000,
 });
 
 function getAccessToken(): string | null {

@@ -26,9 +26,9 @@ export interface Profile {
   years_experience: number | null;
   experience_level: string | null;
   current_field: string | null;
-  target_fields: string[] | null;
+  target_fields: Record<string, string> | null;
   skills: Record<string, string> | null;
-  interests: string[] | null;
+  interests: Record<string, string> | null;
   previous_roles: PreviousRole[] | null;
   certifications: Certification[] | null;
   created_at: string;
@@ -45,9 +45,9 @@ export interface ProfileCreatePayload {
   years_experience?: number | null;
   experience_level?: string | null;
   current_field?: string | null;
-  target_fields?: string[] | null;
+  target_fields?: Record<string, string> | null;
   skills?: Record<string, string> | null;
-  interests?: string[] | null;
+  interests?: Record<string, string> | null;
   previous_roles?: PreviousRole[] | null;
   certifications?: Certification[] | null;
 }

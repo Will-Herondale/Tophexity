@@ -2,21 +2,31 @@
 
 import type { BackupPlan } from "@/types/backup";
 import Card from "@/components/ui/Card";
-import { Shield, ChevronRight, Calendar } from "lucide-react";
+import { Shield, ChevronRight, Calendar, XCircle } from "lucide-react";
 
 interface BackupPlanCardProps {
   plan: BackupPlan;
   onClick: (id: string) => void;
+  onCancel?: (id: string) => void;
 }
 
-export default function BackupPlanCard({ plan, onClick }: BackupPlanCardProps) {
+export default function BackupPlanCard({ plan, onClick, onCancel }: BackupPlanCardProps) {
+  const isCancelled = plan.status === "cancelled";
+
   return (
-    <Card hover onClick={() => onClick(plan.id)} className="cursor-pointer">
+    <Card hover={!isCancelled} onClick={() => !isCancelled && onClick(plan.id)} className={`cursor-pointer ${isCancelled ? "opacity-50" : ""}`}>
       <div className="flex items-start justify-between">
         <div className="flex-1">
-          <h3 className="text-sm font-semibold font-[family-name:var(--font-display)] text-foreground">
-            {plan.title || "Backup Career Plan"}
-          </h3>
+          <div className="flex items-center gap-2">
+            <h3 className="text-sm font-semibold font-[family-name:var(--font-display)] text-foreground">
+              {plan.title || "Backup Career Plan"}
+            </h3>
+            {isCancelled && (
+              <span className="rounded-full bg-red-500/10 px-2 py-0.5 text-xs font-medium text-red-400">
+                Cancelled
+              </span>
+            )}
+          </div>
           {plan.description && (
             <p className="mt-1 text-xs text-text-secondary line-clamp-2">{plan.description}</p>
           )}
@@ -31,7 +41,18 @@ export default function BackupPlanCard({ plan, onClick }: BackupPlanCardProps) {
             </span>
           </div>
         </div>
-        <ChevronRight className="h-5 w-5 text-text-muted" />
+        <div className="flex items-center gap-2">
+          {!isCancelled && onCancel && (
+            <button
+              onClick={(e) => { e.stopPropagation(); onCancel(plan.id); }}
+              className="rounded-md p-1.5 text-text-muted hover:text-red-400 hover:bg-red-500/10 transition-colors"
+              title="Cancel plan"
+            >
+              <XCircle className="h-4 w-4" />
+            </button>
+          )}
+          {!isCancelled && <ChevronRight className="h-5 w-5 text-text-muted" />}
+        </div>
       </div>
     </Card>
   );

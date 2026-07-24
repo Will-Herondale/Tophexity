@@ -195,6 +195,11 @@ export async function getRoadmapById(id: string): Promise<Roadmap> {
   return data;
 }
 
+export async function updateRoadmap(id: string, payload: { status: string }): Promise<Roadmap> {
+  const { data } = await api.patch(`/roadmaps/${id}`, payload);
+  return data;
+}
+
 export async function createBackupPlan(payload: BackupPlanCreatePayload) {
   const { data } = await api.post("/backups", payload);
   return data;
@@ -207,6 +212,11 @@ export async function getBackupPlansHistory(page = 1, pageSize = 10): Promise<Ba
 
 export async function getBackupPlanById(id: string): Promise<BackupPlan> {
   const { data } = await api.get(`/backups/${id}`);
+  return data;
+}
+
+export async function updateBackupPlan(id: string, payload: { status: string }): Promise<BackupPlan> {
+  const { data } = await api.patch(`/backups/${id}`, payload);
   return data;
 }
 
@@ -251,8 +261,9 @@ export async function getChatSession(sessionId: string): Promise<ChatSession> {
 }
 
 export async function sendChatMessages(sessionId: string, messages: ChatMessageCreatePayload[]) {
-  const { data } = await api.post(`/chat/sessions/${sessionId}/messages`, messages);
-  return data;
+  const { data } = await api.post(`/chat/sessions/${sessionId}/messages`, messages, { timeout: 120000 });
+  // Backend wraps response in { value: [...], Count: N } instead of returning array directly
+  return data.value || data;
 }
 
 export async function deleteChatSession(sessionId: string) {

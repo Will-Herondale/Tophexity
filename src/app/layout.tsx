@@ -29,12 +29,13 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
+      data-scroll-behavior="smooth"
       className={`${spaceGrotesk.variable} ${inter.variable} h-full antialiased`}
     >
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=JSON.parse(localStorage.getItem("tophexity_settings")||"{}").theme;if(t==="dark"){document.documentElement.classList.add("dark")}else if(t==="light"){document.documentElement.classList.add("light")}else if(t==="system"||!t){if(window.matchMedia("(prefers-color-scheme:dark)").matches){document.documentElement.classList.add("dark")}else{document.documentElement.classList.add("light")}}}catch(e){document.documentElement.classList.add("dark")}})()`,
+            __html: `(function(){var d=document.documentElement;try{var t=JSON.parse(localStorage.getItem("tophexity_settings")||"{}").theme;var dk=t==="dark"||(t!=="light"&&(t==="system"||!t)&&window.matchMedia("(prefers-color-scheme:dark)").matches);d.classList.add(dk?"dark":"light");d.style.background=dk?"#0a0a0f":"#f8f9fc"}catch(e){d.classList.add("dark");d.style.background="#0a0a0f"}})()`,
           }}
         />
       </head>

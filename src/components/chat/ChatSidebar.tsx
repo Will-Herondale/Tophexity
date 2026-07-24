@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import type { ChatSession } from "@/types/chat";
 import { updateChatSession } from "@/lib/api";
-import { Plus, MessageSquare, Trash2, MoreHorizontal, Pin, PinOff, Archive, ArchiveRestore, Pencil, Search, X } from "lucide-react";
+import { Plus, MessageSquare, Trash2, MoreHorizontal, Pin, PinOff, Archive, ArchiveRestore, Pencil, Search, X, AlertCircle } from "lucide-react";
 
 interface ChatSidebarProps {
   sessions: ChatSession[];
@@ -20,6 +20,7 @@ export default function ChatSidebar({ sessions, activeSessionId, onSelect, onCre
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState("");
+  const [patchError, setPatchError] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const renameInputRef = useRef<HTMLInputElement>(null);
 
@@ -49,6 +50,11 @@ export default function ChatSidebar({ sessions, activeSessionId, onSelect, onCre
       return new Date(b.updated_at || b.created_at).getTime() - new Date(a.updated_at || a.created_at).getTime();
     });
 
+  const showError = (msg: string) => {
+    setPatchError(msg);
+    setTimeout(() => setPatchError(null), 3000);
+  };
+
   const handleTogglePin = async (session: ChatSession) => {
     setMenuOpen(null);
     const optimistic = { ...session, is_pinned: !session.is_pinned };
@@ -58,6 +64,7 @@ export default function ChatSidebar({ sessions, activeSessionId, onSelect, onCre
     } catch (err) {
       console.error("Failed to toggle pin:", err);
       onSessionUpdated(session);
+      showError("Pin update failed — server error");
     }
   };
 
@@ -70,6 +77,7 @@ export default function ChatSidebar({ sessions, activeSessionId, onSelect, onCre
     } catch (err) {
       console.error("Failed to toggle archive:", err);
       onSessionUpdated(session);
+      showError("Archive update failed — server error");
     }
   };
 
@@ -90,6 +98,7 @@ export default function ChatSidebar({ sessions, activeSessionId, onSelect, onCre
       } catch (err) {
         console.error("Failed to rename:", err);
         onSessionUpdated(session);
+        showError("Rename failed — server error");
       }
     }
   };
@@ -133,6 +142,14 @@ export default function ChatSidebar({ sessions, activeSessionId, onSelect, onCre
           <Archive className="h-3 w-3" />
           {showArchived ? "Showing archived" : "Show archived"}
         </button>
+
+        {/* Error toast */}
+        {patchError && (
+          <div className="flex items-center gap-1.5 rounded-lg bg-red-500/10 border border-red-500/20 px-2.5 py-1.5 text-[10px] text-red-400">
+            <AlertCircle className="h-3 w-3 flex-shrink-0" />
+            {patchError}
+          </div>
+        )}
       </div>
 
       {/* Session list */}
@@ -215,7 +232,7 @@ export default function ChatSidebar({ sessions, activeSessionId, onSelect, onCre
                         {session.is_archived ? <ArchiveRestore className="h-3.5 w-3.5" /> : <Archive className="h-3.5 w-3.5" />}
                         {session.is_archived ? "Restore" : "Archive"}
                       </button>
-                      <div className="my-1 h-px bg-[rgba(30,79,163,0.15)]" />
+                      <div className="my-1 h-px bg-border" />
                       <button
                         onClick={(e) => { e.stopPropagation(); onDelete(session.id); setMenuOpen(null); }}
                         className="flex w-full items-center gap-2 px-3 py-2 text-xs text-red-400 hover:bg-red-500/10 transition-colors"

@@ -18,6 +18,23 @@ interface ProfileEditProps {
   onCancel: () => void;
 }
 
+interface ProfileFormState {
+  full_name: string;
+  headline: string;
+  bio: string;
+  location: string;
+  avatar_url: string;
+  education_level: string;
+  years_experience: number | null;
+  experience_level: string;
+  current_field: string;
+  target_fields: string[];
+  skills: Record<string, string>;
+  interests: string[];
+  previous_roles: PreviousRole[];
+  certifications: Certification[];
+}
+
 const STEPS = [
   { id: "about", label: "About You", icon: User },
   { id: "education", label: "Education", icon: GraduationCap },
@@ -34,7 +51,7 @@ const labelClass = "mb-1 block text-sm font-medium text-text-secondary";
 
 export default function ProfileEdit({ profile, onSave, onCancel }: ProfileEditProps) {
   const [step, setStep] = useState(0);
-  const [form, setForm] = useState<ProfileUpdatePayload>({
+  const [form, setForm] = useState<ProfileFormState>({
     full_name: profile.full_name || "",
     headline: profile.headline || "",
     bio: profile.bio || "",
@@ -44,9 +61,9 @@ export default function ProfileEdit({ profile, onSave, onCancel }: ProfileEditPr
     years_experience: profile.years_experience ?? null,
     experience_level: profile.experience_level || "",
     current_field: profile.current_field || "",
-    target_fields: profile.target_fields || [],
+    target_fields: profile.target_fields ? Object.keys(profile.target_fields) : [],
     skills: profile.skills || {},
-    interests: profile.interests || [],
+    interests: profile.interests ? Object.keys(profile.interests) : [],
     previous_roles: profile.previous_roles || [],
     certifications: profile.certifications || [],
   });
@@ -68,8 +85,16 @@ export default function ProfileEdit({ profile, onSave, onCancel }: ProfileEditPr
       if (form.experience_level) clean.experience_level = form.experience_level;
       if (form.years_experience != null) clean.years_experience = form.years_experience;
       if (form.current_field) clean.current_field = form.current_field;
-      if (form.target_fields && form.target_fields.length > 0) clean.target_fields = form.target_fields;
-      if (form.interests && form.interests.length > 0) clean.interests = form.interests;
+      if (form.target_fields && form.target_fields.length > 0) {
+        const tf: Record<string, string> = {};
+        form.target_fields.forEach((f) => { tf[f] = "interested"; });
+        clean.target_fields = tf;
+      }
+      if (form.interests && form.interests.length > 0) {
+        const intr: Record<string, string> = {};
+        form.interests.forEach((i) => { intr[i] = "interested"; });
+        clean.interests = intr;
+      }
       if (form.skills && Object.keys(form.skills).length > 0) clean.skills = form.skills;
       if (form.previous_roles && form.previous_roles.length > 0) clean.previous_roles = form.previous_roles;
       if (form.certifications && form.certifications.length > 0) clean.certifications = form.certifications;
@@ -79,19 +104,19 @@ export default function ProfileEdit({ profile, onSave, onCancel }: ProfileEditPr
     }
   };
 
-  const update = (patch: Partial<ProfileUpdatePayload>) =>
+  const update = (patch: Partial<ProfileFormState>) =>
     setForm((prev) => ({ ...prev, ...patch }));
 
   const addToArray = (field: "target_fields" | "interests", value: string) => {
     if (!value.trim()) return;
-    const arr = (form[field] as string[]) || [];
+    const arr = form[field];
     if (!arr.includes(value.trim())) {
       update({ [field]: [...arr, value.trim()] });
     }
   };
 
   const removeFromArray = (field: "target_fields" | "interests", value: string) => {
-    const arr = (form[field] as string[]) || [];
+    const arr = form[field];
     update({ [field]: arr.filter((v) => v !== value) });
   };
 
@@ -174,7 +199,7 @@ export default function ProfileEdit({ profile, onSave, onCancel }: ProfileEditPr
               <AvatarPicker
                 name={form.full_name || ""}
                 value={form.avatar_url || null}
-                onChange={(v) => update({ avatar_url: v })}
+                onChange={(v) => update({ avatar_url: v || "" })}
                 size="lg"
               />
               <div className="grid flex-1 gap-4 md:grid-cols-2">
@@ -219,7 +244,7 @@ export default function ProfileEdit({ profile, onSave, onCancel }: ProfileEditPr
                 <label className={labelClass}>Education Level</label>
                 <select
                   value={form.education_level || ""}
-                  onChange={(e) => update({ education_level: e.target.value || null })}
+                  onChange={(e) => update({ education_level: e.target.value })}
                   className={selectClass}
                 >
                   <option value="">Select...</option>
@@ -232,7 +257,7 @@ export default function ProfileEdit({ profile, onSave, onCancel }: ProfileEditPr
                 <label className={labelClass}>Experience Level</label>
                 <select
                   value={form.experience_level || ""}
-                  onChange={(e) => update({ experience_level: e.target.value || null })}
+                  onChange={(e) => update({ experience_level: e.target.value })}
                   className={selectClass}
                 >
                   <option value="">Select...</option>

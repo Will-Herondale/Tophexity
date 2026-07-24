@@ -1,15 +1,23 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import type { ChatSession, ChatMessage } from "@/types/chat";
 import { getChatSession, sendChatMessages, rebuildChatMemory, exportChatSession } from "@/lib/api";
 import ChatMessageBubble from "./ChatMessage";
 import ChatExportModal from "./ChatExportModal";
-import { Send, Loader2, Brain, Download, CheckCircle } from "lucide-react";
+import { Send, Loader2, Brain, Download, CheckCircle, RotateCcw, Clock } from "lucide-react";
 
 interface ChatAreaProps {
   session: ChatSession | null;
 }
+
+const THINKING_TIPS = [
+  "Analyzing your question...",
+  "Searching career databases...",
+  "Processing your request...",
+  "Connecting the dots...",
+  "This may take a moment for detailed prompts...",
+];
 
 export default function ChatArea({ session }: ChatAreaProps) {
   const [allMessages, setAllMessages] = useState<Record<string, ChatMessage[]>>({});
@@ -19,7 +27,13 @@ export default function ChatArea({ session }: ChatAreaProps) {
   const [rebuilding, setRebuilding] = useState(false);
   const [rebuildMsg, setRebuildMsg] = useState<string | null>(null);
   const [exportOpen, setExportOpen] = useState(false);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [thinkingTip, setThinkingTip] = useState(0);
+  const [lastError, setLastError] = useState<string | null>(null);
+  const [retryContent, setRetryContent] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const lastSentContent = useRef<string>("");
 
   const messages = useMemo(() => session ? (allMessages[session.id] || []) : [], [session, allMessages]);
 
@@ -42,10 +56,26 @@ export default function ChatArea({ session }: ChatAreaProps) {
     return () => { cancelled = true; };
   }, [session?.id]);
 
-  const handleSend = async () => {
-    if (!session || !input.trim() || sending) return;
-    const content = input.trim();
+  const stopTimer = useCallback(() => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+    setElapsedSeconds(0);
+  }, []);
+
+  useEffect(() => {
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, []);
+
+  const handleSend = useCallback(async (overrideContent?: string) => {
+    if (!session) return;
+    const content = overrideContent || input.trim();
+    if (!content || sending) return;
     setInput("");
+    setLastError(null);
+    setRetryContent(null);
+
     const userMsg: ChatMessage = {
       id: `temp-${Date.now()}`,
       session_id: session.id,
@@ -60,6 +90,17 @@ export default function ChatArea({ session }: ChatAreaProps) {
     };
     setAllMessages((prev) => ({ ...prev, [session.id]: [...(prev[session.id] || []), userMsg] }));
     setSending(true);
+    setElapsedSeconds(0);
+    setThinkingTip(0);
+
+    // Start elapsed timer
+    const startTime = Date.now();
+    timerRef.current = setInterval(() => {
+      setElapsedSeconds(Math.floor((Date.now() - startTime) / 1000));
+      setThinkingTip((prev) => (prev + 1) % THINKING_TIPS.length);
+    }, 3000);
+
+    lastSentContent.current = content;
     try {
       const response = await sendChatMessages(session.id, [{ role: "user", content }]);
       if (Array.isArray(response)) {
@@ -69,20 +110,29 @@ export default function ChatArea({ session }: ChatAreaProps) {
           return { ...prev, [session.id]: [...withoutTemp, ...response] };
         });
       }
-    } catch {
+      setLastError(null);
+      setRetryContent(null);
+    } catch (err: unknown) {
       setAllMessages((prev) => {
         const current = prev[session.id] || [];
         return { ...prev, [session.id]: [...current.filter((m) => m.id !== userMsg.id)] };
       });
-      setAllMessages((prev) => ({
-        ...prev,
-        [session.id]: [
-          ...(prev[session.id] || []),
-          { id: `error-${Date.now()}`, session_id: session.id, role: "assistant", content: "Failed to send message. Please try again.", token_count: null, model_used: null, latency_ms: null, request_id: null, message_data: {}, created_at: new Date().toISOString() },
-        ],
-      }));
+      const axiosErr = err as { code?: string; response?: { status?: number } };
+      const isTimeout = axiosErr.code === "ECONNABORTED" || axiosErr.code === "ERR_NETWORK";
+      const errorMsg = isTimeout
+        ? "The AI is taking longer than expected. Try a shorter prompt or try again."
+        : "Failed to send message. Please try again.";
+      setLastError(errorMsg);
+      setRetryContent(content);
     } finally {
+      stopTimer();
       setSending(false);
+    }
+  }, [session, input, sending, stopTimer]);
+
+  const handleRetry = () => {
+    if (retryContent) {
+      handleSend(retryContent);
     }
   };
 
@@ -157,6 +207,49 @@ export default function ChatArea({ session }: ChatAreaProps) {
         ) : (
           messages.map((msg) => <ChatMessageBubble key={msg.id} message={msg} />)
         )}
+
+        {/* Thinking indicator with timer */}
+        {sending && (
+          <div className="flex justify-start">
+            <div className="max-w-[80%] rounded-2xl px-4 py-3 bg-surface/20">
+              <div className="flex items-center gap-2">
+                <div className="flex gap-1">
+                  <span className="h-2 w-2 rounded-full bg-accent animate-bounce" style={{ animationDelay: "0ms" }} />
+                  <span className="h-2 w-2 rounded-full bg-accent animate-bounce" style={{ animationDelay: "150ms" }} />
+                  <span className="h-2 w-2 rounded-full bg-accent animate-bounce" style={{ animationDelay: "300ms" }} />
+                </div>
+                {elapsedSeconds > 5 && (
+                  <div className="flex items-center gap-1 text-[10px] text-text-muted">
+                    <Clock className="h-3 w-3" />
+                    <span>{elapsedSeconds}s</span>
+                  </div>
+                )}
+              </div>
+              {elapsedSeconds > 10 && (
+                <p className="text-[10px] text-text-muted mt-1.5">{THINKING_TIPS[thinkingTip]}</p>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Error with retry */}
+        {lastError && !sending && (
+          <div className="flex justify-start">
+            <div className="max-w-[80%] rounded-2xl px-4 py-3 bg-red-500/10 border border-red-500/20">
+              <p className="text-sm text-red-400">{lastError}</p>
+              {retryContent && (
+                <button
+                  onClick={handleRetry}
+                  className="mt-2 flex items-center gap-1.5 text-xs font-medium text-accent hover:text-accent-light transition-colors"
+                >
+                  <RotateCcw className="h-3 w-3" />
+                  Retry
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
         <div ref={messagesEndRef} />
       </div>
 
@@ -168,12 +261,12 @@ export default function ChatArea({ session }: ChatAreaProps) {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
-            placeholder="Ask about careers..."
+            placeholder={sending ? "Waiting for response..." : "Ask about careers..."}
             disabled={sending}
             className="flex-1 rounded-2xl bg-surface/30 px-4 py-3 text-sm text-foreground placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-accent/30 disabled:opacity-50"
           />
           <button
-            onClick={handleSend}
+            onClick={() => handleSend()}
             disabled={!input.trim() || sending}
             className="flex h-11 w-11 items-center justify-center rounded-full bg-accent text-white hover:bg-accent-light disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >

@@ -76,9 +76,9 @@ export default function ProfileView({ profile }: { profile: Profile }) {
 
         <Card>
           <h3 className="mb-3 font-[family-name:var(--font-display)] text-sm font-semibold text-foreground">Target Fields</h3>
-          {profile.target_fields && profile.target_fields.length > 0 ? (
+          {profile.target_fields && Object.keys(profile.target_fields).length > 0 ? (
             <div className="flex flex-wrap gap-2">
-              {profile.target_fields.map((field) => (
+              {Object.entries(profile.target_fields).map(([field]) => (
                 <span key={field} className="rounded-full bg-accent/15 px-3 py-1 text-xs font-medium text-accent">
                   {field}
                 </span>
@@ -110,9 +110,9 @@ export default function ProfileView({ profile }: { profile: Profile }) {
             <Heart className="mr-1 inline h-4 w-4 text-accent" />
             Interests
           </h3>
-          {profile.interests && profile.interests.length > 0 ? (
+          {profile.interests && Object.keys(profile.interests).length > 0 ? (
             <div className="flex flex-wrap gap-2">
-              {profile.interests.map((interest) => (
+              {Object.entries(profile.interests).map(([interest]) => (
                 <span key={interest} className="rounded-full bg-accent/15 px-3 py-1 text-xs font-medium text-accent">
                   {interest}
                 </span>

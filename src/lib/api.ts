@@ -181,8 +181,13 @@ export async function getRecommendationById(id: string): Promise<Recommendation>
   return data;
 }
 
-export async function createRoadmap(payload: RoadmapCreatePayload) {
-  const { data } = await api.post("/roadmaps", payload);
+export async function generateRecommendation(payload?: { include_profile?: boolean; max_results?: number }, timeout = 300000) {
+  const { data } = await api.post("/intelligence/recommendations/generate", payload || {}, { timeout });
+  return data;
+}
+
+export async function regenerateRecommendation(id: string, timeout = 300000) {
+  const { data } = await api.post(`/intelligence/recommendations/${id}/regenerate`, {}, { timeout });
   return data;
 }
 
@@ -196,13 +201,13 @@ export async function getRoadmapById(id: string): Promise<Roadmap> {
   return data;
 }
 
-export async function updateRoadmap(id: string, payload: { status: string }): Promise<Roadmap> {
-  const { data } = await api.patch(`/roadmaps/${id}`, payload);
+export async function generateRoadmap(payload: { career_id: string; roadmap_type?: string; custom_duration_months?: number }, timeout = 300000) {
+  const { data } = await api.post("/intelligence/roadmaps/generate", payload, { timeout });
   return data;
 }
 
-export async function createBackupPlan(payload: BackupPlanCreatePayload) {
-  const { data } = await api.post("/backups", payload);
+export async function updateRoadmap(id: string, payload: { status: string }): Promise<Roadmap> {
+  const { data } = await api.patch(`/roadmaps/${id}`, payload);
   return data;
 }
 
@@ -213,6 +218,11 @@ export async function getBackupPlansHistory(page = 1, pageSize = 10): Promise<Ba
 
 export async function getBackupPlanById(id: string): Promise<BackupPlan> {
   const { data } = await api.get(`/backups/${id}`);
+  return data;
+}
+
+export async function generateBackupPlan(payload: { career_id: string; max_scenarios?: number }, timeout = 300000) {
+  const { data } = await api.post("/intelligence/backups/generate", payload, { timeout });
   return data;
 }
 

@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { getRecommendationsHistory } from "@/lib/api";
+import { getRecommendationsHistory, generateRecommendation } from "@/lib/api";
 import type { Recommendation } from "@/types/recommendation";
 import RecommendationCard from "@/components/recommendations/RecommendationCard";
 import Button from "@/components/ui/Button";
@@ -12,8 +12,18 @@ export default function RecommendationsPage() {
   const router = useRouter();
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [loading, setLoading] = useState(true);
+  const [generating, setGenerating] = useState(false);
+  const [genError, setGenError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+
+  const fetchRecs = useCallback((p: number) => {
+    setLoading(true);
+    getRecommendationsHistory(p)
+      .then((data) => { setRecommendations(data.items); setTotalPages(data.total_pages); })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -26,6 +36,20 @@ export default function RecommendationsPage() {
     return () => { cancelled = true; };
   }, [page]);
 
+  const handleGenerate = async () => {
+    setGenerating(true);
+    setGenError(null);
+    try {
+      await generateRecommendation({ include_profile: true, max_results: 5 });
+      fetchRecs(1);
+      setPage(1);
+    } catch (err: any) {
+      setGenError(err?.response?.data?.detail || err?.message || "Failed to generate recommendations");
+    } finally {
+      setGenerating(false);
+    }
+  };
+
   return (
     <div className="mx-auto max-w-3xl px-4 py-8 bg-background">
       <div className="mb-8 flex items-center justify-between">
@@ -34,18 +58,34 @@ export default function RecommendationsPage() {
           <p className="mt-1 text-sm text-text-secondary">Your AI-powered career matches</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={() => setPage(page)}>
-            <RefreshCw className="mr-1 h-4 w-4" />
+          <Button variant="outline" size="sm" onClick={() => fetchRecs(page)} disabled={loading}>
+            <RefreshCw className={`mr-1 h-4 w-4 ${loading ? "animate-spin" : ""}`} />
             Refresh
           </Button>
-          <Button size="sm" onClick={() => router.push("/chat?recommend=true")}>
-            <Sparkles className="mr-1 h-4 w-4" />
-            Get AI Recommendations
+          <Button size="sm" onClick={handleGenerate} disabled={generating}>
+            <Sparkles className={`mr-1 h-4 w-4 ${generating ? "animate-spin" : ""}`} />
+            {generating ? "Generating..." : "Get AI Recommendations"}
           </Button>
         </div>
       </div>
 
-      {loading ? (
+      {generating && (
+        <div className="mb-6 rounded-xl border border-accent/30 bg-accent/5 p-6 text-center">
+          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center">
+            <Sparkles className="h-6 w-6 text-accent animate-pulse" />
+          </div>
+          <p className="text-sm font-medium text-foreground">AI is analyzing your profile and generating personalized recommendations...</p>
+          <p className="mt-1 text-xs text-text-secondary">This can take 30-60 seconds</p>
+        </div>
+      )}
+
+      {genError && (
+        <div className="mb-6 rounded-xl border border-red-300 bg-red-50 p-4 text-sm text-red-700">
+          {genError}
+        </div>
+      )}
+
+      {loading && !generating ? (
         <div className="flex min-h-[300px] items-center justify-center">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-border-light border-t-accent" />
         </div>
@@ -62,9 +102,9 @@ export default function RecommendationsPage() {
             <Button variant="outline" onClick={() => router.push("/profile")}>
               Complete Your Profile
             </Button>
-            <Button onClick={() => router.push("/chat?recommend=true")}>
+            <Button onClick={handleGenerate} disabled={generating}>
               <Sparkles className="mr-1.5 h-4 w-4" />
-              Get AI Recommendations
+              {generating ? "Generating..." : "Get AI Recommendations"}
             </Button>
           </div>
         </div>

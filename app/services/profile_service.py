@@ -67,6 +67,20 @@ async def update_profile(
     return ProfileResponse.model_validate(profile)
 
 
+async def delete_profile(db: AsyncSession, user: User) -> None:
+    result = await db.execute(select(Profile).where(Profile.user_id == user.id))
+    profile = result.scalar_one_or_none()
+    if not profile:
+        raise NotFoundException(detail="Profile not found")
+    versions_result = await db.execute(
+        select(ProfileVersion).where(ProfileVersion.profile_id == profile.id)
+    )
+    for v in versions_result.scalars().all():
+        await db.delete(v)
+    await db.delete(profile)
+    await safe_flush(db)
+
+
 async def get_profile_versions(
     db: AsyncSession, user: User
 ) -> list[ProfileVersionResponse]:

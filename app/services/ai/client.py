@@ -22,6 +22,11 @@ from app.services.ai.token_usage import track_usage
 settings = get_settings()
 
 
+def _should_record_circuit_failure(error: AIError) -> bool:
+    status_code = getattr(error, "status_code", 500)
+    return status_code in (429, 500, 502, 503, 504)
+
+
 class AIClient:
     """Unified AI client with retry, rate limiting, and token tracking."""
 
@@ -91,7 +96,13 @@ class AIClient:
             circuit_breaker.record_failure()
             raise
         except AIError as e:
-            circuit_breaker.record_failure()
+            if _should_record_circuit_failure(e):
+                circuit_breaker.record_failure()
+            else:
+                logger.warning(
+                    "AI request failed with status %s; circuit breaker unchanged",
+                    getattr(e, "status_code", "unknown"),
+                )
             track_usage(
                 prompt_tokens=0, completion_tokens=0,
                 model=settings.AI_DEPLOYMENT_NAME,

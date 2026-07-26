@@ -9,8 +9,10 @@ from sqlalchemy.orm import selectinload
 from app.models.chat import ChatMessage, ChatSession
 from app.models.user import User
 from app.schemas.chat import (
+    ChatHistoryResponse,
     ChatMessageCreate,
     ChatMessageResponse,
+    ChatMessageUpdate,
     ChatSessionCreate,
     ChatSessionDetailResponse,
     ChatSessionListResponse,
@@ -102,6 +104,91 @@ async def get_session_messages(
     if not session:
         raise NotFoundException(detail="Chat session not found")
     return ChatSessionDetailResponse.model_validate(session)
+
+
+async def get_chat_history(
+    db: AsyncSession,
+    user: User,
+    session_id: UUID,
+    page: int = 1,
+    page_size: int = 50,
+) -> ChatHistoryResponse:
+    session_result = await db.execute(
+        select(ChatSession.id).where(
+            ChatSession.id == session_id, ChatSession.user_id == user.id
+        )
+    )
+    if not session_result.scalar_one_or_none():
+        raise NotFoundException(detail="Chat session not found")
+
+    count_query = select(func.count(ChatMessage.id)).where(
+        ChatMessage.session_id == session_id
+    )
+    total_result = await db.execute(count_query)
+    total = total_result.scalar() or 0
+    total_pages = math.ceil(total / page_size) if total > 0 else 1
+
+    query = (
+        select(ChatMessage)
+        .where(ChatMessage.session_id == session_id)
+        .order_by(ChatMessage.created_at)
+        .offset((page - 1) * page_size)
+        .limit(page_size)
+    )
+    result = await db.execute(query)
+    messages = [ChatMessageResponse.model_validate(m) for m in result.scalars().all()]
+    return ChatHistoryResponse(
+        items=messages, total=total, page=page, page_size=page_size, total_pages=total_pages
+    )
+
+
+async def update_chat_message(
+    db: AsyncSession, user: User, session_id: UUID, message_id: UUID, data: ChatMessageUpdate
+) -> ChatMessageResponse:
+    session_result = await db.execute(
+        select(ChatSession.id).where(
+            ChatSession.id == session_id, ChatSession.user_id == user.id
+        )
+    )
+    if not session_result.scalar_one_or_none():
+        raise NotFoundException(detail="Chat session not found")
+
+    result = await db.execute(
+        select(ChatMessage).where(
+            ChatMessage.id == message_id, ChatMessage.session_id == session_id
+        )
+    )
+    msg = result.scalar_one_or_none()
+    if not msg:
+        raise NotFoundException(detail="Chat message not found")
+
+    msg.content = data.content
+    await safe_flush(db)
+    return ChatMessageResponse.model_validate(msg)
+
+
+async def delete_chat_message(
+    db: AsyncSession, user: User, session_id: UUID, message_id: UUID
+) -> None:
+    session_result = await db.execute(
+        select(ChatSession.id).where(
+            ChatSession.id == session_id, ChatSession.user_id == user.id
+        )
+    )
+    if not session_result.scalar_one_or_none():
+        raise NotFoundException(detail="Chat session not found")
+
+    result = await db.execute(
+        select(ChatMessage).where(
+            ChatMessage.id == message_id, ChatMessage.session_id == session_id
+        )
+    )
+    msg = result.scalar_one_or_none()
+    if not msg:
+        raise NotFoundException(detail="Chat message not found")
+
+    await db.delete(msg)
+    await safe_flush(db)
 
 
 async def update_chat_session(

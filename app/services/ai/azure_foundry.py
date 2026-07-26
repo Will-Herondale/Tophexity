@@ -19,14 +19,31 @@ from app.services.ai.token_usage import build_usage
 settings = get_settings()
 
 
+def _normalize_azure_endpoint(endpoint: str) -> str:
+    cleaned = endpoint.strip().rstrip("/")
+    marker = "/openai/v1"
+    marker_index = cleaned.lower().find(marker)
+    if marker_index != -1:
+        cleaned = cleaned[:marker_index]
+    return cleaned.rstrip("/")
+
+
 class AzureFoundryProvider(AIProvider):
     def __init__(self) -> None:
-        self.endpoint = settings.AI_ENDPOINT.rstrip("/")
+        raw_endpoint = settings.AI_ENDPOINT
+        self.endpoint = _normalize_azure_endpoint(raw_endpoint)
         self.api_key = settings.AI_API_KEY
         self.deployment = settings.AI_DEPLOYMENT_NAME
         self.api_version = settings.AI_API_VERSION
         self.timeout = settings.AI_REQUEST_TIMEOUT
         self._client: AsyncAzureOpenAI | None = None
+
+        if self.endpoint != raw_endpoint.strip().rstrip("/"):
+            logger.info(
+                "Normalized AI endpoint for Azure SDK: %s -> %s",
+                raw_endpoint,
+                self.endpoint,
+            )
 
     @property
     def client(self) -> AsyncAzureOpenAI:

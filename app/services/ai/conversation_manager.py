@@ -42,60 +42,83 @@ class ConversationManager:
     async def get_session(self, session_id: UUID) -> ChatSession:
         result = await self.db.execute(
             select(ChatSession)
-            .options(selectinload(ChatSession.messages))
             .where(ChatSession.id == session_id, ChatSession.user_id == self.user.id)
         )
         session = result.unique().scalar_one_or_none()
         if not session:
             raise NotFoundException(detail="Chat session not found")
+
+        msg_result = await self.db.execute(
+            select(ChatMessage)
+            .where(ChatMessage.session_id == session_id)
+            .order_by(ChatMessage.created_at.desc())
+            .limit(settings.AI_MAX_CONTEXT_MESSAGES)
+        )
+        recent_msgs = list(reversed(msg_result.scalars().all()))
+
+        # Use run_sync to set the relationship without triggering a lazy load.
+        # Directly setting session.messages when the relationship hasn't been
+        # eagerly loaded triggers a sync lazy-load -> greenlet_spawn error.
+        await self.db.run_sync(
+            lambda sync_session: setattr(session, "messages", recent_msgs)
+        )
+
         return session
 
-    async def load_memory(self, session: ChatSession) -> ConversationMemory:
-        """Load conversation memory from persistent summary + recent messages."""
-        total_messages = len(session.messages)
+    async def _build_memory_core(
+        self,
+        session: ChatSession,
+        messages: list[ChatMessage],
+        summary: str | None,
+        summary_message_count: int,
+    ) -> ConversationMemory:
+        """Core memory-building logic that operates on a message list snapshot.
+
+        This avoids triggering lazy-loads of session.messages after DB queries
+        in ContextBuilder have expired the relationship cache.
+        """
+        total_messages = len(messages)
         recent_count = min(total_messages, settings.AI_MAX_CONTEXT_MESSAGES)
         recent = [
             {"role": m.role.value if hasattr(m.role, "value") else str(m.role), "content": m.content}
-            for m in session.messages[-recent_count:]
+            for m in messages[-recent_count:]
         ]
 
         memory = ConversationMemory(
             recent_messages=recent,
-            summary=session.summary,
+            summary=summary,
             max_recent=settings.AI_MAX_CONTEXT_MESSAGES,
         )
 
         # Check if summarization is needed
-        if session.summary_message_count == 0:
-            # First-time summarization
+        if summary_message_count == 0:
             if total_messages > settings.AI_SUMMARY_THRESHOLD_MESSAGES:
                 keep = settings.AI_SUMMARY_KEEP_RECENT
                 to_summarize = [
                     {"role": m.role.value if hasattr(m.role, "value") else str(m.role), "content": m.content}
-                    for m in session.messages[:-keep]
+                    for m in messages[:-keep]
                 ]
-                summary = await summarize_messages(to_summarize, user_id=str(self.user.id))
-                validated = validate_summary(summary, session.summary)
+                new_summary = await summarize_messages(to_summarize, user_id=str(self.user.id))
+                validated = validate_summary(new_summary, summary)
                 if validated:
                     session.summary = validated
                     session.summary_updated_at = datetime.now(timezone.utc)
                     session.summary_message_count = total_messages - keep
                     memory.summary = validated
         else:
-            # Incremental summarization
-            unsummarized = total_messages - session.summary_message_count
+            unsummarized = total_messages - summary_message_count
             if unsummarized > settings.AI_SUMMARY_THRESHOLD_MESSAGES:
                 keep = settings.AI_SUMMARY_KEEP_RECENT
-                start_idx = session.summary_message_count
+                start_idx = summary_message_count
                 end_idx = total_messages - keep
                 delta_msgs = [
                     {"role": m.role.value if hasattr(m.role, "value") else str(m.role), "content": m.content}
-                    for m in session.messages[start_idx:end_idx]
+                    for m in messages[start_idx:end_idx]
                 ]
                 delta_summary = await summarize_delta(delta_msgs, user_id=str(self.user.id))
                 if delta_summary:
-                    combined = merge_summaries(session.summary, delta_summary)
-                    validated = validate_summary(combined, session.summary)
+                    combined = merge_summaries(summary, delta_summary)
+                    validated = validate_summary(combined, summary)
                     if validated:
                         session.summary = validated
                         session.summary_updated_at = datetime.now(timezone.utc)
@@ -103,6 +126,26 @@ class ConversationManager:
                         memory.summary = validated
 
         return memory
+
+    async def load_memory_from_snapshot(
+        self,
+        session: ChatSession,
+        messages: list[ChatMessage],
+        summary: str | None,
+        summary_message_count: int,
+    ) -> ConversationMemory:
+        return await self._build_memory_core(
+            session, messages, summary, summary_message_count,
+        )
+
+    async def load_memory(self, session: ChatSession) -> ConversationMemory:
+        """Load conversation memory from persistent summary + recent messages."""
+        return await self._build_memory_core(
+            session,
+            list(session.messages) if getattr(session, "messages", None) else [],
+            session.summary,
+            session.summary_message_count,
+        )
 
     async def maybe_extract_facts(self, session: ChatSession, total_messages: int) -> None:
         """Extract facts from recent messages if interval is met."""
@@ -155,11 +198,20 @@ class ConversationManager:
         prompt_name: str = "system",
     ) -> list[dict[str, str]]:
         """Build full AI message list: system prompt + context + memory + user message."""
+        # Snapshot messages BEFORE load_all — DB queries in load_all expire
+        # the session.messages relationship cache, causing greenlet_spawn errors
+        # when load_memory later accesses session.messages (lazy load in sync ctx).
+        snapshot = list(session.messages) if getattr(session, "messages", None) else []
+        session_summary = session.summary
+        session_summary_msg_count = session.summary_message_count
+
         ctx = ContextBuilder(self.db, self.user)
-        await ctx.load_all()
+        await ctx.load_all(user_message=user_message)
         system_prompt = ctx.build_system_prompt(prompt_name)
 
-        memory = await self.load_memory(session)
+        memory = await self.load_memory_from_snapshot(
+            session, snapshot, session_summary, session_summary_msg_count,
+        )
         memory.add_message("user", user_message)
 
         return memory.build_messages_for_ai(system_prompt)
@@ -247,7 +299,10 @@ class ConversationManager:
             .order_by(ChatMessage.created_at)
         )
         messages = result.scalars().all()
-        session.messages = list(messages)
+        _msgs = list(messages)
+        await self.db.run_sync(
+            lambda sync_session: setattr(session, "messages", _msgs)
+        )
 
         # Re-run summarization if enough messages
         if len(messages) > settings.AI_SUMMARY_THRESHOLD_MESSAGES:

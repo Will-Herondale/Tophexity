@@ -9,6 +9,7 @@ from app.schemas.profile import (
     ProfileUpdate,
     ProfileVersionResponse,
 )
+from app.schemas.common import MessageResponse
 from app.services import profile_service
 
 router = APIRouter()
@@ -71,6 +72,24 @@ async def update_profile(
     current_user: User = Depends(get_current_active_user),
 ):
     return await profile_service.update_profile(db, current_user, data)
+
+
+@router.delete(
+    "/profile",
+    response_model=MessageResponse,
+    summary="Delete user profile",
+    description="Delete the authenticated user's profile and all version snapshots.",
+    responses={
+        401: {"description": "Not authenticated"},
+        404: {"description": "Profile not found"},
+    },
+)
+async def delete_profile(
+    db: AsyncSession = Depends(get_db_session),
+    current_user: User = Depends(get_current_active_user),
+):
+    await profile_service.delete_profile(db, current_user)
+    return MessageResponse(message="Profile deleted")
 
 
 @router.get(

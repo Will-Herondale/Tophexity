@@ -1,4 +1,5 @@
 import secrets
+import os
 from functools import lru_cache
 from pathlib import Path
 
@@ -27,10 +28,10 @@ class Settings(BaseSettings):
     AI_API_VERSION: str = "2024-12-01-preview"
     AI_FOUNDRY_PROJECT_URL: str = "https://tophex.services.ai.azure.com/api/projects/proj-tophex"
 
-    AI_MAX_RETRIES: int = 5
+    AI_MAX_RETRIES: int = 3
     AI_RETRY_BASE_DELAY: float = 1.0
-    AI_RETRY_MAX_DELAY: float = 60.0
-    AI_REQUEST_TIMEOUT: float = 120.0
+    AI_RETRY_MAX_DELAY: float = 30.0
+    AI_REQUEST_TIMEOUT: float = 300.0
     AI_MAX_TOKENS: int = 16384
     AI_TEMPERATURE: float = 0.7
 
@@ -91,10 +92,28 @@ class Settings(BaseSettings):
     ADMIN_API_ENABLED: bool = True
 
 
+def _set_if_missing(target: str, aliases: tuple[str, ...]) -> None:
+    if os.environ.get(target):
+        return
+    for alias in aliases:
+        value = os.environ.get(alias)
+        if value:
+            os.environ[target] = value
+            return
+
+
+def _load_ai_env_aliases() -> None:
+    _set_if_missing("AI_ENDPOINT", ("OPENAI_ENDPOINT", "AZURE_OPENAI_ENDPOINT"))
+    _set_if_missing("AI_API_KEY", ("OPENAI_API_KEY", "AZURE_OPENAI_API_KEY"))
+    _set_if_missing(
+        "AI_DEPLOYMENT_NAME",
+        ("OPENAI_DEPLOYMENT", "AZURE_OPENAI_DEPLOYMENT", "AZURE_OPENAI_DEPLOYMENT_NAME"),
+    )
+    _set_if_missing("AI_API_VERSION", ("OPENAI_API_VERSION", "AZURE_OPENAI_API_VERSION"))
+
+
 def _load_api_key_into_env() -> None:
     """Read api_key.txt and set AI_API_KEY env var if not already set."""
-    import os
-
     if os.environ.get("AI_API_KEY"):
         return
 
@@ -109,6 +128,7 @@ def _load_api_key_into_env() -> None:
     os.environ["AI_API_KEY"] = key
 
 
+_load_ai_env_aliases()
 _load_api_key_into_env()
 
 

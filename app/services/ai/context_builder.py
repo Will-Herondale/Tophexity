@@ -33,6 +33,7 @@ class ContextBuilder:
         self._recommendation: dict | None = None
         self._roadmap: dict | None = None
         self._backup: dict | None = None
+        self._rag_context: str | None = None
         self._token_usage: dict = {}
 
     def estimate_tokens(self, text: str) -> int:
@@ -213,22 +214,46 @@ class ContextBuilder:
         context_cache.set(self.user.id, "backup", self._backup)
         return self._backup
 
-    async def load_all(self) -> dict:
-        """Load all user context data. Individual failures are non-fatal."""
-        results = {}
-        loaders = [
-            ("profile", self.load_profile),
-            ("portfolio", self.load_portfolio),
-            ("latest_recommendation", self.load_latest_recommendation),
-            ("latest_roadmap", self.load_latest_roadmap),
-            ("latest_backup", self.load_latest_backup),
-        ]
-        for key, loader in loaders:
+    async def load_rag_context(self, query: str, max_tokens: int = 2000) -> str:
+        """Retrieve relevant knowledge base context via semantic search."""
+        try:
+            from app.services.retrieval_engine import get_relevant_knowledge
+            rag = await get_relevant_knowledge(
+                self.db, query, max_tokens=max_tokens,
+            )
+            self._rag_context = rag or None
+            return self._rag_context
+        except Exception as e:
+            logger.warning("RAG context load failed: %s", str(e)[:200])
+            self._rag_context = None
+            return ""
+
+    async def load_all(self, user_message: str | None = None) -> dict:
+        """Load all user context data sequentially. Individual failures are non-fatal.
+
+        Note: Must run sequentially (not asyncio.gather) because all loaders share
+        the same async DB session/connection. Concurrent queries on a single
+        asyncpg connection raise InterfaceError.
+        """
+        loaders = {
+            "profile": self.load_profile,
+            "portfolio": self.load_portfolio,
+            "latest_recommendation": self.load_latest_recommendation,
+            "latest_roadmap": self.load_latest_roadmap,
+            "latest_backup": self.load_latest_backup,
+        }
+        if user_message:
+            loaders["rag_context"] = lambda: self.load_rag_context(user_message)
+        defaults = {"profile": {}, "portfolio": []}
+
+        results: dict = {}
+        for key, fn in loaders.items():
             try:
-                results[key] = await loader()
+                results[key] = await fn()
             except Exception as e:
                 logger.warning("Context load failed for %s: %s", key, str(e)[:200])
-                results[key] = {} if key == "profile" else [] if key == "portfolio" else None
+                results[key] = defaults.get(key)
+
         return results
 
     def build_system_prompt(self, prompt_name: str = "system") -> str:
@@ -255,6 +280,9 @@ class ContextBuilder:
 
         if self._backup:
             parts.append(f"Latest Backup Plan: {self._backup}")
+
+        if self._rag_context:
+            parts.append(f"Relevant Knowledge Base Context:\n{self._rag_context}")
 
         return "\n".join(parts) if parts else "No user data available."
 
@@ -291,7 +319,15 @@ class ContextBuilder:
             messages.append({"role": "system", "content": summary_section})
             used += self.estimate_tokens(summary_section)
 
-        # 5-9. Lower priority sections (included if budget allows)
+        # 5. RAG context (high priority — retrieved from knowledge base)
+        if self._rag_context:
+            rag_section = f"## Relevant Knowledge Base\n{self._rag_context}"
+            rag_tokens = self.estimate_tokens(rag_section)
+            if used + rag_tokens <= token_budget - self._reserve_for_messages():
+                messages.append({"role": "system", "content": rag_section})
+                used += rag_tokens
+
+        # 6-10. Lower priority sections (included if budget allows)
         remaining_sections = []
         if self._portfolio:
             remaining_sections.append(f"## Portfolio\n{self._portfolio}")

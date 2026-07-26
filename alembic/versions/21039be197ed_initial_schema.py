@@ -468,4 +468,16 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_careers_title'), table_name='careers')
     op.drop_index(op.f('ix_careers_id'), table_name='careers')
     op.drop_table('careers')
+
+    # Explicitly drop named enum types so downgrade -> upgrade is repeatable.
+    for enum_name in (
+        "chatmessagerole",
+        "skilllevel",
+        "careerrelationtype",
+        "roadmapstatus",
+        "recommendationstatus",
+        "backupplanstatus",
+        "userrole",
+    ):
+        op.execute(sa.text(f"DROP TYPE IF EXISTS {enum_name}"))
     # ### end Alembic commands ###

@@ -1,15 +1,20 @@
+import asyncio
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query, Request
+from sqlalchemy import func as sa_func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_active_user, get_db_session
+from app.core.config import get_settings
 from app.core.logging import logger
 from app.models.user import User
 from app.schemas.chat import (
     ChatExportResponse,
+    ChatHistoryResponse,
     ChatMessageCreate,
     ChatMessageResponse,
+    ChatMessageUpdate,
     ChatSessionCreate,
     ChatSessionDetailResponse,
     ChatSessionListResponse,
@@ -23,6 +28,9 @@ from app.services import chat_service
 from app.services.ai.client import get_ai_client
 from app.services.ai.conversation_manager import ConversationManager
 from app.services.ai.exceptions import AIError
+from app.utils.exceptions import safe_flush
+
+settings = get_settings()
 
 router = APIRouter()
 
@@ -90,6 +98,66 @@ async def get_session(
     return await chat_service.get_session_messages(db, current_user, session_id)
 
 
+@router.get(
+    "/sessions/{session_id}/messages",
+    response_model=ChatHistoryResponse,
+    summary="Get chat message history",
+    description="Retrieve paginated message history for a chat session.",
+    responses={
+        401: {"description": "Not authenticated"},
+        404: {"description": "Session not found"},
+    },
+)
+async def get_chat_history(
+    session_id: UUID,
+    page: int = Query(1, ge=1, description="Page number"),
+    page_size: int = Query(50, ge=1, le=200, description="Messages per page"),
+    db: AsyncSession = Depends(get_db_session),
+    current_user: User = Depends(get_current_active_user),
+):
+    return await chat_service.get_chat_history(db, current_user, session_id, page, page_size)
+
+
+@router.patch(
+    "/sessions/{session_id}/messages/{message_id}",
+    response_model=ChatMessageResponse,
+    summary="Edit chat message",
+    description="Update the content of a chat message.",
+    responses={
+        401: {"description": "Not authenticated"},
+        404: {"description": "Session or message not found"},
+    },
+)
+async def update_message(
+    session_id: UUID,
+    message_id: UUID,
+    data: ChatMessageUpdate,
+    db: AsyncSession = Depends(get_db_session),
+    current_user: User = Depends(get_current_active_user),
+):
+    return await chat_service.update_chat_message(db, current_user, session_id, message_id, data)
+
+
+@router.delete(
+    "/sessions/{session_id}/messages/{message_id}",
+    response_model=MessageResponse,
+    summary="Delete chat message",
+    description="Delete a single chat message from a session.",
+    responses={
+        401: {"description": "Not authenticated"},
+        404: {"description": "Session or message not found"},
+    },
+)
+async def delete_message(
+    session_id: UUID,
+    message_id: UUID,
+    db: AsyncSession = Depends(get_db_session),
+    current_user: User = Depends(get_current_active_user),
+):
+    await chat_service.delete_chat_message(db, current_user, session_id, message_id)
+    return MessageResponse(message="Chat message deleted")
+
+
 @router.patch(
     "/sessions/{session_id}",
     response_model=ChatSessionResponse,
@@ -135,28 +203,25 @@ async def add_messages(
     current_user: User = Depends(get_current_active_user),
 ):
     user_msgs = [m for m in messages if m.role == "user"]
-    system_msgs = [m for m in messages if m.role == "system"]
 
-    # Store all incoming messages first
     stored = await chat_service.add_messages(db, current_user, session_id, messages)
 
-    # If there are user messages, generate AI response
     if user_msgs:
         client = get_ai_client()
         if client.is_configured:
+            _step = ""
             try:
+                _step = "get_session"
                 conv_manager = ConversationManager(db, current_user)
                 session_obj = await conv_manager.get_session(session_id)
 
-                # Generate title for first message
-                if session_obj.title is None and user_msgs:
-                    await conv_manager.generate_title(session_obj, user_msgs[0].content)
-
+                _step = "build_ai_messages"
                 last_user_msg = user_msgs[-1].content
                 ai_messages = await conv_manager.build_ai_messages(
                     session_obj, last_user_msg, prompt_name="chat",
                 )
 
+                _step = "client.chat"
                 response = await client.chat(
                     messages=ai_messages,
                     user_id=str(current_user.id),
@@ -164,7 +229,7 @@ async def add_messages(
                     ip=request.client.host if request.client else None,
                 )
 
-                # Store assistant response with AI metadata
+                _step = "store_assistant"
                 assistant_stored = await chat_service.add_message_with_metadata(
                     db, current_user, session_id,
                     role="assistant",
@@ -181,8 +246,14 @@ async def add_messages(
                 )
                 stored.append(assistant_stored)
 
-                # Update session metadata
-                total_msg_count = len(session_obj.messages) + len(messages)
+                _step = "count_msgs"
+                from app.models.chat import ChatMessage as CM
+                count_result = await db.execute(
+                    select(sa_func.count()).select_from(CM).where(CM.session_id == session_id)
+                )
+                total_msg_count = count_result.scalar() or len(stored)
+
+                _step = "update_metadata"
                 await conv_manager.update_session_metadata(
                     session_obj,
                     total_tokens=response.token_usage.total_tokens,
@@ -190,14 +261,51 @@ async def add_messages(
                     completion_tokens=response.token_usage.completion_tokens,
                     model=response.model,
                 )
-                await conv_manager.maybe_extract_facts(session_obj, total_msg_count)
+                await safe_flush(db)
+
+                _step = "background_tasks"
+                asyncio.create_task(
+                    _background_tasks(session_id, current_user, session_obj, user_msgs[0].content, total_msg_count)
+                )
             except AIError:
                 raise
             except Exception as e:
-                logger.error("AI response generation failed for session %s: %s", session_id, str(e)[:300])
-                raise AIError(message="AI response generation failed", status_code=503)
+                logger.error("AI response generation failed at step '%s' for session %s: %s", _step, session_id, str(e)[:300])
+                raise AIError(message=f"AI response generation failed", status_code=503)
 
     return stored
+
+
+async def _background_tasks(
+    session_id: UUID,
+    user: User,
+    session_obj,
+    first_message: str,
+    total_msg_count: int,
+) -> None:
+    """Run title generation, summarization, and fact extraction in background."""
+    from app.core.database import async_session_factory
+
+    try:
+        async with async_session_factory() as bg_db:
+            bg_user = user
+            bg_conv = ConversationManager(bg_db, bg_user)
+
+            # Title generation (first message only)
+            if session_obj.title is None:
+                await bg_conv.generate_title(session_obj, first_message)
+
+            # Summarization (handled inside build_ai_messages -> load_memory)
+            # Only run if threshold exceeded, to avoid re-summarizing on every message
+            if total_msg_count > settings.AI_SUMMARY_THRESHOLD_MESSAGES:
+                await bg_conv.load_memory(session_obj)
+
+            # Fact extraction (every N messages)
+            await bg_conv.maybe_extract_facts(session_obj, total_msg_count)
+
+            await safe_flush(bg_db)
+    except Exception as e:
+        logger.warning("Background tasks failed for session %s: %s", session_id, str(e)[:200])
 
 
 @router.delete(

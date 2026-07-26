@@ -27,3 +27,16 @@ to_fix/
 -w
 .deployment_zip/
 local.settings.json
+
+# Generated runtime/debug artifacts
+logs/
+rdocs/
+
+# One-off data generation/import scratch files
+batch*.py
+build_all.py
+generate_careers.py
+fix_fields.py
+w.py
+writer.py
+careers_*.csv

@@ -19,6 +19,10 @@ class ChatSessionUpdate(BaseModel):
     is_archived: bool | None = None
 
 
+class ChatMessageUpdate(BaseModel):
+    content: str = Field(..., min_length=1)
+
+
 class ChatSessionResponse(BaseModel):
     id: UUID
     user_id: UUID
@@ -64,6 +68,14 @@ class ChatSessionDetailResponse(BaseModel):
 
 class ChatSessionListResponse(BaseModel):
     items: list[ChatSessionResponse]
+    total: int
+    page: int
+    page_size: int
+    total_pages: int
+
+
+class ChatHistoryResponse(BaseModel):
+    items: list[ChatMessageResponse]
     total: int
     page: int
     page_size: int

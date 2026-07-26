@@ -1,7 +1,7 @@
 import uuid
 
 from sqlalchemy import Boolean, ForeignKey, Integer, Numeric, String, Text, UniqueConstraint
-from sqlalchemy.dialects.postgresql import JSON, UUID
+from sqlalchemy.dialects.postgresql import JSON, JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
@@ -19,6 +19,22 @@ class Career(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     demand_level: Mapped[str | None] = mapped_column(String(50), nullable=True)
     required_education: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     typical_skills: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+
+    # Knowledge Base extended fields
+    category: Mapped[str | None] = mapped_column(String(255), nullable=True, index=True)
+    industry: Mapped[str | None] = mapped_column(String(255), nullable=True, index=True)
+    work_environment: Mapped[str | None] = mapped_column(Text, nullable=True)
+    weekly_hours: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    travel_requirement: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    stress_level: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    work_life_balance: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    automation_risk: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    salary_currency: Mapped[str | None] = mapped_column(String(10), nullable=True)
+    entry_level_salary: Mapped[float | None] = mapped_column(Numeric(12, 2), nullable=True)
+    mid_level_salary: Mapped[float | None] = mapped_column(Numeric(12, 2), nullable=True)
+    senior_level_salary: Mapped[float | None] = mapped_column(Numeric(12, 2), nullable=True)
+    highest_salary: Mapped[float | None] = mapped_column(Numeric(12, 2), nullable=True)
+    metadata_: Mapped[dict | None] = mapped_column("metadata", JSONB, nullable=True)
 
     career_skills: Mapped[list["CareerSkill"]] = relationship(back_populates="career")
     career_degrees: Mapped[list["CareerDegree"]] = relationship(back_populates="career")

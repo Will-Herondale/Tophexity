@@ -3,10 +3,11 @@
 import { useState, type FormEvent } from "react";
 import type { PortfolioItem, PortfolioItemCreatePayload } from "@/types/portfolio";
 import type { PortfolioItemType } from "@/lib/constants";
-import { PORTFOLIO_ITEM_TYPES, SKILL_PRESETS, DEFAULT_SKILL_LEVEL } from "@/lib/constants";
+import { PORTFOLIO_ITEM_TYPES, SKILL_PRESETS, SKILL_LEVELS, DEFAULT_SKILL_LEVEL } from "@/lib/constants";
 import Modal from "@/components/ui/Modal";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
+import { X, Plus, Check, ChevronsUpDown } from "lucide-react";
 
 interface PortfolioItemFormProps {
   item?: PortfolioItem;
@@ -48,6 +49,7 @@ export default function PortfolioItemForm({ item, onSave, onClose }: PortfolioIt
 
   const addSkill = (name: string) => {
     if (!name.trim()) return;
+    if (skills[name.trim()]) return;
     setSkills({ ...skills, [name.trim()]: DEFAULT_SKILL_LEVEL });
     setSkillInput("");
   };
@@ -57,6 +59,12 @@ export default function PortfolioItemForm({ item, onSave, onClose }: PortfolioIt
     delete next[name];
     setSkills(next);
   };
+
+  const setSkillLevel = (name: string, level: string) => {
+    setSkills({ ...skills, [name]: level });
+  };
+
+  const [levelPickerOpen, setLevelPickerOpen] = useState<string | null>(null);
 
   return (
     <Modal isOpen onClose={onClose} title={item ? "Edit Portfolio Item" : "Add Portfolio Item"}>
@@ -70,16 +78,14 @@ export default function PortfolioItemForm({ item, onSave, onClose }: PortfolioIt
         />
 
         <div>
-          <label className="mb-1 block text-sm font-medium" style={{ color: "#8a8a9a" }}>Type</label>
+          <label className="mb-1 block text-sm font-medium text-text-secondary">Type</label>
           <select
             value={itemType}
             onChange={(e) => setItemType(e.target.value as PortfolioItemType)}
             className="w-full rounded-lg border border-border bg-surface/30 px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-accent"
           >
             {PORTFOLIO_ITEM_TYPES.map((type) => (
-              <option key={type.value} value={type.value}>
-                {type.label}
-              </option>
+              <option key={type.value} value={type.value}>{type.label}</option>
             ))}
           </select>
         </div>
@@ -90,7 +96,7 @@ export default function PortfolioItemForm({ item, onSave, onClose }: PortfolioIt
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={3}
-            className="w-full rounded-lg border border-border bg-surface/30 px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-accent"
+            className="w-full rounded-lg border border-border bg-surface/30 px-3 py-2 text-sm text-foreground placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-accent resize-none"
             placeholder="What did you do? What did you learn?"
           />
         </div>
@@ -103,50 +109,94 @@ export default function PortfolioItemForm({ item, onSave, onClose }: PortfolioIt
         />
 
         <div>
-          <label className="mb-1 block text-sm font-medium" style={{ color: "#8a8a9a" }}>Skills Used</label>
-          <div className="mb-2 flex flex-wrap gap-1.5">
-            {Object.entries(skills).map(([skill, level]) => (
-              <span key={skill} className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium" style={{ backgroundColor: "#1E4FA3", color: "#ffffff" }}>
-                {skill} <span className="text-[10px] capitalize" style={{ color: "#5b9aff" }}>{level}</span>
-                <button type="button" onClick={() => removeSkill(skill)} className="ml-0.5 hover:text-white transition-colors" style={{ color: "#8a8a9a" }}>
-                  &times;
-                </button>
-              </span>
-            ))}
-          </div>
+          <label className="mb-1 block text-sm font-medium text-text-secondary">Skills Used</label>
+          {Object.keys(skills).length > 0 && (
+            <div className="mb-2 flex flex-wrap gap-1.5">
+              {Object.entries(skills).map(([skill, level]) => (
+                <div key={skill} className="group relative">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-accent/15 pl-2.5 pr-1.5 py-1 text-xs font-medium text-accent-light">
+                    {skill}
+                    <button
+                      type="button"
+                      onClick={() => setLevelPickerOpen(levelPickerOpen === skill ? null : skill)}
+                      className="flex items-center gap-0.5 rounded px-1 py-0.5 text-[10px] uppercase tracking-wider text-accent/60 hover:text-accent transition-colors"
+                    >
+                      {level}
+                      <ChevronsUpDown className="h-2.5 w-2.5" />
+                    </button>
+                    <button type="button" onClick={() => removeSkill(skill)}
+                      className="ml-0.5 rounded p-0.5 text-text-muted hover:text-red-400 hover:bg-red-500/10 transition-colors">
+                      <X className="h-3 w-3" />
+                    </button>
+                  </span>
+                  {levelPickerOpen === skill && (
+                    <div className="absolute top-full left-0 z-20 mt-1 w-36 rounded-lg border border-border bg-surface shadow-xl overflow-hidden">
+                      {SKILL_LEVELS.map((sl) => (
+                        <button
+                          key={sl.value}
+                          type="button"
+                          onClick={() => { setSkillLevel(skill, sl.value); setLevelPickerOpen(null); }}
+                          className={`flex w-full items-center gap-2 px-3 py-2 text-xs transition-colors ${
+                            level === sl.value
+                              ? "bg-accent/15 text-accent-light"
+                              : "text-text-secondary hover:bg-surface-light/30 hover:text-foreground"
+                          }`}
+                        >
+                          {level === sl.value && <Check className="h-3 w-3 shrink-0" />}
+                          <span className={level === sl.value ? "" : "ml-5"}>{sl.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
           <div className="relative">
-            <input
-              type="text"
-              value={skillInput}
-              onChange={(e) => setSkillInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && skillInput.trim()) {
-                  e.preventDefault();
-                  addSkill(skillInput);
-                }
-              }}
-              placeholder="Type a skill..."
-              className="w-full rounded-lg border border-border bg-surface/30 px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-accent"
-            />
+            <div className="relative">
+              <input
+                type="text"
+                value={skillInput}
+                onChange={(e) => setSkillInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && skillInput.trim()) {
+                    e.preventDefault();
+                    addSkill(skillInput);
+                  }
+                }}
+                placeholder="Type a skill name and press Enter..."
+                className="w-full rounded-lg border border-border bg-surface/30 pl-3 pr-10 py-2 text-sm text-foreground placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-accent"
+              />
+              {skillInput.trim() && !skills[skillInput.trim()] && (
+                <button
+                  type="button"
+                  onClick={() => addSkill(skillInput)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1 text-accent hover:bg-accent/10 transition-colors"
+                >
+                  <Plus className="h-4 w-4" />
+                </button>
+              )}
+            </div>
             {skillInput && suggestions.length > 0 && (
-              <div className="absolute top-full left-0 z-10 mt-1 max-h-32 w-full overflow-y-auto rounded-lg border shadow-lg" style={{ borderColor: "rgba(30, 79, 163, 0.15)", backgroundColor: "#0d214f" }}>
-                {suggestions.slice(0, 5).map((s) => (
-                  <button key={s} type="button" onClick={() => addSkill(s)} className="block w-full px-3 py-2 text-left text-sm transition-colors" style={{ color: "#f0f0f0" }}
-                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#112a5e")}
-                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#0d214f")}>
+              <div className="absolute top-full left-0 z-10 mt-1 w-full overflow-y-auto rounded-lg border border-border bg-surface shadow-xl">
+                {suggestions.slice(0, 6).map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => addSkill(s)}
+                    className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-text-secondary hover:bg-surface-light/30 hover:text-foreground transition-colors"
+                  >
+                    <Plus className="h-3 w-3 shrink-0 text-accent" />
                     {s}
                   </button>
                 ))}
               </div>
             )}
           </div>
-          <p className="mt-1 text-xs" style={{ color: "#5a5a6a" }}>Default level: {DEFAULT_SKILL_LEVEL}. Add a skill to edit its level.</p>
         </div>
 
         <div className="flex justify-end gap-3 pt-2">
-          <Button type="button" variant="outline" onClick={onClose}>
-            Cancel
-          </Button>
+          <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
           <Button type="submit" disabled={saving || !title.trim()}>
             {saving ? "Saving..." : item ? "Update" : "Add Item"}
           </Button>

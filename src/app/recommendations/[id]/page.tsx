@@ -38,7 +38,7 @@ export default function RecommendationDetailPage() {
   if (!rec) return null;
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8 bg-background">
+    <div className="mx-auto max-w-3xl px-4 py-8">
       <button onClick={() => router.push("/recommendations")} className="mb-6 flex items-center gap-2 text-sm transition-colors hover:text-foreground text-text-secondary">
         <ArrowLeft className="h-4 w-4" /> Back to Recommendations
       </button>
@@ -92,7 +92,7 @@ function RankedItem({ item, onViewDetails }: { item: RecommendationItem; onViewD
                 {item.career?.title || "Career"}
               </h3>
               {item.career?.description && (
-                <p className="mt-1 text-xs line-clamp-2 text-text-secondary">{item.career.description}</p>
+                <p className="mt-1 text-xs text-text-secondary [display:-webkit-box] [-webkit-line-clamp:2] [-webkit-box-orient:vertical] overflow-hidden">{item.career.description}</p>
               )}
             </div>
             <span className={`ml-3 rounded-full px-3 py-1 text-sm font-bold`} style={scoreStyle}>

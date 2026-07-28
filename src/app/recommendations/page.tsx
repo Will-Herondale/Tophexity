@@ -52,7 +52,7 @@ export default function RecommendationsPage() {
   };
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8 bg-background">
+    <div className="mx-auto max-w-3xl px-4 py-8">
       <div className="mb-8 flex items-center justify-between">
         <div>
           <h1 className="font-[family-name:var(--font-display)] text-2xl font-bold text-foreground">Recommendations</h1>
@@ -81,7 +81,7 @@ export default function RecommendationsPage() {
       )}
 
       {genError && (
-        <div className="mb-6 rounded-xl border border-red-300 bg-red-50 p-4 text-sm text-red-700">
+        <div className="mb-6 rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-400">
           {genError}
         </div>
       )}

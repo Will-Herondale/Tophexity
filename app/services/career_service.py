@@ -271,3 +271,21 @@ async def delete_career(db: AsyncSession, career_id: UUID) -> None:
         await db.execute(sa_delete(junction_model).where(junction_model.career_id == career_id))
     await db.delete(career)
     await safe_flush(db)
+
+
+async def find_career_by_title(
+    db: AsyncSession, title: str
+) -> Career | None:
+    """Find a career by title using fuzzy matching."""
+    result = await db.execute(
+        select(Career).where(Career.title.ilike(f"%{title}%")).limit(1)
+    )
+    career = result.scalar_one_or_none()
+    if not career:
+        words = title.split()
+        if words:
+            result = await db.execute(
+                select(Career).where(Career.title.ilike(f"%{words[0]}%")).limit(1)
+            )
+            career = result.scalar_one_or_none()
+    return career

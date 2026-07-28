@@ -272,15 +272,6 @@ class TestRetrievalEngine:
             assert results == []
 
     @pytest.mark.asyncio
-    async def test_get_career_context_for_ai_empty(self):
-        from app.services.retrieval_engine import get_career_context_for_ai
-
-        mock_db = AsyncMock()
-        with patch("app.services.retrieval_engine.semantic_search", new_callable=AsyncMock, return_value=[]):
-            result = await get_career_context_for_ai(mock_db, "test query")
-            assert result == ""
-
-    @pytest.mark.asyncio
     async def test_get_relevant_knowledge_empty(self):
         from app.services.retrieval_engine import get_relevant_knowledge
 
@@ -320,33 +311,6 @@ class TestIntelligenceAPI:
                 "/v1/intelligence/embeddings/rebuild",
                 json={"source_type": "career"},
             )
-            assert resp.status_code == 200
-
-    @pytest.mark.anyio
-    async def test_recommendations_list(self, auth_client):
-        with patch("app.api.v1.intelligence.recommendation_service") as mock_svc:
-            mock_svc.list_recommendations = AsyncMock(return_value={
-                "items": [], "total": 0, "page": 1, "page_size": 20, "total_pages": 0,
-            })
-            resp = await auth_client.get("/v1/intelligence/recommendations")
-            assert resp.status_code == 200
-
-    @pytest.mark.anyio
-    async def test_roadmaps_list(self, auth_client):
-        with patch("app.api.v1.intelligence.roadmap_service") as mock_svc:
-            mock_svc.list_roadmaps = AsyncMock(return_value={
-                "items": [], "total": 0, "page": 1, "page_size": 20, "total_pages": 0,
-            })
-            resp = await auth_client.get("/v1/intelligence/roadmaps")
-            assert resp.status_code == 200
-
-    @pytest.mark.anyio
-    async def test_backups_list(self, auth_client):
-        with patch("app.api.v1.intelligence.backup_service") as mock_svc:
-            mock_svc.list_backup_plans = AsyncMock(return_value={
-                "items": [], "total": 0, "page": 1, "page_size": 20, "total_pages": 0,
-            })
-            resp = await auth_client.get("/v1/intelligence/backups")
             assert resp.status_code == 200
 
     @pytest.mark.anyio

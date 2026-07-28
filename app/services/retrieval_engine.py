@@ -240,18 +240,6 @@ async def debug_retrieval(
     }
 
 
-async def get_career_context_for_ai(
-    db: AsyncSession, query: str, max_tokens: int = 3000
-) -> str:
-    """Get compressed career context for AI prompts."""
-    results = await semantic_search(
-        db, query, source_types=["career"], top_k=5, score_threshold=0.3
-    )
-    if not results:
-        return ""
-    return compress_context(results, max_tokens=max_tokens)
-
-
 async def get_relevant_knowledge(
     db: AsyncSession,
     query: str,

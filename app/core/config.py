@@ -68,16 +68,10 @@ class Settings(BaseSettings):
     AI_PROMPT_CACHE_TTL: float = 300.0
     AI_PROMPT_DEBUG_ENABLED: bool = True
 
-    RECOMMENDATION_SERVICE_URL: str = "http://localhost:8001"
-
-    CORS_ORIGINS: list[str] = ["http://localhost:3000"]
+    CORS_ORIGINS: list[str] = ["http://localhost:3000", "https://tophexity-frontend.azurewebsites.net"]
 
     LOG_LEVEL: str = "INFO"
     LOG_JSON_MODE: bool = False
-
-    @property
-    def jwt_secret_is_default(self) -> bool:
-        return self.JWT_SECRET_KEY == "CHANGE_ME_IN_PRODUCTION"
 
     # Circuit breaker
     AI_CIRCUIT_BREAKER_THRESHOLD: int = 10

@@ -110,7 +110,7 @@ Respond with JSON:
 
     ai_client = get_ai_client()
     try:
-        response = await ai_client.generate_json(
+        response = await ai_client.generate(
             prompt=prompt,
             system_prompt=ROADMAP_SYSTEM_PROMPT,
             user_id=str(user.id),

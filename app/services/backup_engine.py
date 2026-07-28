@@ -16,6 +16,7 @@ from app.models.career import Career
 from app.models.profile import Profile
 from app.models.user import User
 from app.services.ai.client import get_ai_client
+from app.services.career_service import find_career_by_title
 from app.services.retrieval_engine import get_relevant_knowledge
 from app.utils.exceptions import BadRequestException, NotFoundException, safe_flush
 
@@ -108,7 +109,7 @@ Respond with JSON:
 
     ai_client = get_ai_client()
     try:
-        response = await ai_client.generate_json(
+        response = await ai_client.generate(
             prompt=prompt,
             system_prompt=BACKUP_SYSTEM_PROMPT,
             user_id=str(user.id),
@@ -129,15 +130,7 @@ Respond with JSON:
 
     for scenario_data in parsed.get("scenarios", [])[:max_scenarios]:
         career_title = scenario_data.get("career_title", "")
-        alt_result = await db.execute(
-            select(Career).where(Career.title.ilike(f"%{career_title}%")).limit(1)
-        )
-        alt_career = alt_result.scalar_one_or_none()
-        if not alt_career:
-            alt_result = await db.execute(
-                select(Career).where(Career.title.ilike(f"%{career_title.split()[0]}%")).limit(1)
-            )
-            alt_career = alt_result.scalar_one_or_none()
+        alt_career = await find_career_by_title(db, career_title)
         if not alt_career:
             continue
 

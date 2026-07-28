@@ -1,9 +1,8 @@
 """AI test endpoint, AI health endpoint, and prompt management endpoints."""
 
 from fastapi import APIRouter, Depends, Request
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import get_current_active_user, get_db_session
+from app.api.deps import get_current_active_user
 from app.models.user import User
 from app.schemas.ai import PromptListResponse, PromptMetadata, PromptTestResponse
 from app.services.ai.client import get_ai_client
@@ -35,7 +34,6 @@ router = APIRouter()
 )
 async def ai_test(
     request: Request,
-    db: AsyncSession = Depends(get_db_session),
     current_user: User = Depends(get_current_active_user),
 ):
     body = await request.json()

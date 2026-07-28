@@ -10,8 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_active_user, get_db_session
 from app.models.user import User
-from app.schemas.backup import BackupPlanListResponse, BackupPlanResponse
-from app.schemas.common import MessageResponse
+
 from app.schemas.intelligence import (
     CareerComparisonRequest,
     CareerComparisonResponse,
@@ -31,42 +30,11 @@ from app.schemas.intelligence import (
     RetrievalResult,
     SemanticSearchRequest,
 )
-from app.schemas.recommendation import RecommendationListResponse, RecommendationResponse
-from app.schemas.roadmap import RoadmapListResponse, RoadmapResponse
 from app.services import recommendation_engine, roadmap_engine, backup_engine
-from app.services import recommendation_service, roadmap_service, backup_service
+from app.services import roadmap_service
 from app.services import embedding_service, retrieval_engine
 
 router = APIRouter()
-
-
-@router.get(
-    "/recommendations",
-    response_model=RecommendationListResponse,
-    summary="List user's recommendation history",
-    description="Get all career recommendations generated for the current user.",
-)
-async def list_recommendations(
-    page: int = Query(1, ge=1),
-    page_size: int = Query(20, ge=1, le=100),
-    db: AsyncSession = Depends(get_db_session),
-    user: User = Depends(get_current_active_user),
-):
-    return await recommendation_service.list_recommendations(db, user, page, page_size)
-
-
-@router.get(
-    "/recommendations/{recommendation_id}",
-    response_model=RecommendationResponse,
-    summary="Get recommendation details",
-    description="Retrieve a specific recommendation with all its items.",
-)
-async def get_recommendation(
-    recommendation_id: UUID,
-    db: AsyncSession = Depends(get_db_session),
-    user: User = Depends(get_current_active_user),
-):
-    return await recommendation_service.get_recommendation(db, user, recommendation_id)
 
 
 @router.post(
@@ -132,35 +100,6 @@ async def compare_careers(
     return CareerComparisonResponse(**result)
 
 
-@router.get(
-    "/roadmaps",
-    response_model=RoadmapListResponse,
-    summary="List user's roadmaps",
-    description="Get all roadmaps generated for the current user.",
-)
-async def list_roadmaps(
-    page: int = Query(1, ge=1),
-    page_size: int = Query(20, ge=1, le=100),
-    db: AsyncSession = Depends(get_db_session),
-    user: User = Depends(get_current_active_user),
-):
-    return await roadmap_service.list_roadmaps(db, user, page, page_size)
-
-
-@router.get(
-    "/roadmaps/{roadmap_id}",
-    response_model=RoadmapResponse,
-    summary="Get roadmap details",
-    description="Retrieve a specific roadmap with all its steps.",
-)
-async def get_roadmap(
-    roadmap_id: UUID,
-    db: AsyncSession = Depends(get_db_session),
-    user: User = Depends(get_current_active_user),
-):
-    return await roadmap_service.get_roadmap(db, user, roadmap_id)
-
-
 @router.post(
     "/roadmaps/generate",
     response_model=GenerateRoadmapResponse,
@@ -211,35 +150,6 @@ async def regenerate_roadmap(
         steps=[{"title": s.title, "description": s.description, "step_order": s.step_order, "duration_months": s.duration_months, "resources": s.resources} for s in rm.steps],
         generated_at=rm.created_at,
     )
-
-
-@router.get(
-    "/backups",
-    response_model=BackupPlanListResponse,
-    summary="List user's backup plans",
-    description="Get all backup plans generated for the current user.",
-)
-async def list_backups(
-    page: int = Query(1, ge=1),
-    page_size: int = Query(20, ge=1, le=100),
-    db: AsyncSession = Depends(get_db_session),
-    user: User = Depends(get_current_active_user),
-):
-    return await backup_service.list_backup_plans(db, user, page, page_size)
-
-
-@router.get(
-    "/backups/{backup_id}",
-    response_model=BackupPlanResponse,
-    summary="Get backup plan details",
-    description="Retrieve a specific backup plan with all its scenarios.",
-)
-async def get_backup(
-    backup_id: UUID,
-    db: AsyncSession = Depends(get_db_session),
-    user: User = Depends(get_current_active_user),
-):
-    return await backup_service.get_backup_plan(db, user, backup_id)
 
 
 @router.post(

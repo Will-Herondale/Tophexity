@@ -21,6 +21,7 @@ from app.models.profile import Profile
 from app.models.recommendation import Recommendation, RecommendationItem
 from app.models.user import User
 from app.services.ai.client import get_ai_client
+from app.services.career_service import find_career_by_title
 from app.services.retrieval_engine import get_relevant_knowledge, compress_context, semantic_search
 from app.utils.exceptions import BadRequestException, safe_flush
 
@@ -118,7 +119,7 @@ Respond with a JSON object:
 
     ai_client = get_ai_client()
     try:
-        response = await ai_client.generate_json(
+        response = await ai_client.generate(
             prompt=prompt,
             system_prompt=RECOMMENDATION_SYSTEM_PROMPT,
             user_id=str(user.id),
@@ -140,15 +141,7 @@ Respond with a JSON object:
     rec_items = parsed.get("recommendations", [])
     for idx, item in enumerate(rec_items[:max_results]):
         career_title = item.get("career_title", "")
-        career_result = await db.execute(
-            select(Career).where(Career.title.ilike(f"%{career_title}%")).limit(1)
-        )
-        career = career_result.scalar_one_or_none()
-        if not career:
-            career_result = await db.execute(
-                select(Career).where(Career.title.ilike(f"%{career_title.split()[0]}%")).limit(1)
-            )
-            career = career_result.scalar_one_or_none()
+        career = await find_career_by_title(db, career_title)
         if not career:
             continue
 
@@ -267,7 +260,7 @@ Provide a detailed comparison with JSON:
 
     ai_client = get_ai_client()
     try:
-        response = await ai_client.generate_json(prompt=prompt, user_id=None)
+        response = await ai_client.generate(prompt=prompt, user_id=None)
         parsed = json.loads(response)
     except Exception as e:
         parsed = {

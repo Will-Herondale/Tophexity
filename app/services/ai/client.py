@@ -139,27 +139,6 @@ class AIClient:
         )
         return response.content
 
-    async def generate_json(
-        self,
-        prompt: str,
-        system_prompt: str | None = None,
-        temperature: float | None = None,
-        max_tokens: int | None = None,
-        user_id: str | None = None,
-    ) -> str:
-        messages = []
-        if system_prompt:
-            messages.append({"role": "system", "content": system_prompt})
-        messages.append({"role": "user", "content": prompt})
-
-        response = await self.chat(
-            messages=messages,
-            temperature=temperature,
-            max_tokens=max_tokens,
-            user_id=user_id,
-        )
-        return response.content
-
     async def health(self) -> dict:
         if not self.is_configured:
             return {

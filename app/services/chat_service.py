@@ -275,11 +275,8 @@ async def delete_chat_session(
     session = result.scalar_one_or_none()
     if not session:
         raise NotFoundException(detail="Chat session not found")
-    msg_result = await db.execute(
-        select(ChatMessage).where(ChatMessage.session_id == session.id)
-    )
-    for msg in msg_result.scalars().all():
-        await db.delete(msg)
+    from sqlalchemy import delete as sa_delete
+    await db.execute(sa_delete(ChatMessage).where(ChatMessage.session_id == session.id))
     await db.delete(session)
     await safe_flush(db)
 

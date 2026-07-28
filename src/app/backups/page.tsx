@@ -66,8 +66,9 @@ export default function BackupsPage() {
       setCareerResults([]);
       fetchPlans(1);
       setPage(1);
-    } catch (err: any) {
-      setGenError(err?.response?.data?.detail || err?.message || "Failed to generate backup plan");
+    } catch (err) {
+      const e = err as { response?: { data?: { detail?: string } }; message?: string };
+      setGenError(e?.response?.data?.detail || e?.message || "Failed to generate backup plan");
     } finally {
       setGenerating(false);
     }

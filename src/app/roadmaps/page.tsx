@@ -66,8 +66,9 @@ export default function RoadmapsPage() {
       setCareerResults([]);
       fetchRoadmaps(1);
       setPage(1);
-    } catch (err: any) {
-      setGenError(err?.response?.data?.detail || err?.message || "Failed to generate roadmap");
+    } catch (err) {
+      const e = err as { response?: { data?: { detail?: string } }; message?: string };
+      setGenError(e?.response?.data?.detail || e?.message || "Failed to generate roadmap");
     } finally {
       setGenerating(false);
     }

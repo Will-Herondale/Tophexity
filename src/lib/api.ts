@@ -3,8 +3,8 @@ import type { AuthTokens, LoginPayload, RegisterPayload } from "@/types/auth";
 import type { Profile, ProfileCreatePayload, ProfileUpdatePayload, ProfileVersion } from "@/types/profile";
 import type { CareerDetail, CareerListResponse, CareerSearchParams } from "@/types/career";
 import type { Recommendation, RecommendationListResponse } from "@/types/recommendation";
-import type { Roadmap, RoadmapListResponse, RoadmapCreatePayload } from "@/types/roadmap";
-import type { BackupPlan, BackupPlanListResponse, BackupPlanCreatePayload } from "@/types/backup";
+import type { Roadmap, RoadmapListResponse } from "@/types/roadmap";
+import type { BackupPlan, BackupPlanListResponse } from "@/types/backup";
 import type { PortfolioItem, PortfolioItemCreatePayload, PortfolioItemUpdatePayload, PortfolioListResponse } from "@/types/portfolio";
 import type { ChatSession, ChatMessageCreatePayload, ChatSessionUpdatePayload, ChatStats, ChatExportResponse, ChatRebuildMemoryResponse } from "@/types/chat";
 

@@ -43,8 +43,9 @@ export default function RecommendationsPage() {
       await generateRecommendation({ include_profile: true, max_results: 5 });
       fetchRecs(1);
       setPage(1);
-    } catch (err: any) {
-      setGenError(err?.response?.data?.detail || err?.message || "Failed to generate recommendations");
+    } catch (err) {
+      const e = err as { response?: { data?: { detail?: string } }; message?: string };
+      setGenError(e?.response?.data?.detail || e?.message || "Failed to generate recommendations");
     } finally {
       setGenerating(false);
     }

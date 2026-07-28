@@ -2,7 +2,7 @@ import axios from "axios";
 import type { AuthTokens, LoginPayload, RegisterPayload } from "@/types/auth";
 import type { Profile, ProfileCreatePayload, ProfileUpdatePayload, ProfileVersion } from "@/types/profile";
 import type { CareerDetail, CareerListResponse, CareerSearchParams } from "@/types/career";
-import type { Recommendation, RecommendationListResponse, RecommendationCreatePayload } from "@/types/recommendation";
+import type { Recommendation, RecommendationListResponse } from "@/types/recommendation";
 import type { Roadmap, RoadmapListResponse, RoadmapCreatePayload } from "@/types/roadmap";
 import type { BackupPlan, BackupPlanListResponse, BackupPlanCreatePayload } from "@/types/backup";
 import type { PortfolioItem, PortfolioItemCreatePayload, PortfolioItemUpdatePayload, PortfolioListResponse } from "@/types/portfolio";
@@ -166,11 +166,6 @@ export async function importCareers(careers: Record<string, unknown>[]) {
   return data;
 }
 
-export async function createRecommendation(payload: RecommendationCreatePayload) {
-  const { data } = await api.post("/recommendations", payload);
-  return data;
-}
-
 export async function getRecommendationsHistory(page = 1, pageSize = 10): Promise<RecommendationListResponse> {
   const { data } = await api.get("/recommendations/history", { params: { page, page_size: pageSize } });
   return data;
@@ -279,11 +274,6 @@ export async function sendChatMessages(sessionId: string, messages: ChatMessageC
 
 export async function deleteChatSession(sessionId: string) {
   const { data } = await api.delete(`/chat/sessions/${sessionId}`);
-  return data;
-}
-
-export async function testAi(message?: string) {
-  const { data } = await api.post("/ai/test", { message });
   return data;
 }
 

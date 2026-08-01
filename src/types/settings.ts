@@ -23,7 +23,7 @@ export const DEFAULT_SETTINGS: UserSettings = {
     { id: "backups", label: "Backup Plans", href: "/backups", icon: "Shield", visible: true, order: 6 },
     { id: "chat", label: "Chat", href: "/chat", icon: "MessageSquare", visible: true, order: 7 },
     { id: "settings", label: "Settings", href: "/settings", icon: "Settings", visible: true, order: 8 },
-    { id: "dbviewer", label: "DB Viewer", href: "/system/db", icon: "Database", visible: false, order: 9 },
+    { id: "dbviewer", label: "DB Viewer", href: "/system/db", icon: "Database", visible: true, order: 9 },
   ],
   theme: "dark",
 };

@@ -1,10 +1,12 @@
 "use client";
 
+import { usePageTitle } from "@/hooks/usePageTitle";
 import SettingsForm from "@/components/settings/SettingsForm";
 import { Settings } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function SettingsPage() {
+  usePageTitle("Settings");
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
       <motion.div

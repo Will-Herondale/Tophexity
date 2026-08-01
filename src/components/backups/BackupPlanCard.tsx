@@ -2,15 +2,14 @@
 
 import type { BackupPlan } from "@/types/backup";
 import Card from "@/components/ui/Card";
-import { Shield, ChevronRight, Calendar, XCircle } from "lucide-react";
+import { Shield, ChevronRight, Calendar } from "lucide-react";
 
 interface BackupPlanCardProps {
   plan: BackupPlan;
   onClick: (id: string) => void;
-  onCancel?: (id: string) => void;
 }
 
-export default function BackupPlanCard({ plan, onClick, onCancel }: BackupPlanCardProps) {
+export default function BackupPlanCard({ plan, onClick }: BackupPlanCardProps) {
   const isCancelled = plan.status === "cancelled";
 
   return (
@@ -41,18 +40,7 @@ export default function BackupPlanCard({ plan, onClick, onCancel }: BackupPlanCa
             </span>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          {!isCancelled && onCancel && (
-            <button
-              onClick={(e) => { e.stopPropagation(); onCancel(plan.id); }}
-              className="rounded-md p-1.5 text-text-muted hover:text-red-400 hover:bg-red-500/10 transition-colors"
-              title="Cancel plan"
-            >
-              <XCircle className="h-4 w-4" />
-            </button>
-          )}
-          {!isCancelled && <ChevronRight className="h-5 w-5 text-text-muted" />}
-        </div>
+        {!isCancelled && <ChevronRight className="h-5 w-5 text-text-muted" />}
       </div>
     </Card>
   );

@@ -8,14 +8,17 @@ import { login as apiLogin } from "@/lib/api";
 import { APP_NAME } from "@/lib/constants";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
-import { LogIn } from "lucide-react";
+import { usePageTitle } from "@/hooks/usePageTitle";
+import { LogIn, Eye, EyeOff } from "lucide-react";
 
 export default function LoginForm() {
+  usePageTitle("Sign In");
   const router = useRouter();
   const searchParams = useSearchParams();
   const { setUser } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -75,18 +78,36 @@ export default function LoginForm() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            autoComplete="email"
             className="border-border bg-background/50 text-foreground placeholder:text-text-muted focus:border-accent focus:ring-accent/30"
           />
 
-          <Input
-            label="Password"
-            type="password"
-            placeholder="Enter your password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            className="border-border bg-background/50 text-foreground placeholder:text-text-muted focus:border-accent focus:ring-accent/30"
-          />
+          <div className="relative">
+            <Input
+              label="Password"
+              type={showPassword ? "text" : "password"}
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              autoComplete="current-password"
+              className="border-border bg-background/50 text-foreground placeholder:text-text-muted focus:border-accent focus:ring-accent/30"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-[34px] text-text-muted hover:text-foreground transition-colors"
+              tabIndex={-1}
+            >
+              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
+          </div>
+
+          <div className="flex justify-end">
+            <Link href="/forgot-password" className="text-xs font-medium text-accent hover:text-accent-light transition-colors">
+              Forgot password?
+            </Link>
+          </div>
 
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? (

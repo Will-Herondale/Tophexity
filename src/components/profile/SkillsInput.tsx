@@ -20,10 +20,18 @@ export default function SkillsInput({ value, onChange }: SkillsInputProps) {
     .flat()
     .filter((s) => s.toLowerCase().includes(input.toLowerCase()) && !value[s]);
 
-  const addSkill = useCallback(
-    (name: string, level: SkillLevel = DEFAULT_SKILL_LEVEL) => {
-      if (!name.trim()) return;
-      onChange({ ...value, [name.trim()]: level });
+  const addSkills = useCallback(
+    (raw: string, level: SkillLevel = DEFAULT_SKILL_LEVEL) => {
+      const names = raw
+        .split(/[,;\n]+/)
+        .map((s) => s.trim())
+        .filter(Boolean);
+      if (names.length === 0) return;
+      const next = { ...value };
+      names.forEach((name) => {
+        if (!next[name]) next[name] = level;
+      });
+      onChange(next);
       setInput("");
       inputRef.current?.focus();
     },
@@ -108,7 +116,7 @@ export default function SkillsInput({ value, onChange }: SkillsInputProps) {
             onKeyDown={(e) => {
               if (e.key === "Enter" && input.trim()) {
                 e.preventDefault();
-                addSkill(input);
+                addSkills(input);
               }
             }}
             placeholder="Type a skill name..."
@@ -120,7 +128,7 @@ export default function SkillsInput({ value, onChange }: SkillsInputProps) {
                 <button
                   key={s}
                   type="button"
-                  onClick={() => addSkill(s)}
+                  onClick={() => addSkills(s)}
                   className="block w-full px-3 py-2 text-left text-sm text-foreground hover:bg-accent/15"
                 >
                   {s}
@@ -131,7 +139,7 @@ export default function SkillsInput({ value, onChange }: SkillsInputProps) {
         </div>
         <button
           type="button"
-          onClick={() => input.trim() && addSkill(input)}
+          onClick={() => input.trim() && addSkills(input)}
           className="rounded-lg bg-accent px-3 py-2 text-sm font-medium text-white hover:bg-accent/80"
         >
           <Plus className="h-4 w-4" />
@@ -157,7 +165,7 @@ export default function SkillsInput({ value, onChange }: SkillsInputProps) {
                     <button
                       key={skill}
                       type="button"
-                      onClick={() => addSkill(skill)}
+                      onClick={() => addSkills(skill)}
                       className="rounded-full border border-border bg-background/40 px-2.5 py-1 text-xs text-text-secondary transition-colors hover:border-accent/40 hover:bg-accent/15 hover:text-accent"
                     >
                       + {skill}

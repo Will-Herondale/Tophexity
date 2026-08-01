@@ -8,11 +8,14 @@ import PortfolioGrid from "@/components/portfolio/PortfolioGrid";
 import PortfolioItemForm from "@/components/portfolio/PortfolioItemForm";
 import Button from "@/components/ui/Button";
 import Modal from "@/components/ui/Modal";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import { Plus, FolderOpen, Search } from "lucide-react";
 
 export default function PortfolioPage() {
+  usePageTitle("Portfolio");
   const [items, setItems] = useState<PortfolioItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [filter, setFilter] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [editItem, setEditItem] = useState<PortfolioItem | null>(null);
@@ -25,8 +28,8 @@ export default function PortfolioPage() {
     const params: { page: number; page_size: number; item_type?: string } = { page, page_size: 12 };
     if (filter) params.item_type = filter;
     getPortfolioItems(params)
-      .then((data) => { if (!cancelled) { setItems(data.items); setTotalPages(data.total_pages); } })
-      .catch(() => {})
+      .then((data) => { if (!cancelled) { setFetchError(null); setItems(data.items); setTotalPages(data.total_pages); } })
+      .catch(() => { if (!cancelled) setFetchError("Failed to load portfolio items"); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   }, [page, filter]);
@@ -83,6 +86,12 @@ export default function PortfolioPage() {
           </button>
         ))}
       </div>
+
+      {fetchError && (
+        <div className="mb-6 rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-400">
+          {fetchError}
+        </div>
+      )}
 
       {loading ? (
         <div className="flex min-h-[300px] items-center justify-center">

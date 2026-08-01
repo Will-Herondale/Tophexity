@@ -23,6 +23,7 @@ export interface LoginPayload {
 export interface RegisterPayload {
   email: string;
   password: string;
+  full_name?: string;
 }
 
 export interface ChangePasswordPayload {

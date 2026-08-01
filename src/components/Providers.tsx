@@ -6,6 +6,8 @@ import { ProfileProvider } from "@/contexts/ProfileContext";
 import { SettingsProvider } from "@/contexts/SettingsContext";
 import { useAuthInit } from "@/hooks/useAuthInit";
 import ThemeProvider from "@/components/ThemeProvider";
+import ErrorBoundary from "@/components/ErrorBoundary";
+import { ToastProvider } from "@/contexts/ToastContext";
 
 function AuthInit() {
   useAuthInit();
@@ -14,15 +16,19 @@ function AuthInit() {
 
 export default function Providers({ children }: { children: ReactNode }) {
   return (
-    <AuthProvider>
-      <AuthInit />
-      <SettingsProvider>
-        <ThemeProvider>
-          <ProfileProvider>
-            {children}
-          </ProfileProvider>
-        </ThemeProvider>
-      </SettingsProvider>
-    </AuthProvider>
+    <ErrorBoundary>
+      <ToastProvider>
+        <AuthProvider>
+          <AuthInit />
+          <SettingsProvider>
+            <ThemeProvider>
+              <ProfileProvider>
+                {children}
+              </ProfileProvider>
+            </ThemeProvider>
+          </SettingsProvider>
+        </AuthProvider>
+      </ToastProvider>
+    </ErrorBoundary>
   );
 }

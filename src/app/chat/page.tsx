@@ -9,6 +9,7 @@ import ChatArea from "@/components/chat/ChatArea";
 import ChatStatsCard from "@/components/chat/ChatStatsCard";
 import Modal from "@/components/ui/Modal";
 import Button from "@/components/ui/Button";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 function buildCareerContext(title: string, description: string | null, salary: number | null, demand: string | null, skills: Record<string, string> | null): string {
   const lines = [`I want to learn about the "${title}" career path.`];
@@ -34,6 +35,7 @@ function buildCompareContext(careers: { title: string; description: string | nul
 }
 
 function ChatContent() {
+  usePageTitle("Chat");
   const searchParams = useSearchParams();
   const careerParam = searchParams.get("career");
   const compareParam = searchParams.get("compare");
@@ -45,16 +47,13 @@ function ChatContent() {
   const [initialMessage, setInitialMessage] = useState<string | undefined>(undefined);
   const [prefillLoading, setPrefillLoading] = useState(false);
 
-  const fetchSessions = useCallback(async () => {
-    try {
-      const data = await getChatSessions();
-      setSessions(data.items || []);
-    } catch {}
-  }, []);
-
   useEffect(() => {
-    fetchSessions();
-  }, [fetchSessions]);
+    let cancelled = false;
+    getChatSessions()
+      .then((data) => { if (!cancelled) setSessions(data.items || []); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
 
   useEffect(() => {
     if (!careerParam && !compareParam && !recommendParam) return;

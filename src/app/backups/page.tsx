@@ -8,12 +8,23 @@ import type { Career } from "@/types/career";
 import BackupPlanCard from "@/components/backups/BackupPlanCard";
 import Button from "@/components/ui/Button";
 import Modal from "@/components/ui/Modal";
+import GenerationProgress from "@/components/ui/GenerationProgress";
+import { useGenerationProgress } from "@/hooks/useGenerationProgress";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import { Shield, RefreshCw, Sparkles, Search } from "lucide-react";
 
+function newProgressToken(): string {
+  return typeof crypto !== "undefined" && "randomUUID" in crypto
+    ? crypto.randomUUID()
+    : `pg-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
 export default function BackupsPage() {
+  usePageTitle("Backup Plans");
   const router = useRouter();
   const [plans, setPlans] = useState<BackupPlan[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
@@ -24,21 +35,24 @@ export default function BackupsPage() {
   const [searching, setSearching] = useState(false);
   const [selectedCareer, setSelectedCareer] = useState<Career | null>(null);
   const [generating, setGenerating] = useState(false);
+  const [progressToken, setProgressToken] = useState<string | null>(null);
+  const { progress, elapsedSeconds, stop } = useGenerationProgress(progressToken);
   const [genError, setGenError] = useState<string | null>(null);
 
   const fetchPlans = useCallback((p: number) => {
     setLoading(true);
+    setFetchError(null);
     getBackupPlansHistory(p)
       .then((data) => { setPlans(data.items); setTotalPages(data.total_pages); })
-      .catch(() => {})
+      .catch(() => setFetchError("Failed to load backup plans"))
       .finally(() => setLoading(false));
   }, []);
 
   useEffect(() => {
     let cancelled = false;
     getBackupPlansHistory(page)
-      .then((data) => { if (!cancelled) { setPlans(data.items); setTotalPages(data.total_pages); } })
-      .catch(() => {})
+      .then((data) => { if (!cancelled) { setFetchError(null); setPlans(data.items); setTotalPages(data.total_pages); } })
+      .catch(() => { if (!cancelled) setFetchError("Failed to load backup plans"); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   }, [page]);
@@ -56,10 +70,12 @@ export default function BackupsPage() {
 
   const handleGenerate = async () => {
     if (!selectedCareer) return;
+    const token = newProgressToken();
     setGenerating(true);
+    setProgressToken(token);
     setGenError(null);
     try {
-      await generateBackupPlan({ career_id: selectedCareer.id, max_scenarios: 3 });
+      await generateBackupPlan({ career_id: selectedCareer.id, max_scenarios: 3, progress_token: token });
       setModalOpen(false);
       setSelectedCareer(null);
       setCareerSearch("");
@@ -70,6 +86,8 @@ export default function BackupsPage() {
       const e = err as { response?: { data?: { detail?: string } }; message?: string };
       setGenError(e?.response?.data?.detail || e?.message || "Failed to generate backup plan");
     } finally {
+      stop();
+      setProgressToken(null);
       setGenerating(false);
     }
   };
@@ -86,13 +104,19 @@ export default function BackupsPage() {
             <RefreshCw className={`mr-1 h-4 w-4 ${loading ? "animate-spin" : ""}`} /> Refresh
           </Button>
           <Button size="sm" onClick={() => setModalOpen(true)}>
-            <Sparkles className="mr-1 h-4 w-4" /> Generate Backup Plan
+            <Sparkles className="mr-1 h-4 w-4" /> {plans.length > 0 ? "Regenerate Backup Plan" : "Generate Backup Plan"}
           </Button>
         </div>
       </div>
 
+      {fetchError && (
+        <div className="mb-6 rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-400">
+          {fetchError}
+        </div>
+      )}
+
       {genError && (
-        <div className="mb-6 rounded-xl border border-red-300 bg-red-50 p-4 text-sm text-red-700">
+        <div className="mb-6 rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-400">
           {genError}
         </div>
       )}
@@ -168,13 +192,17 @@ export default function BackupsPage() {
             </div>
           )}
 
-          {genError && <div className="rounded-lg border border-red-300 bg-red-50 p-3 text-xs text-red-700">{genError}</div>}
+          {genError && <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-3 text-xs text-red-400">{genError}</div>}
 
           {generating && (
-            <div className="rounded-lg border border-accent/30 bg-accent/5 p-4 text-center">
-              <Sparkles className="mx-auto mb-2 h-5 w-5 text-accent animate-pulse" />
-              <p className="text-sm text-foreground">AI is generating your backup plan...</p>
-              <p className="mt-0.5 text-xs text-text-secondary">This can take 30-60 seconds</p>
+            <div className="rounded-lg border border-accent/30 bg-accent/5 p-4">
+              <GenerationProgress
+                compact
+                percent={progress?.percent ?? 5}
+                phase={progress?.phase ?? "Starting..."}
+                message={progress?.message ?? "Preparing your backup plan"}
+                elapsedSeconds={elapsedSeconds}
+              />
             </div>
           )}
 

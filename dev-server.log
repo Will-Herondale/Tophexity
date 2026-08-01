@@ -1,0 +1,32 @@
+
+> career-recommendation@0.1.0 dev
+> next dev
+
+▲ Next.js 16.2.11 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.1.4:3000
+- Environments: .env.local
+✓ Ready in 669ms
+- Experiments (use with caution):
+  · proxyTimeout: 300000
+
+○ Compiling /profile ...
+ GET /profile 200 in 4.2s (next.js: 3.7s, application-code: 469ms)
+ GET /profile 200 in 134ms (next.js: 22ms, application-code: 112ms)
+✓ Compiled in 76ms
+ GET /profile 200 in 96ms (next.js: 63ms, application-code: 33ms)
+✓ Compiled in 77ms
+ GET /profile 200 in 83ms (next.js: 57ms, application-code: 26ms)
+✓ Compiled in 69ms
+ GET /profile 200 in 85ms (next.js: 63ms, application-code: 21ms)
+✓ Compiled in 55ms
+ GET /profile 200 in 78ms (next.js: 51ms, application-code: 27ms)
+✓ Compiled in 67ms
+ GET /profile 200 in 75ms (next.js: 49ms, application-code: 25ms)
+✓ Compiled in 63ms
+ GET /profile 200 in 77ms (next.js: 48ms, application-code: 29ms)
+ GET /profile 200 in 267ms (next.js: 7ms, application-code: 260ms)
+ GET /profile 200 in 65ms (next.js: 7ms, application-code: 58ms)
+ GET /chat?recommend=true 200 in 761ms (next.js: 733ms, application-code: 28ms)
+ GET /recommendations 200 in 1055ms (next.js: 997ms, application-code: 59ms)
+[?25h

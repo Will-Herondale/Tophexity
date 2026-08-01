@@ -2,7 +2,8 @@
 
 import type { BackupScenario } from "@/types/backup";
 import Card from "@/components/ui/Card";
-import { ArrowRight, Clock } from "lucide-react";
+import ReasoningView from "@/components/ai/ReasoningView";
+import { ArrowRight, Clock, Lightbulb } from "lucide-react";
 
 const difficultyColors: Record<string, string> = {
   easy: "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20",
@@ -37,7 +38,15 @@ export default function BackupScenarioCard({ scenario }: BackupScenarioCardProps
             <p className="mt-2 text-xs text-text-secondary">{scenario.description}</p>
           )}
           {scenario.reasoning && (
-            <p className="mt-2 text-xs text-text-muted italic">&ldquo;{scenario.reasoning}&rdquo;</p>
+            <div className="mt-2.5 rounded-xl border border-accent/10 bg-accent/[0.02] p-3">
+              <div className="flex items-start gap-2">
+                <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-medium text-foreground/80">Why this backup?</p>
+                  <ReasoningView text={scenario.reasoning} className="mt-1" />
+                </div>
+              </div>
+            </div>
           )}
           {scenario.estimated_transition_months && (
             <span className="mt-2 inline-flex items-center gap-1 text-xs text-text-muted">

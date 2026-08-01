@@ -104,11 +104,17 @@ export default function ProfileEdit({ profile, onSave, onCancel }: ProfileEditPr
     setForm((prev) => ({ ...prev, ...patch }));
 
   const addToArray = (field: "target_fields" | "interests", value: string) => {
-    if (!value.trim()) return;
+    const items = value
+      .split(/[,;\n]+/)
+      .map((v) => v.trim())
+      .filter(Boolean);
+    if (items.length === 0) return;
     const arr = form[field];
-    if (!arr.includes(value.trim())) {
-      update({ [field]: [...arr, value.trim()] });
-    }
+    const next = [...arr];
+    items.forEach((item) => {
+      if (!next.includes(item)) next.push(item);
+    });
+    update({ [field]: next });
   };
 
   const removeFromArray = (field: "target_fields" | "interests", value: string) => {

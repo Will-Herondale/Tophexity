@@ -5,6 +5,8 @@ import type { ChatSession, ChatMessage } from "@/types/chat";
 import { getChatSession, sendChatMessages, rebuildChatMemory, exportChatSession } from "@/lib/api";
 import ChatMessageBubble from "./ChatMessage";
 import ChatExportModal from "./ChatExportModal";
+import GenerationProgress from "@/components/ui/GenerationProgress";
+import { useGenerationProgress } from "@/hooks/useGenerationProgress";
 import { Send, Loader2, Brain, Download, CheckCircle, RotateCcw, Clock } from "lucide-react";
 
 interface ChatAreaProps {
@@ -33,6 +35,8 @@ export default function ChatArea({ session, initialMessage }: ChatAreaProps) {
   const [thinkingTip, setThinkingTip] = useState(0);
   const [lastError, setLastError] = useState<string | null>(null);
   const [retryContent, setRetryContent] = useState<string | null>(null);
+  const [progressToken, setProgressToken] = useState<string | null>(null);
+  const { progress, elapsedSeconds: progressElapsed } = useGenerationProgress(progressToken);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const lastSentContent = useRef<string>("");
@@ -46,14 +50,14 @@ export default function ChatArea({ session, initialMessage }: ChatAreaProps) {
   useEffect(() => {
     if (!session) return;
     let cancelled = false;
-    setLoadingSession(true);
+    queueMicrotask(() => { if (!cancelled) setLoadingSession(true); });
     getChatSession(session.id)
       .then((data) => {
         if (!cancelled && data.messages) {
           setAllMessages((prev) => ({ ...prev, [session.id]: data.messages! }));
         }
       })
-      .catch(() => {})
+      .catch(() => { if (!cancelled) setLastError("Failed to load chat session"); })
       .finally(() => { if (!cancelled) setLoadingSession(false); });
     return () => { cancelled = true; };
   }, [session?.id]);
@@ -110,8 +114,12 @@ export default function ChatArea({ session, initialMessage }: ChatAreaProps) {
     }, 3000);
 
     lastSentContent.current = content;
+    const token = typeof crypto !== "undefined" && "randomUUID" in crypto
+      ? crypto.randomUUID()
+      : `pg-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    setProgressToken(token);
     try {
-      const response = await sendChatMessages(session.id, [{ role: "user", content }]);
+      const response = await sendChatMessages(session.id, [{ role: "user", content }], token);
       if (Array.isArray(response)) {
         setAllMessages((prev) => {
           const current = prev[session.id] || [];
@@ -136,6 +144,7 @@ export default function ChatArea({ session, initialMessage }: ChatAreaProps) {
     } finally {
       stopTimer();
       setSending(false);
+      setProgressToken(null);
     }
   }, [session, input, sending, stopTimer]);
 
@@ -220,22 +229,34 @@ export default function ChatArea({ session, initialMessage }: ChatAreaProps) {
         {/* Thinking indicator with timer */}
         {sending && (
           <div className="flex justify-start">
-            <div className="max-w-[80%] rounded-2xl px-4 py-3 bg-surface/20">
-              <div className="flex items-center gap-2">
-                <div className="flex gap-1">
-                  <span className="h-2 w-2 rounded-full bg-accent animate-bounce" style={{ animationDelay: "0ms" }} />
-                  <span className="h-2 w-2 rounded-full bg-accent animate-bounce" style={{ animationDelay: "150ms" }} />
-                  <span className="h-2 w-2 rounded-full bg-accent animate-bounce" style={{ animationDelay: "300ms" }} />
-                </div>
-                {elapsedSeconds > 5 && (
-                  <div className="flex items-center gap-1 text-[10px] text-text-muted">
-                    <Clock className="h-3 w-3" />
-                    <span>{elapsedSeconds}s</span>
+            <div className="w-full max-w-[80%] rounded-2xl px-4 py-3 bg-surface/20 sm:w-[440px]">
+              {progress ? (
+                <GenerationProgress
+                  compact
+                  percent={progress.percent}
+                  phase={progress.phase}
+                  message={progress.message}
+                  elapsedSeconds={progressElapsed}
+                />
+              ) : (
+                <>
+                  <div className="flex items-center gap-2">
+                    <div className="flex gap-1">
+                      <span className="h-2 w-2 rounded-full bg-accent animate-bounce" style={{ animationDelay: "0ms" }} />
+                      <span className="h-2 w-2 rounded-full bg-accent animate-bounce" style={{ animationDelay: "150ms" }} />
+                      <span className="h-2 w-2 rounded-full bg-accent animate-bounce" style={{ animationDelay: "300ms" }} />
+                    </div>
+                    {elapsedSeconds > 5 && (
+                      <div className="flex items-center gap-1 text-[10px] text-text-muted">
+                        <Clock className="h-3 w-3" />
+                        <span>{elapsedSeconds}s</span>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-              {elapsedSeconds > 10 && (
-                <p className="text-[10px] text-text-muted mt-1.5">{THINKING_TIPS[thinkingTip]}</p>
+                  {elapsedSeconds > 10 && (
+                    <p className="text-[10px] text-text-muted mt-1.5">{THINKING_TIPS[thinkingTip]}</p>
+                  )}
+                </>
               )}
             </div>
           </div>

@@ -16,7 +16,7 @@ export default function ChatStatsCard({ variant = "dashboard" }: ChatStatsCardPr
     let cancelled = false;
     getChatStats()
       .then((data) => { if (!cancelled) setStats(data); })
-      .catch(() => {});
+      .catch(() => { if (!cancelled) setStats(null); });
     return () => { cancelled = true; };
   }, []);
 

@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start -p ${PORT:-8080}",
+    "start": "node -e \"const p=process.env.PORT||8080;require('child_process').spawn('next',['start','-p',String(p)],{stdio:'inherit',shell:true})\"",
     "lint": "eslint"
   },
   "dependencies": {

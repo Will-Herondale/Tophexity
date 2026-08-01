@@ -2,24 +2,66 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/contexts/AuthContext";
-import { getProfile, getRecommendationsHistory, getPortfolioItems } from "@/lib/api";
+import { getProfile, getRecommendationsHistory, getPortfolioItems, getGenerationStatus } from "@/lib/api";
 import type { Profile } from "@/types/profile";
 import type { Recommendation } from "@/types/recommendation";
 import type { PortfolioItem } from "@/types/portfolio";
+import type { GenerationStatus } from "@/types/system";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import ChatStatsCard from "@/components/chat/ChatStatsCard";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import {
-  User, Briefcase, Star, Map, FolderOpen, Shield, MessageSquare, ArrowRight,
+  User, Briefcase, Star, Map, FolderOpen, Shield, MessageSquare, ArrowRight, CheckCircle2, Circle,
 } from "lucide-react";
 
+function DashboardSkeleton() {
+  return (
+    <div className="mx-auto max-w-5xl px-4 py-8 animate-pulse">
+      <div className="mb-8">
+        <div className="h-8 w-64 rounded-lg bg-surface/20" />
+        <div className="mt-2 h-4 w-48 rounded bg-surface/15" />
+      </div>
+      <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+        {Array.from({ length: 7 }).map((_, i) => (
+          <div key={i} className="flex flex-col items-center gap-2 rounded-2xl bg-surface/20 p-4">
+            <div className="h-10 w-10 rounded-xl bg-surface/15" />
+            <div className="h-4 w-16 rounded bg-surface/15" />
+          </div>
+        ))}
+      </div>
+      <div className="grid gap-6 md:grid-cols-2">
+        <div className="rounded-2xl bg-surface/20 p-6">
+          <div className="mb-3 h-5 w-40 rounded bg-surface/15" />
+          <div className="space-y-2">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="h-12 rounded-xl bg-surface/15" />
+            ))}
+          </div>
+        </div>
+        <div className="rounded-2xl bg-surface/20 p-6">
+          <div className="mb-3 h-5 w-32 rounded bg-surface/15" />
+          <div className="space-y-2">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="h-12 rounded-xl bg-surface/15" />
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function DashboardPage() {
-  const { } = useAuth();
+  usePageTitle("Dashboard");
   const router = useRouter();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [portfolioItems, setPortfolioItems] = useState<PortfolioItem[]>([]);
+  const [genStatus, setGenStatus] = useState<GenerationStatus | null>(null);
+  const [genStatusFailed, setGenStatusFailed] = useState(false);
+  const [fetchError, setFetchError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
@@ -27,14 +69,27 @@ export default function DashboardPage() {
       getProfile().catch(() => null),
       getRecommendationsHistory(1, 3).catch(() => null),
       getPortfolioItems({ page: 1, page_size: 5 }).catch(() => null),
-    ]).then(([profileRes, recsRes, portfolioRes]) => {
+      getGenerationStatus().catch(() => null),
+    ]).then(([profileRes, recsRes, portfolioRes, genRes]) => {
       if (cancelled) return;
+      const failed: string[] = [];
       if (profileRes.status === "fulfilled" && profileRes.value) setProfile(profileRes.value as Profile);
+      else if (profileRes.status === "rejected" || !profileRes.value) failed.push("profile");
       if (recsRes.status === "fulfilled" && recsRes.value) setRecommendations((recsRes.value as { items: Recommendation[] }).items || []);
+      else if (recsRes.status === "rejected" || !recsRes.value) failed.push("recommendations");
       if (portfolioRes.status === "fulfilled" && portfolioRes.value) setPortfolioItems((portfolioRes.value as { items: PortfolioItem[] }).items || []);
+      else if (portfolioRes.status === "rejected" || !portfolioRes.value) failed.push("portfolio");
+      if (genRes.status === "fulfilled" && genRes.value) setGenStatus(genRes.value as GenerationStatus);
+      else if (genRes.status === "rejected" || !genRes.value) setGenStatusFailed(true);
+      if (failed.length > 0) {
+        setFetchError(`Couldn't load ${failed.join(", ")}. Refresh the page or check your connection.`);
+      }
+      setLoading(false);
     });
     return () => { cancelled = true; };
   }, []);
+
+  if (loading) return <DashboardSkeleton />;
 
   const quickLinks = [
     { icon: <User className="h-5 w-5" />, label: "Profile", href: "/profile", color: "bg-accent/20 text-accent" },
@@ -59,6 +114,12 @@ export default function DashboardPage() {
         </p>
       </div>
 
+      {fetchError && (
+        <div className="mb-6 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+          {fetchError}
+        </div>
+      )}
+
       {!profile && (
         <Card className="mb-6 border-border-light bg-surface/50">
           <div className="flex items-center justify-between">
@@ -80,13 +141,55 @@ export default function DashboardPage() {
           <button
             key={link.href}
             onClick={() => router.push(link.href)}
-            className="flex flex-col items-center gap-2 rounded-2xl bg-surface/20 p-4 text-center transition-all hover:bg-surface/30"
+            className="flex flex-col items-center gap-2 rounded-2xl bg-surface/20 p-4 text-center transition-all hover:bg-surface/30 hover:scale-[1.02] active:scale-[0.98]"
           >
             <div className={`rounded-xl p-2.5 ${link.color}`}>{link.icon}</div>
             <span className="text-sm font-medium text-foreground">{link.label}</span>
           </button>
         ))}
       </div>
+
+      {genStatus && (
+        <Card className="mb-6">
+          <h3 className="mb-3 text-sm font-semibold text-foreground font-[family-name:var(--font-display)]">
+            AI Generation Status
+          </h3>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {[
+              { label: "Profile", done: genStatus.has_profile, href: "/profile" },
+              { label: `Recommendations${genStatus.recommendation_count ? ` (${genStatus.recommendation_count})` : ""}`, done: genStatus.has_recommendations, href: "/recommendations" },
+              { label: `Roadmaps${genStatus.roadmap_count ? ` (${genStatus.roadmap_count})` : ""}`, done: genStatus.has_roadmaps, href: "/roadmaps" },
+              { label: `Backup Plans${genStatus.backup_plan_count ? ` (${genStatus.backup_plan_count})` : ""}`, done: genStatus.has_backup_plans, href: "/backups" },
+              { label: `Portfolio Items${genStatus.portfolio_item_count ? ` (${genStatus.portfolio_item_count})` : ""}`, done: genStatus.has_portfolio_items, href: "/portfolio" },
+              { label: `Chat Sessions${genStatus.chat_session_count ? ` (${genStatus.chat_session_count})` : ""}`, done: genStatus.has_chat_sessions, href: "/chat" },
+            ].map((item) => (
+              <button
+                key={item.label}
+                onClick={() => router.push(item.href)}
+                className="flex items-center gap-2 rounded-xl bg-surface/15 p-3 text-left transition-colors hover:bg-surface/30"
+              >
+                {item.done ? (
+                  <CheckCircle2 className="h-4 w-4 flex-shrink-0 text-emerald-400" />
+                ) : (
+                  <Circle className="h-4 w-4 flex-shrink-0 text-text-muted" />
+                )}
+                <span className="text-sm text-foreground">{item.label}</span>
+              </button>
+            ))}
+          </div>
+        </Card>
+      )}
+
+      {genStatusFailed && (
+        <Card className="mb-6 border-border-light">
+          <h3 className="mb-1 text-sm font-semibold text-foreground font-[family-name:var(--font-display)]">
+            AI Generation Status
+          </h3>
+          <p className="text-xs text-text-muted">
+            Status is unavailable right now. Try refreshing the page.
+          </p>
+        </Card>
+      )}
 
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
@@ -106,7 +209,7 @@ export default function DashboardPage() {
                 >
                   <div>
                     <p className="text-sm font-medium text-foreground">{rec.title || "Career Recommendation"}</p>
-                    <p className="text-xs text-text-muted">{rec.items.length} careers</p>
+                    <p className="text-xs text-text-muted">{(rec.items?.length ?? 0)} careers</p>
                   </div>
                   <ArrowRight className="h-4 w-4 text-text-muted" />
                 </button>

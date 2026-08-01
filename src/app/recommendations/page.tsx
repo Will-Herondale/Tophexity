@@ -2,26 +2,40 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { getRecommendationsHistory, generateRecommendation } from "@/lib/api";
+import { getRecommendationsHistory, generateRecommendation, regenerateRecommendation } from "@/lib/api";
 import type { Recommendation } from "@/types/recommendation";
 import RecommendationCard from "@/components/recommendations/RecommendationCard";
 import Button from "@/components/ui/Button";
+import GenerationProgress from "@/components/ui/GenerationProgress";
+import { useGenerationProgress } from "@/hooks/useGenerationProgress";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import { Star, RefreshCw, Sparkles } from "lucide-react";
 
+function newProgressToken(): string {
+  return typeof crypto !== "undefined" && "randomUUID" in crypto
+    ? crypto.randomUUID()
+    : `pg-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
 export default function RecommendationsPage() {
+  usePageTitle("Recommendations");
   const router = useRouter();
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
+  const [progressToken, setProgressToken] = useState<string | null>(null);
+  const { progress, elapsedSeconds, stop } = useGenerationProgress(progressToken);
   const [genError, setGenError] = useState<string | null>(null);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
   const fetchRecs = useCallback((p: number) => {
     setLoading(true);
+    setFetchError(null);
     getRecommendationsHistory(p)
       .then((data) => { setRecommendations(data.items); setTotalPages(data.total_pages); })
-      .catch(() => {})
+      .catch(() => setFetchError("Failed to load recommendations"))
       .finally(() => setLoading(false));
   }, []);
 
@@ -29,24 +43,32 @@ export default function RecommendationsPage() {
     let cancelled = false;
     getRecommendationsHistory(page)
       .then((data) => {
-        if (!cancelled) { setRecommendations(data.items); setTotalPages(data.total_pages); }
+        if (!cancelled) { setFetchError(null); setRecommendations(data.items); setTotalPages(data.total_pages); }
       })
-      .catch(() => {})
+      .catch(() => { if (!cancelled) setFetchError("Failed to load recommendations"); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   }, [page]);
 
   const handleGenerate = async () => {
+    const token = newProgressToken();
     setGenerating(true);
+    setProgressToken(token);
     setGenError(null);
     try {
-      await generateRecommendation({ include_profile: true, max_results: 5 });
+      if (recommendations.length > 0 && recommendations[0]?.id) {
+        await regenerateRecommendation(recommendations[0].id, token);
+      } else {
+        await generateRecommendation({ include_profile: true, max_results: 10, progress_token: token });
+      }
       fetchRecs(1);
       setPage(1);
     } catch (err) {
       const e = err as { response?: { data?: { detail?: string } }; message?: string };
       setGenError(e?.response?.data?.detail || e?.message || "Failed to generate recommendations");
     } finally {
+      stop();
+      setProgressToken(null);
       setGenerating(false);
     }
   };
@@ -64,19 +86,34 @@ export default function RecommendationsPage() {
             Refresh
           </Button>
           <Button size="sm" onClick={handleGenerate} disabled={generating}>
-            <Sparkles className={`mr-1 h-4 w-4 ${generating ? "animate-spin" : ""}`} />
-            {generating ? "Generating..." : "Get AI Recommendations"}
+            {recommendations.length > 0 ? (
+              <RefreshCw className={`mr-1 h-4 w-4 ${generating ? "animate-spin" : ""}`} />
+            ) : (
+              <Sparkles className={`mr-1 h-4 w-4 ${generating ? "animate-spin" : ""}`} />
+            )}
+            {generating
+              ? "Generating..."
+              : recommendations.length > 0
+                ? "Regenerate Recommendations"
+                : "Get AI Recommendations"}
           </Button>
         </div>
       </div>
 
       {generating && (
-        <div className="mb-6 rounded-xl border border-accent/30 bg-accent/5 p-6 text-center">
-          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center">
-            <Sparkles className="h-6 w-6 text-accent animate-pulse" />
-          </div>
-          <p className="text-sm font-medium text-foreground">AI is analyzing your profile and generating personalized recommendations...</p>
-          <p className="mt-1 text-xs text-text-secondary">This can take 30-60 seconds</p>
+        <div className="mb-6 rounded-xl border border-accent/30 bg-accent/5 p-6">
+          <GenerationProgress
+            percent={progress?.percent ?? 5}
+            phase={progress?.phase ?? "Starting..."}
+            message={progress?.message ?? "Preparing your personalized analysis"}
+            elapsedSeconds={elapsedSeconds}
+          />
+        </div>
+      )}
+
+      {fetchError && (
+        <div className="mb-6 rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-400">
+          {fetchError}
         </div>
       )}
 
@@ -113,11 +150,7 @@ export default function RecommendationsPage() {
         <>
           <div className="space-y-4">
             {recommendations.map((rec) => (
-              <RecommendationCard
-                key={rec.id}
-                recommendation={rec}
-                onClick={(id) => router.push(`/recommendations/${id}`)}
-              />
+              <RecommendationCard key={rec.id} recommendation={rec} />
             ))}
           </div>
 

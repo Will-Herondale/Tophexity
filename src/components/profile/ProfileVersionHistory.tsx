@@ -32,7 +32,7 @@ export default function ProfileVersionHistory({ onClose }: ProfileVersionHistory
     let cancelled = false;
     getProfileVersions()
       .then((data) => { if (!cancelled) setVersions(data || []); })
-      .catch(() => {})
+      .catch(() => { if (!cancelled) setVersions([]); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   }, []);

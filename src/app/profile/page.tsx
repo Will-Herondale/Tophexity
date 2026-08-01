@@ -2,14 +2,18 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { getProfile, createProfile, updateProfile } from "@/lib/api";
+import { getProfile, createProfile, updateProfile, getRecommendationsHistory, generateRecommendation } from "@/lib/api";
 import type { Profile, ProfileUpdatePayload } from "@/types/profile";
 import { createEmptyProfile } from "@/types/profile";
 import ProfileView from "@/components/profile/ProfileView";
 import ProfileEdit from "@/components/profile/ProfileEdit";
 import ProfileVersionHistory from "@/components/profile/ProfileVersionHistory";
 import Button from "@/components/ui/Button";
-import { Edit3, Plus, History, Sparkles } from "lucide-react";
+import GenerationProgress from "@/components/ui/GenerationProgress";
+import { useGenerationProgress } from "@/hooks/useGenerationProgress";
+import { usePageTitle } from "@/hooks/usePageTitle";
+import { useToast } from "@/contexts/ToastContext";
+import { Edit3, Plus, History, Sparkles, CheckCircle2 } from "lucide-react";
 
 function isProfileComplete(p: Profile): boolean {
   const hasSkills = p.skills && Object.keys(p.skills).length > 0;
@@ -19,13 +23,18 @@ function isProfileComplete(p: Profile): boolean {
 }
 
 export default function ProfilePage() {
+  usePageTitle("Profile");
   const router = useRouter();
+  const toast = useToast();
   const [profile, setProfile] = useState<Profile>(createEmptyProfile());
   const [hasProfile, setHasProfile] = useState(false);
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [showVersions, setShowVersions] = useState(false);
+  const [hasRecommendations, setHasRecommendations] = useState(false);
+  const [generating, setGenerating] = useState(false);
+  const [progressToken, setProgressToken] = useState<string | null>(null);
+  const { progress, elapsedSeconds, stop } = useGenerationProgress(progressToken);
 
   useEffect(() => {
     let cancelled = false;
@@ -38,11 +47,13 @@ export default function ProfilePage() {
         if (!cancelled && axiosErr.response?.status === 404) setHasProfile(false);
       })
       .finally(() => { if (!cancelled) setLoading(false); });
+    getRecommendationsHistory(1, 1)
+      .then((data) => { if (!cancelled) setHasRecommendations((data.items?.length ?? 0) > 0); })
+      .catch(() => { if (!cancelled) setHasRecommendations(false); });
     return () => { cancelled = true; };
   }, []);
 
   const handleSave = async (payload: ProfileUpdatePayload) => {
-    setMessage(null);
     try {
       let updatedProfile: Profile;
       if (hasProfile) {
@@ -54,30 +65,57 @@ export default function ProfilePage() {
         setHasProfile(true);
       }
       setEditing(false);
+      toast.showToast("Profile updated successfully", "success");
       if (isProfileComplete(updatedProfile)) {
-        setMessage({ type: "success", text: "Profile complete! Generating your career recommendations..." });
-        setTimeout(() => router.push("/chat?recommend=true"), 1500);
-      } else {
-        setMessage({ type: "success", text: "Profile updated successfully" });
+        setTimeout(() => router.push("/chat?recommend=true"), 1200);
       }
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { detail?: string | Array<{ msg: string }> } } };
       const detail = axiosErr.response?.data?.detail;
       const text = Array.isArray(detail) ? detail.map((d) => d.msg).join(", ") : typeof detail === "string" ? detail : "Failed to save profile";
-      setMessage({ type: "error", text });
+      toast.showToast(text, "error");
+    }
+  };
+
+  const handleGetRecommendations = async () => {
+    const token = typeof crypto !== "undefined" && "randomUUID" in crypto
+      ? crypto.randomUUID()
+      : `pg-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    setGenerating(true);
+    setProgressToken(token);
+    try {
+      await generateRecommendation({ include_profile: true, max_results: 10, progress_token: token });
+      setHasRecommendations(true);
+      toast.showToast("Recommendations generated and profile updated", "success");
+      setTimeout(() => router.push("/chat?recommend=true"), 800);
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { detail?: string | Array<{ msg: string }> } }; message?: string };
+      const detail = axiosErr.response?.data?.detail;
+      const text = Array.isArray(detail) ? detail.map((d) => d.msg).join(", ") : typeof detail === "string" ? detail : axiosErr?.message || "Failed to generate recommendations";
+      toast.showToast(text, "error");
+    } finally {
+      stop();
+      setProgressToken(null);
+      setGenerating(false);
     }
   };
 
   if (loading) {
     return (
-      <div className="flex min-h-[400px] items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-border-light border-t-accent" />
+      <div className="flex min-h-[500px] items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="relative">
+            <div className="h-10 w-10 animate-spin rounded-full border-[3px] border-border-light border-t-accent" />
+            <div className="absolute inset-0 h-10 w-10 animate-pulse rounded-full bg-accent/5" />
+          </div>
+          <p className="text-sm text-text-muted">Loading profile...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8">
+    <div className="mx-auto max-w-5xl px-4 py-8">
       <div className="mb-8 flex items-center justify-between">
         <div>
           <h1 className="font-[family-name:var(--font-display)] text-2xl font-bold text-foreground">My Profile</h1>
@@ -86,24 +124,20 @@ export default function ProfilePage() {
           </p>
         </div>
         {hasProfile && !editing && (
-          <Button onClick={() => setEditing(true)}>
-            <Edit3 className="mr-1 h-4 w-4" />
-            Edit
-          </Button>
+          <div className="flex items-center gap-3">
+          {isProfileComplete(profile) && !hasRecommendations && (
+              <span className="hidden items-center gap-1.5 rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-400 sm:inline-flex">
+                <CheckCircle2 className="h-3.5 w-3.5" />
+                Complete
+              </span>
+            )}
+            <Button onClick={() => setEditing(true)}>
+              <Edit3 className="mr-1 h-4 w-4" />
+              Edit
+            </Button>
+          </div>
         )}
       </div>
-
-      {message && (
-        <div
-          className={`mb-6 rounded-xl border p-3 text-sm ${
-            message.type === "success"
-              ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-400"
-              : "border-red-500/20 bg-red-500/10 text-red-400"
-          }`}
-        >
-          {message.text}
-        </div>
-      )}
 
       {editing ? (
         <ProfileEdit
@@ -115,22 +149,44 @@ export default function ProfilePage() {
         <div className="space-y-6">
           <ProfileView profile={profile} />
           {isProfileComplete(profile) && (
-            <div className="rounded-xl border border-accent/20 bg-accent/5 p-4 text-center">
-              <p className="mb-3 text-sm text-text-secondary">Your profile looks complete! Ready for AI-powered career recommendations.</p>
-              <Button onClick={() => router.push("/chat?recommend=true")}>
-                <Sparkles className="mr-1.5 h-4 w-4" />
-                Get AI Recommendations
-              </Button>
+            <div className="group relative overflow-hidden rounded-2xl border border-accent/20 bg-gradient-to-br from-accent/5 to-accent/[0.02] p-6 text-center">
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-accent/5 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+              <div className="relative">
+                <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-accent/10">
+                  <Sparkles className="h-6 w-6 text-accent" />
+                </div>
+                <p className="mb-1 text-sm font-medium text-foreground">
+                  {hasRecommendations
+                    ? "Your AI recommendations are ready — refresh them as your profile changes"
+                    : "Your profile is ready for AI-powered career recommendations"}
+                </p>
+                <p className="mb-4 text-xs text-text-muted">Our AI analyzes your profile to find the best career paths for you</p>
+                {generating ? (
+                  <div className="mx-auto mt-1 max-w-md rounded-xl bg-surface/20 p-4 text-left">
+                    <GenerationProgress
+                      percent={progress?.percent ?? 5}
+                      phase={progress?.phase ?? "Starting..."}
+                      message={progress?.message ?? "Preparing your personalized analysis"}
+                      elapsedSeconds={elapsedSeconds}
+                    />
+                  </div>
+                ) : (
+                  <Button onClick={handleGetRecommendations}>
+                    <Sparkles className="mr-1.5 h-4 w-4" />
+                    {hasRecommendations ? "Regenerate Recommendations" : "Get AI Recommendations"}
+                  </Button>
+                )}
+              </div>
             </div>
           )}
         </div>
       ) : (
-        <div className="rounded-2xl border-2 border-dashed border-border bg-surface/30 p-12 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-accent/20">
+        <div className="rounded-2xl border-2 border-dashed border-border bg-gradient-to-b from-surface/30 to-surface/10 p-16 text-center">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-accent/10">
             <Plus className="h-8 w-8 text-accent" />
           </div>
           <h3 className="font-[family-name:var(--font-display)] text-lg font-semibold text-foreground">No profile yet</h3>
-          <p className="mt-2 text-sm text-text-secondary">Create your profile to start getting career recommendations.</p>
+          <p className="mt-2 text-sm text-text-secondary">Create your profile to start getting personalized career recommendations.</p>
           <Button className="mt-6" onClick={() => setEditing(true)}>
             <Plus className="mr-1 h-4 w-4" />
             Create Profile

@@ -10,6 +10,12 @@ export interface Roadmap {
   steps: RoadmapStep[];
 }
 
+export interface RoadmapResource {
+  name?: string;
+  type?: string;
+  url?: string;
+}
+
 export interface RoadmapStep {
   id: string;
   roadmap_id: string;
@@ -17,7 +23,7 @@ export interface RoadmapStep {
   description: string | null;
   step_order: number;
   duration_months: number | null;
-  resources: Record<string, unknown> | null;
+  resources: RoadmapResource[] | null;
 }
 
 export interface RoadmapListResponse {
@@ -33,7 +39,7 @@ export interface RoadmapStepCreatePayload {
   description?: string;
   step_order: number;
   duration_months?: number;
-  resources?: Record<string, unknown>;
+  resources?: RoadmapResource[];
 }
 
 export interface RoadmapCreatePayload {

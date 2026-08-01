@@ -10,16 +10,19 @@ import CareerFilters, { type FilterState } from "@/components/careers/CareerFilt
 import Button from "@/components/ui/Button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useFavorites } from "@/hooks/useFavorites";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import Link from "next/link";
 import { Briefcase, Shield, Heart, CheckSquare, Sparkles, X } from "lucide-react";
 
 export default function CareersPage() {
+  usePageTitle("Careers");
   const { user } = useAuth();
   const router = useRouter();
   const { favorites, toggleFavorite, isFavorite } = useFavorites();
   const [careers, setCareers] = useState<Career[]>([]);
   const [allCareers, setAllCareers] = useState<Career[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
@@ -69,7 +72,7 @@ export default function CareersPage() {
           setTotal(data.total);
         }
       })
-      .catch(() => {})
+      .catch(() => { if (!cancelled) setFetchError("Failed to load careers"); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   }, [page, searchQuery, filters]);
@@ -173,6 +176,12 @@ export default function CareersPage() {
       {activeTab === "all" && (
         <div className="mb-6">
           <CareerFilters onSearch={handleSearch} onFilterChange={handleFilterChange} />
+        </div>
+      )}
+
+      {fetchError && (
+        <div className="mb-6 rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-400">
+          {fetchError}
         </div>
       )}
 

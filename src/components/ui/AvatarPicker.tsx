@@ -85,10 +85,10 @@ export default function AvatarPicker({ name, value, onChange, size = "md" }: Ava
 
       <div className="flex gap-1 rounded-lg border border-border bg-surface/30 p-0.5">
         {([
-          ["initials", <User className="h-3 w-3" />, "Initials"],
-          ["upload", <Camera className="h-3 w-3" />, "Upload"],
-          ["emoji", <Smile className="h-3 w-3" />, "Emoji"],
-        ] as const).map(([id, icon, label]) => (
+          { id: "initials", icon: <User className="h-3 w-3" />, label: "Initials" },
+          { id: "upload", icon: <Camera className="h-3 w-3" />, label: "Upload" },
+          { id: "emoji", icon: <Smile className="h-3 w-3" />, label: "Emoji" },
+        ] as const).map(({ id, icon, label }) => (
           <button
             key={id}
             type="button"

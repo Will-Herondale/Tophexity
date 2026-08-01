@@ -136,7 +136,15 @@ export async function getProfile(): Promise<Profile> {
   return data;
 }
 
-export async function createProfile(payload: ProfileCreatePayload): Promise<Profile> {
+export async function getGenerationStatus() {
+  const { data } = await api.get("/users/generation-status");
+  return data;
+}
+
+export async function getDbOverview() {
+  const { data } = await api.get("/admin/db/overview");
+  return data;
+}export async function createProfile(payload: ProfileCreatePayload): Promise<Profile> {
   const { data } = await api.post("/users/profile", payload);
   return data;
 }
@@ -176,13 +184,30 @@ export async function getRecommendationById(id: string): Promise<Recommendation>
   return data;
 }
 
-export async function generateRecommendation(payload?: { include_profile?: boolean; max_results?: number }, timeout = 300000) {
+export interface GenerationProgress {
+  token: string;
+  percent: number;
+  phase: string;
+  message: string;
+  status: string;
+}
+
+export async function getProgress(token: string): Promise<GenerationProgress> {
+  const { data } = await api.get(`/intelligence/progress/${token}`);
+  return data;
+}
+
+export async function generateRecommendation(payload?: { include_profile?: boolean; max_results?: number; progress_token?: string }, timeout = 300000) {
   const { data } = await api.post("/intelligence/recommendations/generate", payload || {}, { timeout });
   return data;
 }
 
-export async function regenerateRecommendation(id: string, timeout = 300000) {
-  const { data } = await api.post(`/intelligence/recommendations/${id}/regenerate`, {}, { timeout });
+export async function regenerateRecommendation(id: string, progressToken?: string, timeout = 300000) {
+  const { data } = await api.post(
+    `/intelligence/recommendations/${id}/regenerate`,
+    {},
+    { timeout, params: progressToken ? { progress_token: progressToken } : undefined },
+  );
   return data;
 }
 
@@ -196,7 +221,7 @@ export async function getRoadmapById(id: string): Promise<Roadmap> {
   return data;
 }
 
-export async function generateRoadmap(payload: { career_id: string; roadmap_type?: string; custom_duration_months?: number }, timeout = 300000) {
+export async function generateRoadmap(payload: { career_id: string; roadmap_type?: string; custom_duration_months?: number; progress_token?: string }, timeout = 300000) {
   const { data } = await api.post("/intelligence/roadmaps/generate", payload, { timeout });
   return data;
 }
@@ -216,7 +241,7 @@ export async function getBackupPlanById(id: string): Promise<BackupPlan> {
   return data;
 }
 
-export async function generateBackupPlan(payload: { career_id: string; max_scenarios?: number }, timeout = 300000) {
+export async function generateBackupPlan(payload: { career_id: string; max_scenarios?: number; progress_token?: string }, timeout = 300000) {
   const { data } = await api.post("/intelligence/backups/generate", payload, { timeout });
   return data;
 }
@@ -266,8 +291,12 @@ export async function getChatSession(sessionId: string): Promise<ChatSession> {
   return data;
 }
 
-export async function sendChatMessages(sessionId: string, messages: ChatMessageCreatePayload[]) {
-  const { data } = await api.post(`/chat/sessions/${sessionId}/messages`, messages, { timeout: 120000 });
+export async function sendChatMessages(sessionId: string, messages: ChatMessageCreatePayload[], progressToken?: string) {
+  const { data } = await api.post(
+    `/chat/sessions/${sessionId}/messages`,
+    messages,
+    { timeout: 120000, params: progressToken ? { progress_token: progressToken } : undefined },
+  );
   // Backend wraps response in { value: [...], Count: N } instead of returning array directly
   return data.value || data;
 }
@@ -304,6 +333,16 @@ export async function exportChatSession(sessionId: string, format: "json" | "mar
 
 export async function rebuildChatMemory(sessionId: string): Promise<ChatRebuildMemoryResponse> {
   const { data } = await api.post(`/chat/sessions/${sessionId}/rebuild-memory`);
+  return data;
+}
+
+export async function forgotPassword(email: string) {
+  const { data } = await api.post("/auth/forgot-password", { email });
+  return data;
+}
+
+export async function resetPassword(token: string, new_password: string) {
+  const { data } = await api.post("/auth/reset-password", { token, new_password });
   return data;
 }
 

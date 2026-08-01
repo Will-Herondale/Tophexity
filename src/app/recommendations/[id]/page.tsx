@@ -7,9 +7,12 @@ import type { Recommendation, RecommendationItem } from "@/types/recommendation"
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import CareerDetailModal from "@/components/careers/CareerDetailModal";
-import { ArrowLeft, Star, ExternalLink } from "lucide-react";
+import ReasoningView from "@/components/ai/ReasoningView";
+import { usePageTitle } from "@/hooks/usePageTitle";
+import { ArrowLeft, Star, ExternalLink, Lightbulb, TrendingUp, Target, Zap } from "lucide-react";
 
 export default function RecommendationDetailPage() {
+  usePageTitle("Recommendation Details");
   const router = useRouter();
   const params = useParams();
   const id = params.id as string;
@@ -73,35 +76,77 @@ export default function RecommendationDetailPage() {
 }
 
 function RankedItem({ item, onViewDetails }: { item: RecommendationItem; onViewDetails: (careerId: string) => void }) {
-  const scoreStyle =
-    item.match_score >= 90 ? { color: "#4ade80", backgroundColor: "rgba(74, 222, 128, 0.1)" } :
-    item.match_score >= 75 ? { color: "#5b9aff", backgroundColor: "rgba(30, 79, 163, 0.1)" } :
-    item.match_score >= 60 ? { color: "#fbbf24", backgroundColor: "rgba(251, 191, 36, 0.1)" } :
-    { color: "#8a8a9a", backgroundColor: "#112a5e" };
+  const scoreColor =
+    item.match_score >= 90 ? "text-emerald-400 bg-emerald-500/10" :
+    item.match_score >= 75 ? "text-blue-400 bg-accent/10" :
+    item.match_score >= 60 ? "text-amber-400 bg-amber-500/10" :
+    "text-text-muted bg-surface/15";
+  const scoreBarWidth = `${Math.min(item.match_score, 100)}%`;
+  const scoreBarColor =
+    item.match_score >= 90 ? "bg-emerald-400" :
+    item.match_score >= 75 ? "bg-accent" :
+    item.match_score >= 60 ? "bg-amber-400" :
+    "bg-text-muted";
 
   return (
-    <Card>
+    <Card className="group transition-all hover:bg-surface/25">
       <div className="flex items-start gap-4">
-        <div className="flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold bg-accent text-white">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent text-sm font-bold text-white shadow-sm shadow-accent/30">
           #{item.rank}
         </div>
-        <div className="flex-1">
-          <div className="flex items-start justify-between">
-            <div>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
               <h3 className="text-base font-semibold font-[family-name:var(--font-display)] text-foreground">
                 {item.career?.title || "Career"}
               </h3>
               {item.career?.description && (
-                <p className="mt-1 text-xs text-text-secondary [display:-webkit-box] [-webkit-line-clamp:2] [-webkit-box-orient:vertical] overflow-hidden">{item.career.description}</p>
+                <p className="mt-1 text-xs text-text-secondary line-clamp-2">{item.career.description}</p>
               )}
             </div>
-            <span className={`ml-3 rounded-full px-3 py-1 text-sm font-bold`} style={scoreStyle}>
-              {item.match_score}%
-            </span>
+            <div className="flex flex-col items-center shrink-0">
+              <span className={`rounded-full px-3 py-1 text-sm font-bold ${scoreColor}`}>
+                {item.match_score}%
+              </span>
+              <div className="mt-1 h-1.5 w-16 overflow-hidden rounded-full bg-surface/20">
+                <div className={`h-full rounded-full transition-all ${scoreBarColor}`} style={{ width: scoreBarWidth }} />
+              </div>
+            </div>
           </div>
+
           {item.reasoning && (
-            <p className="mt-2 text-sm text-text-secondary">{item.reasoning}</p>
+            <div className="mt-3 rounded-xl border border-accent/10 bg-accent/[0.02] p-3">
+              <div className="flex items-start gap-2">
+                <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />
+                <div>
+                  <p className="text-xs font-medium text-foreground/80">Why this career?</p>
+                  <ReasoningView text={item.reasoning} className="mt-1" />
+                </div>
+              </div>
+            </div>
           )}
+
+          <div className="mt-3 flex flex-wrap gap-2">
+            {item.career?.average_salary && (
+              <span className="inline-flex items-center gap-1 rounded-md bg-emerald-500/5 px-2 py-1 text-xs text-emerald-400">
+                <TrendingUp className="h-3 w-3" />
+                ${(item.career.average_salary / 1000).toFixed(0)}k avg.
+              </span>
+            )}
+            {item.career?.growth_outlook && (
+              <span className="inline-flex items-center gap-1 rounded-md bg-blue-500/5 px-2 py-1 text-xs text-blue-400">
+                <Zap className="h-3 w-3" />
+                {item.career.growth_outlook}
+              </span>
+            )}
+            {item.career?.demand_level && (
+              <span className="inline-flex items-center gap-1 rounded-md bg-purple-500/5 px-2 py-1 text-xs text-purple-400">
+                <Target className="h-3 w-3" />
+                {item.career.demand_level} demand
+              </span>
+            )}
+          </div>
+
           <div className="mt-3 flex gap-2">
             <Button size="sm" onClick={() => onViewDetails(item.career_id)}>
               <ExternalLink className="mr-1 h-3 w-3" />

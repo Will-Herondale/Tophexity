@@ -20,6 +20,7 @@ import {
   LineChart,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 
@@ -77,6 +78,7 @@ const footerCompany = [
 ];
 
 export default function HomePage() {
+  usePageTitle("Home");
   const { user } = useAuth();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);

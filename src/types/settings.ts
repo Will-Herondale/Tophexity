@@ -10,11 +10,6 @@ export interface NavItem {
 export interface UserSettings {
   navItems: NavItem[];
   theme: "light" | "dark" | "system";
-  notifications: {
-    email: boolean;
-    recommendations: boolean;
-    roadmapUpdates: boolean;
-  };
 }
 
 export const DEFAULT_SETTINGS: UserSettings = {
@@ -28,11 +23,7 @@ export const DEFAULT_SETTINGS: UserSettings = {
     { id: "backups", label: "Backup Plans", href: "/backups", icon: "Shield", visible: true, order: 6 },
     { id: "chat", label: "Chat", href: "/chat", icon: "MessageSquare", visible: true, order: 7 },
     { id: "settings", label: "Settings", href: "/settings", icon: "Settings", visible: true, order: 8 },
+    { id: "dbviewer", label: "DB Viewer", href: "/system/db", icon: "Database", visible: false, order: 9 },
   ],
   theme: "dark",
-  notifications: {
-    email: true,
-    recommendations: true,
-    roadmapUpdates: true,
-  },
 };

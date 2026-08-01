@@ -21,6 +21,7 @@ export interface RecommendationItem {
     description: string;
     average_salary: number | null;
     demand_level: string | null;
+    growth_outlook: string | null;
   };
 }
 

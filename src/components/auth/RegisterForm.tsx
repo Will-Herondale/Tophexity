@@ -7,13 +7,15 @@ import { register as apiRegister } from "@/lib/api";
 import { APP_NAME } from "@/lib/constants";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
-import { UserPlus } from "lucide-react";
+import { UserPlus, Eye, EyeOff } from "lucide-react";
 
 export default function RegisterForm() {
   const router = useRouter();
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
@@ -35,7 +37,7 @@ export default function RegisterForm() {
     setLoading(true);
 
     try {
-      await apiRegister({ email, password });
+      await apiRegister({ email, password, full_name: fullName || undefined });
       setSuccess("Account created! Redirecting to login...");
       setTimeout(() => router.push("/login"), 1500);
     } catch (err: unknown) {
@@ -94,34 +96,59 @@ export default function RegisterForm() {
           )}
 
           <Input
+            label="Full Name"
+            type="text"
+            placeholder="John Doe"
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+            autoComplete="name"
+            className={inputClass}
+          />
+
+          <Input
             label="Email"
             type="email"
             placeholder="you@example.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            autoComplete="email"
             className={inputClass}
           />
 
-          <Input
-            label="Password"
-            type="password"
-            placeholder="At least 8 characters"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            className={inputClass}
-          />
+          <div className="relative">
+            <Input
+              label="Password"
+              type={showPassword ? "text" : "password"}
+              placeholder="At least 8 characters"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              autoComplete="new-password"
+              className={inputClass}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-[34px] text-text-muted hover:text-foreground transition-colors"
+              tabIndex={-1}
+            >
+              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
+          </div>
 
-          <Input
-            label="Confirm Password"
-            type="password"
-            placeholder="Repeat your password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            required
-            className={inputClass}
-          />
+          <div className="relative">
+            <Input
+              label="Confirm Password"
+              type={showPassword ? "text" : "password"}
+              placeholder="Repeat your password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+              autoComplete="new-password"
+              className={inputClass}
+            />
+          </div>
 
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? (

@@ -27,14 +27,24 @@ export default function RoadmapTimeline({ steps }: RoadmapTimelineProps) {
                   <Clock className="h-3 w-3" /> {step.duration_months} month{step.duration_months !== 1 ? "s" : ""}
                 </span>
               )}
-              {step.resources && Object.keys(step.resources).length > 0 && (
-                <div className="mt-2">
-                  {Object.entries(step.resources).map(([key, value]) => (
-                    <div key={key} className="text-xs" style={{ color: "#8a8a9a" }}>
-                      <span className="font-medium" style={{ color: "#f0f0f0" }}>{key}:</span>{" "}
-                      {Array.isArray(value) ? value.join(", ") : String(value)}
-                    </div>
-                  ))}
+              {Array.isArray(step.resources) && step.resources.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {step.resources.map((res, i) => {
+                    const label = res.name || res.type || "Resource";
+                    const content = (
+                      <span className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px]"
+                        style={{ backgroundColor: "rgba(30, 79, 163, 0.15)", color: "#8a8a9a" }}>
+                        {label}
+                      </span>
+                    );
+                    return res.url ? (
+                      <a key={i} href={res.url} target="_blank" rel="noopener noreferrer" className="transition-opacity hover:opacity-75">
+                        {content}
+                      </a>
+                    ) : (
+                      <span key={i}>{content}</span>
+                    );
+                  })}
                 </div>
               )}
             </div>

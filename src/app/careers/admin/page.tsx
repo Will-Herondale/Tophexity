@@ -7,6 +7,7 @@ import type { Career, CareerSearchParams } from "@/types/career";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Modal from "@/components/ui/Modal";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import {
   ArrowLeft, Upload, Search, Edit3, Trash2, Loader2, Plus, X,
   Briefcase, DollarSign, TrendingUp, BarChart3, Lock,
@@ -16,6 +17,7 @@ import { VALID_DEMAND_LEVELS, VALID_GROWTH_OUTLOOKS } from "@/lib/constants";
 const ADMIN_SECRET = "BEFOREGTA6";
 
 export default function CareersAdminPage() {
+  usePageTitle("Careers Admin");
   const router = useRouter();
 
   const [unlocked, setUnlocked] = useState(false);
@@ -49,7 +51,9 @@ export default function CareersAdminPage() {
   const [deletingBusy, setDeletingBusy] = useState(false);
 
   useEffect(() => {
-    if (sessionStorage.getItem("admin_unlocked") === "1") setUnlocked(true);
+    if (sessionStorage.getItem("admin_unlocked") === "1") {
+      queueMicrotask(() => setUnlocked(true));
+    }
   }, []);
 
   const handleUnlock = () => {
@@ -64,7 +68,6 @@ export default function CareersAdminPage() {
   };
 
   const fetchCareers = useCallback(async () => {
-    setLoading(true);
     try {
       const params: CareerSearchParams = { page, page_size: 20, sort_by: "title", sort_order: "asc" };
       if (searchTerm) params.search = searchTerm;
@@ -78,7 +81,23 @@ export default function CareersAdminPage() {
     }
   }, [page, searchTerm]);
 
-  useEffect(() => { if (unlocked) fetchCareers(); }, [unlocked, fetchCareers]);
+  useEffect(() => {
+    if (!unlocked) return;
+    let cancelled = false;
+    const params: CareerSearchParams = { page, page_size: 20, sort_by: "title", sort_order: "asc" };
+    if (searchTerm) params.search = searchTerm;
+    getCareers(params)
+      .then((data) => {
+        if (cancelled) return;
+        const seen = new Set<string>();
+        const unique = (data.items || []).filter((c) => { if (seen.has(c.id)) return false; seen.add(c.id); return true; });
+        setCareers(unique);
+        setTotal(data.total || 0);
+      })
+      .catch(() => {})
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [unlocked, page, searchTerm]);
 
   if (!unlocked) {
     return (

@@ -6,65 +6,24 @@ import NavCustomizer from "./NavCustomizer";
 import Button from "@/components/ui/Button";
 import { useAuth } from "@/contexts/AuthContext";
 import {
-  Save,
   Sun,
   Moon,
   Monitor,
   Palette,
-  Bell,
   User,
   Check,
   LogOut,
-  Mail,
-  Shield,
   ChevronRight,
 } from "lucide-react";
 import { motion } from "framer-motion";
 
-function Toggle({
-  checked,
-  onChange,
-  disabled,
-}: {
-  checked: boolean;
-  onChange: (v: boolean) => void;
-  disabled?: boolean;
-}) {
-  return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={checked}
-      disabled={disabled}
-      onClick={() => !disabled && onChange(!checked)}
-      className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full transition-colors duration-200 ${
-        checked ? "bg-accent" : "bg-surface-light"
-      } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
-    >
-      <span
-        className={`inline-block h-3.5 w-3.5 rounded-full bg-white shadow-sm transition-transform duration-200 ${
-          checked ? "translate-x-[18px]" : "translate-x-[3px]"
-        }`}
-      />
-    </button>
-  );
-}
-
 export default function SettingsForm() {
   const { settings, updateSettings } = useSettings();
   const { user, logout } = useAuth();
-  const [notifications, setNotifications] = useState(settings.notifications);
-  const [saved, setSaved] = useState(false);
   const [showNavCustomizer, setShowNavCustomizer] = useState(false);
 
   const handleThemeChange = (value: "light" | "dark" | "system") => {
     updateSettings({ theme: value });
-  };
-
-  const handleSave = () => {
-    updateSettings({ notifications });
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
   };
 
   const themes: Array<{
@@ -161,45 +120,6 @@ export default function SettingsForm() {
         </div>
       </div>
 
-      {/* ─── Notifications ─── */}
-      <div className="rounded-2xl bg-surface/20 p-6 shadow-sm">
-        <div className="flex items-center gap-2.5 mb-5">
-          <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center">
-            <Bell className="h-4 w-4 text-accent" />
-          </div>
-          <div>
-            <h3 className="text-sm font-semibold font-[family-name:var(--font-display)] text-foreground">Notifications</h3>
-            <p className="text-xs text-text-muted">Control what you get notified about</p>
-          </div>
-        </div>
-        <div className="divide-y divide-border/50">
-          {[
-            { key: "email" as const, label: "Email notifications", desc: "Receive updates and alerts via email", icon: Mail },
-            { key: "recommendations" as const, label: "New recommendations", desc: "Get notified when new careers match your profile", icon: Shield },
-            { key: "roadmapUpdates" as const, label: "Roadmap updates", desc: "Track progress on your career roadmaps", icon: Bell },
-          ].map((item) => {
-            const Icon = item.icon;
-            return (
-              <div key={item.key} className="flex items-center justify-between py-3.5 first:pt-0 last:pb-0">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-surface/30 flex items-center justify-center">
-                    <Icon className="h-4 w-4 text-text-secondary" />
-                  </div>
-                  <div>
-                    <span className="text-sm font-medium text-foreground block">{item.label}</span>
-                    <span className="text-xs text-text-muted">{item.desc}</span>
-                  </div>
-                </div>
-                <Toggle
-                  checked={notifications[item.key]}
-                  onChange={(v) => setNotifications({ ...notifications, [item.key]: v })}
-                />
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
       {/* ─── Navigation Customization ─── */}
       <div className="rounded-2xl bg-surface/20 overflow-hidden shadow-sm">
         <button
@@ -256,14 +176,6 @@ export default function SettingsForm() {
           </div>
         </div>
       )}
-
-      {/* ─── Save Button ─── */}
-      <div className="flex justify-end pt-2">
-        <Button onClick={handleSave} className="min-w-[140px]">
-          <Save className="mr-1.5 h-4 w-4" />
-          {saved ? "Saved!" : "Save Settings"}
-        </Button>
-      </div>
     </div>
   );
 }

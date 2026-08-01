@@ -70,7 +70,12 @@ class AzureFoundryProvider(AIProvider):
         if request.reasoning_effort:
             kwargs["reasoning_effort"] = request.reasoning_effort
         if request.temperature is not None:
-            kwargs["temperature"] = request.temperature
+            model_name = (self.deployment or "").lower()
+            reasoning_only_default_temp = any(
+                token in model_name for token in ("gpt-5", "o1", "o3", "-mini", "-nano")
+            )
+            if request.temperature != 1.0 and not reasoning_only_default_temp:
+                kwargs["temperature"] = request.temperature
 
         try:
             response = await self.client.chat.completions.create(**kwargs)

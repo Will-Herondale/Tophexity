@@ -23,6 +23,7 @@ from app.models.backup import BackupPlan, BackupScenario
 from app.models.chat import ChatMessage, ChatSession
 from app.models.ai_analytics import AIUsageLog, AIHealthSnapshot
 from app.models.embedding import DocumentEmbedding, EmbeddingJob
+from app.models.generation_progress import GenerationProgress
 
 __all__ = [
     "User",
@@ -55,4 +56,5 @@ __all__ = [
     "AIHealthSnapshot",
     "DocumentEmbedding",
     "EmbeddingJob",
+    "GenerationProgress",
 ]

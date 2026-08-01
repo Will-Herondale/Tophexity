@@ -68,7 +68,7 @@ async def generate_recommendation(
             db, user, include_profile, max_results, reporter
         )
     except Exception as e:
-        reporter.report(0, "Failed", f"Generation failed: {str(e)[:200]}", status="failed")
+        await reporter.report(0, "Failed", f"Generation failed: {str(e)[:200]}", status="failed")
         raise
 
 
@@ -80,7 +80,7 @@ async def _generate_recommendation_inner(
     reporter: ProgressReporter,
 ) -> Recommendation:
     """Generate AI-powered career recommendations."""
-    reporter.report(2, "Starting", "Preparing your personalized analysis")
+    await reporter.report(2, "Starting", "Preparing your personalized analysis")
     profile_data = {}
     portfolio_data = []
 
@@ -113,9 +113,9 @@ async def _generate_recommendation_inner(
         for i in items
     ]
 
-    reporter.report(10, "Gathering your profile", "Reading your profile and portfolio")
+    await reporter.report(10, "Gathering your profile", "Reading your profile and portfolio")
     search_query = _build_search_query(profile_data, portfolio_data)
-    reporter.report(20, "Searching career knowledge base", "Finding relevant careers and insights")
+    await reporter.report(20, "Searching career knowledge base", "Finding relevant careers and insights")
     kb_context = await get_relevant_knowledge(db, search_query, max_tokens=2000)
 
     result = await db.execute(select(Career.title).order_by(Career.title))
@@ -163,7 +163,7 @@ Respond with a JSON object:
 }}"""
 
     ai_client = get_ai_client()
-    reporter.report(55, "Analyzing with AI", "Comparing your profile against careers — this usually takes 30-60 seconds")
+    await reporter.report(55, "Analyzing with AI", "Comparing your profile against careers — this usually takes 30-60 seconds")
     try:
         response = await ai_client.generate(
             prompt=prompt,
@@ -178,7 +178,7 @@ Respond with a JSON object:
         logger.error("Recommendation generation failed: %s", str(e)[:200])
         raise BadRequestException(detail=f"Failed to generate recommendations: {str(e)[:200]}")
 
-    reporter.report(85, "Building your recommendations", "Saving your best matches")
+    await reporter.report(85, "Building your recommendations", "Saving your best matches")
 
     recommendation = Recommendation(
         user_id=user.id,
@@ -226,7 +226,7 @@ Respond with a JSON object:
         .options(selectinload(Recommendation.items).selectinload(RecommendationItem.career))
         .where(Recommendation.id == recommendation.id)
     )
-    reporter.report(100, "Done", "Recommendations ready", status="succeeded")
+    await reporter.report(100, "Done", "Recommendations ready", status="succeeded")
     return result.unique().scalar_one()
 
 

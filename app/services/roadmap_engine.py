@@ -54,7 +54,7 @@ async def generate_roadmap(
             db, user, career_id, roadmap_type, custom_duration_months, reporter
         )
     except Exception as e:
-        reporter.report(0, "Failed", f"Generation failed: {str(e)[:200]}", status="failed")
+        await reporter.report(0, "Failed", f"Generation failed: {str(e)[:200]}", status="failed")
         raise
 
 
@@ -67,7 +67,7 @@ async def _generate_roadmap_inner(
     reporter: ProgressReporter,
 ) -> Roadmap:
     """Generate an AI-powered personalized roadmap."""
-    reporter.report(2, "Starting", "Preparing your roadmap")
+    await reporter.report(2, "Starting", "Preparing your roadmap")
     career = await db.get(Career, career_id)
     if not career:
         raise NotFoundException(detail="Career not found")
@@ -86,11 +86,11 @@ async def _generate_roadmap_inner(
             "interests": profile.interests,
         }
 
-    reporter.report(15, "Gathering your profile", "Reading your profile and background")
+    await reporter.report(15, "Gathering your profile", "Reading your profile and background")
     search_query = f"{career.title} career path {roadmap_type} roadmap"
     if profile_data.get("education_level"):
         search_query += f" {profile_data['education_level']}"
-    reporter.report(25, "Searching career knowledge base", "Finding relevant skills and milestones")
+    await reporter.report(25, "Searching career knowledge base", "Finding relevant skills and milestones")
     kb_context = await get_relevant_knowledge(db, search_query, max_tokens=1500)
 
     duration_hint = f"Target duration: {custom_duration_months} months." if custom_duration_months else "Choose a realistic duration."
@@ -136,7 +136,7 @@ Respond with JSON:
 }}"""
 
     ai_client = get_ai_client()
-    reporter.report(55, "Designing with AI", "Planning your milestones — this usually takes 30-60 seconds")
+    await reporter.report(55, "Designing with AI", "Planning your milestones — this usually takes 30-60 seconds")
     try:
         response = await ai_client.generate(
             prompt=prompt,
@@ -151,7 +151,7 @@ Respond with JSON:
         logger.error("Roadmap generation failed: %s", str(e)[:200])
         raise BadRequestException(detail=f"Failed to generate roadmap: {str(e)[:200]}")
 
-    reporter.report(85, "Building your roadmap", "Saving your milestones and steps")
+    await reporter.report(85, "Building your roadmap", "Saving your milestones and steps")
 
     roadmap = Roadmap(
         user_id=user.id,
@@ -183,5 +183,5 @@ Respond with JSON:
         .options(selectinload(Roadmap.steps))
         .where(Roadmap.id == roadmap.id)
     )
-    reporter.report(100, "Done", "Roadmap ready", status="succeeded")
+    await reporter.report(100, "Done", "Roadmap ready", status="succeeded")
     return result.unique().scalar_one()

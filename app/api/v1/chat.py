@@ -216,7 +216,7 @@ async def add_messages(
         if client.is_configured:
             _step = ""
             try:
-                reporter.report(15, "Preparing context", "Building conversation context")
+                await reporter.report(15, "Preparing context", "Building conversation context")
 
                 _step = "get_session"
                 conv_manager = ConversationManager(db, current_user)
@@ -229,7 +229,7 @@ async def add_messages(
                 )
 
                 _step = "client.chat"
-                reporter.report(40, "Analyzing with AI", "Thinking about your question — this usually takes 10-30 seconds")
+                await reporter.report(40, "Analyzing with AI", "Thinking about your question — this usually takes 10-30 seconds")
                 response = await client.chat(
                     messages=ai_messages,
                     user_id=str(current_user.id),
@@ -254,7 +254,7 @@ async def add_messages(
                         "completion_tokens": response.token_usage.completion_tokens,
                     },
                 )
-                reporter.report(90, "Saving response", "Finishing up")
+                await reporter.report(90, "Saving response", "Finishing up")
                 stored.append(assistant_stored)
 
                 _step = "count_msgs"
@@ -274,17 +274,17 @@ async def add_messages(
                 )
                 await safe_flush(db)
 
-                reporter.report(100, "Done", "Response ready", status="succeeded")
+                await reporter.report(100, "Done", "Response ready", status="succeeded")
 
                 _step = "background_tasks"
                 asyncio.create_task(
                     _background_tasks(session_id, current_user, user_msgs[0].content, total_msg_count)
                 )
             except AIError:
-                reporter.report(0, "Failed", "The AI service could not generate a response", status="failed")
+                await reporter.report(0, "Failed", "The AI service could not generate a response", status="failed")
                 raise
             except Exception as e:
-                reporter.report(0, "Failed", str(e)[:200], status="failed")
+                await reporter.report(0, "Failed", str(e)[:200], status="failed")
                 logger.error("AI response generation failed at step '%s' for session %s: %s", _step, session_id, str(e)[:300])
                 raise AIError(message=f"AI response generation failed", status_code=503)
 

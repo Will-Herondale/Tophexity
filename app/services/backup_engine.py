@@ -56,7 +56,7 @@ async def generate_backup_plan(
             db, user, career_id, max_scenarios, reporter
         )
     except Exception as e:
-        reporter.report(0, "Failed", f"Generation failed: {str(e)[:200]}", status="failed")
+        await reporter.report(0, "Failed", f"Generation failed: {str(e)[:200]}", status="failed")
         raise
 
 
@@ -68,7 +68,7 @@ async def _generate_backup_plan_inner(
     reporter: ProgressReporter,
 ) -> BackupPlan:
     """Generate AI-powered backup plans for a career."""
-    reporter.report(2, "Starting", "Preparing your backup plan")
+    await reporter.report(2, "Starting", "Preparing your backup plan")
     career = await db.get(Career, career_id)
     if not career:
         raise NotFoundException(detail="Career not found")
@@ -87,9 +87,9 @@ async def _generate_backup_plan_inner(
             "interests": profile.interests,
         }
 
-    reporter.report(15, "Gathering your profile", "Reading your profile and background")
+    await reporter.report(15, "Gathering your profile", "Reading your profile and background")
     search_query = f"{career.title} alternative careers similar jobs transitions"
-    reporter.report(25, "Searching career knowledge base", "Finding relevant alternative careers")
+    await reporter.report(25, "Searching career knowledge base", "Finding relevant alternative careers")
     kb_context = await get_relevant_knowledge(db, search_query, max_tokens=1500)
 
     prompt = f"""Generate {max_scenarios} intelligent backup plan alternatives for a career as {career.title}.
@@ -134,7 +134,7 @@ Respond with JSON:
 }}"""
 
     ai_client = get_ai_client()
-    reporter.report(55, "Analyzing with AI", "Comparing alternative careers — this usually takes 30-60 seconds")
+    await reporter.report(55, "Analyzing with AI", "Comparing alternative careers — this usually takes 30-60 seconds")
     try:
         response = await ai_client.generate(
             prompt=prompt,
@@ -149,7 +149,7 @@ Respond with JSON:
         logger.error("Backup plan generation failed: %s", str(e)[:200])
         raise BadRequestException(detail=f"Failed to generate backup plan: {str(e)[:200]}")
 
-    reporter.report(85, "Building your backup plan", "Saving your alternative paths")
+    await reporter.report(85, "Building your backup plan", "Saving your alternative paths")
 
     plan = BackupPlan(
         user_id=user.id,
@@ -191,5 +191,5 @@ Respond with JSON:
         .options(selectinload(BackupPlan.scenarios))
         .where(BackupPlan.id == plan.id)
     )
-    reporter.report(100, "Done", "Backup plan ready", status="succeeded")
+    await reporter.report(100, "Done", "Backup plan ready", status="succeeded")
     return result.unique().scalar_one()

@@ -107,8 +107,8 @@ async def get_generation_progress(
     db: AsyncSession = Depends(get_db_session),
     user: User = Depends(get_current_active_user),
 ):
-    rec = progress_store.get(token)
-    if not rec or rec["user_id"] != str(user.id):
+    rec = await progress_store.get(token, str(user.id))
+    if not rec:
         raise NotFoundException(detail="Progress not found or expired")
     return ProgressResponse(
         token=token,

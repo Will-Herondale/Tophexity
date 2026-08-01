@@ -11,6 +11,7 @@ class AIRequest(BaseModel):
     temperature: float | None = None
     max_tokens: int | None = None
     response_format: str | None = None
+    reasoning_effort: str | None = None
     user_id: UUID | None = None
     conversation_id: UUID | None = None
 

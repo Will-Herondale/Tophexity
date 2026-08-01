@@ -1,5 +1,7 @@
 """AI test endpoint, AI health endpoint, and prompt management endpoints."""
 
+import json
+
 from fastapi import APIRouter, Depends, Request
 
 from app.api.deps import get_current_active_user
@@ -14,6 +16,7 @@ from app.services.ai.prompt_loader import (
     list_prompts,
     render_prompt,
 )
+from app.utils.exceptions import NotFoundException
 
 router = APIRouter()
 
@@ -36,7 +39,13 @@ async def ai_test(
     request: Request,
     current_user: User = Depends(get_current_active_user),
 ):
-    body = await request.json()
+    body = {}
+    raw = await request.body()
+    if raw:
+        try:
+            body = json.loads(raw)
+        except json.JSONDecodeError:
+            body = {}
     message = body.get("message", "Hello, this is a test message.")
 
     client = get_ai_client()
@@ -118,9 +127,18 @@ async def ai_test_prompt(
     request: Request,
     current_user: User = Depends(get_current_active_user),
 ):
-    body = await request.json()
+    body = {}
+    raw = await request.body()
+    if raw:
+        try:
+            body = json.loads(raw)
+        except json.JSONDecodeError:
+            body = {}
     variables = body.get("variables", {})
-    rendered = render_prompt(prompt_name, variables)
+    try:
+        rendered = render_prompt(prompt_name, variables)
+    except FileNotFoundError:
+        raise NotFoundException(detail=f"Prompt '{prompt_name}' not found")
     return PromptTestResponse(
         name=prompt_name,
         rendered=rendered,

@@ -114,7 +114,7 @@ class ContextBuilder:
 
         result = await self.db.execute(
             select(Recommendation)
-            .options(selectinload(Recommendation.items))
+            .options(selectinload(Recommendation.items).selectinload(RecommendationItem.career))
             .where(Recommendation.user_id == self.user.id)
             .order_by(Recommendation.created_at.desc())
             .limit(1)

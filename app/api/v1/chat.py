@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.deps import get_current_active_user, get_db_session
 from app.core.config import get_settings
 from app.core.logging import logger
+from app.models.chat import ChatSession
 from app.models.user import User
 from app.schemas.chat import (
     ChatExportResponse,
@@ -199,9 +200,13 @@ async def add_messages(
     session_id: UUID,
     messages: list[ChatMessageCreate],
     request: Request,
+    progress_token: str | None = Query(None, description="Optional token for polling progress via GET /intelligence/progress/{token}"),
     db: AsyncSession = Depends(get_db_session),
     current_user: User = Depends(get_current_active_user),
 ):
+    from app.services.progress_store import ProgressReporter
+
+    reporter = ProgressReporter(progress_token, str(current_user.id))
     user_msgs = [m for m in messages if m.role == "user"]
 
     stored = await chat_service.add_messages(db, current_user, session_id, messages)
@@ -211,6 +216,8 @@ async def add_messages(
         if client.is_configured:
             _step = ""
             try:
+                reporter.report(15, "Preparing context", "Building conversation context")
+
                 _step = "get_session"
                 conv_manager = ConversationManager(db, current_user)
                 session_obj = await conv_manager.get_session(session_id)
@@ -222,11 +229,14 @@ async def add_messages(
                 )
 
                 _step = "client.chat"
+                reporter.report(40, "Analyzing with AI", "Thinking about your question — this usually takes 10-30 seconds")
                 response = await client.chat(
                     messages=ai_messages,
                     user_id=str(current_user.id),
                     conversation_id=str(session_id),
                     ip=request.client.host if request.client else None,
+                    max_tokens=settings.AI_CHAT_MAX_TOKENS,
+                    reasoning_effort=settings.AI_REASONING_EFFORT,
                 )
 
                 _step = "store_assistant"
@@ -244,6 +254,7 @@ async def add_messages(
                         "completion_tokens": response.token_usage.completion_tokens,
                     },
                 )
+                reporter.report(90, "Saving response", "Finishing up")
                 stored.append(assistant_stored)
 
                 _step = "count_msgs"
@@ -263,13 +274,17 @@ async def add_messages(
                 )
                 await safe_flush(db)
 
+                reporter.report(100, "Done", "Response ready", status="succeeded")
+
                 _step = "background_tasks"
                 asyncio.create_task(
-                    _background_tasks(session_id, current_user, session_obj, user_msgs[0].content, total_msg_count)
+                    _background_tasks(session_id, current_user, user_msgs[0].content, total_msg_count)
                 )
             except AIError:
+                reporter.report(0, "Failed", "The AI service could not generate a response", status="failed")
                 raise
             except Exception as e:
+                reporter.report(0, "Failed", str(e)[:200], status="failed")
                 logger.error("AI response generation failed at step '%s' for session %s: %s", _step, session_id, str(e)[:300])
                 raise AIError(message=f"AI response generation failed", status_code=503)
 
@@ -279,7 +294,6 @@ async def add_messages(
 async def _background_tasks(
     session_id: UUID,
     user: User,
-    session_obj,
     first_message: str,
     total_msg_count: int,
 ) -> None:
@@ -290,6 +304,14 @@ async def _background_tasks(
         async with async_session_factory() as bg_db:
             bg_user = user
             bg_conv = ConversationManager(bg_db, bg_user)
+
+            result = await bg_db.execute(
+                select(ChatSession).where(ChatSession.id == session_id)
+            )
+            session_obj = result.scalar_one_or_none()
+            if session_obj is None:
+                logger.warning("Background tasks: session %s no longer exists", session_id)
+                return
 
             # Title generation (first message only)
             if session_obj.title is None:

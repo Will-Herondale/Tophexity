@@ -34,6 +34,11 @@ class Settings(BaseSettings):
     AI_REQUEST_TIMEOUT: float = 300.0
     AI_MAX_TOKENS: int = 16384
     AI_TEMPERATURE: float = 0.7
+    AI_REASONING_EFFORT: str = "low"
+    AI_CHAT_MAX_TOKENS: int = 4096
+    AI_GENERATION_MAX_TOKENS: int = 10000
+    AI_COMPARE_MAX_TOKENS: int = 4000
+    AI_GENERATION_JSON_MODE: bool = True
 
     AI_RATE_LIMIT_PER_MINUTE: int = 50
     AI_RATE_LIMIT_PER_HOUR: int = 500

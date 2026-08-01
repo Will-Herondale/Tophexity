@@ -25,8 +25,13 @@ def validate_settings() -> list[str]:
             errors.append(f"DATABASE_URL has no hostname: {db_url[:60]}...")
 
     # JWT
-    if settings.JWT_SECRET_KEY == "CHANGE_ME_IN_PRODUCTION":
-        errors.append("JWT_SECRET_KEY is still the default value")
+    jwt_secret = settings.JWT_SECRET_KEY
+    if not jwt_secret:
+        errors.append("JWT_SECRET_KEY is empty")
+    elif jwt_secret in ("CHANGE_ME_IN_PROD", "CHANGE_ME_IN_PRODUCTION", "CHANGE_ME"):
+        errors.append("JWT_SECRET_KEY is still a placeholder value")
+    elif len(jwt_secret) < 32:
+        errors.append("JWT_SECRET_KEY is too short (< 32 chars) for production")
 
     # AI endpoint
     ai_ep = settings.AI_ENDPOINT

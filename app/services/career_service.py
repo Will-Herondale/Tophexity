@@ -277,15 +277,22 @@ async def find_career_by_title(
     db: AsyncSession, title: str
 ) -> Career | None:
     """Find a career by title using fuzzy matching."""
+    if not title:
+        return None
     result = await db.execute(
         select(Career).where(Career.title.ilike(f"%{title}%")).limit(1)
     )
     career = result.scalar_one_or_none()
     if not career:
         words = title.split()
-        if words:
+        for w in words:
+            w = w.strip().rstrip(",)(")
+            if len(w) < 3:
+                continue
             result = await db.execute(
-                select(Career).where(Career.title.ilike(f"%{words[0]}%")).limit(1)
+                select(Career).where(Career.title.ilike(f"%{w}%")).limit(1)
             )
             career = result.scalar_one_or_none()
+            if career:
+                break
     return career

@@ -67,6 +67,10 @@ class AzureFoundryProvider(AIProvider):
         }
         if request.response_format:
             kwargs["response_format"] = {"type": request.response_format}
+        if request.reasoning_effort:
+            kwargs["reasoning_effort"] = request.reasoning_effort
+        if request.temperature is not None:
+            kwargs["temperature"] = request.temperature
 
         try:
             response = await self.client.chat.completions.create(**kwargs)

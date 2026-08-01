@@ -8,14 +8,13 @@ from datetime import datetime, timezone, timedelta
 from typing import Any
 
 from fastapi import APIRouter, Depends, Query
-from sqlalchemy import select, func, case
+from sqlalchemy import select, func, case, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import get_current_active_user, get_db_session
+from app.api.deps import get_current_active_user, get_db_session, require_admin
 from app.core.config import get_settings
 from app.core.logging import logger
 from app.models.chat import ChatMessage, ChatSession
-from app.models.enums import UserRole
 from app.models.user import User
 from app.services.ai.analytics import analytics_service
 from app.services.ai.circuit_breaker import circuit_breaker
@@ -27,15 +26,9 @@ from app.services.ai.prompt_loader import (
     prompt_exists,
 )
 from app.services.ai.rate_limiter import rate_limiter
-from app.utils.exceptions import BadRequestException, ForbiddenException, NotFoundException
+from app.utils.exceptions import BadRequestException, NotFoundException
 
 router = APIRouter()
-
-
-def require_admin(current_user: User = Depends(get_current_active_user)) -> User:
-    if current_user.role != UserRole.ADMIN:
-        raise ForbiddenException(detail="Admin access required")
-    return current_user
 
 
 @router.get("/metrics", summary="System metrics")
@@ -347,6 +340,83 @@ async def get_rate_limit_status(
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
+_SENSITIVE_COLUMNS = {
+    "hashed_password",
+    "refresh_token",
+    "access_token",
+    "password",
+    "password_hash",
+    "api_key",
+    "secret",
+    "token",
+    "email",
+    "phone",
+}
+
+
+def _redact_row(row: dict[str, Any]) -> dict[str, Any]:
+    out = {}
+    for k, v in row.items():
+        if k in _SENSITIVE_COLUMNS and v is not None:
+            out[k] = "***REDACTED***"
+        else:
+            out[k] = v
+    return out
+
+
+@router.get("/db/overview", summary="Read-only database overview")
+async def get_db_overview(
+    db: AsyncSession = Depends(get_db_session),
+    current_user: User = Depends(get_current_active_user),
+) -> dict[str, Any]:
+    """Return every table with its row count, columns, and a small sample of rows.
+
+    Read-only: never mutates data. Sensitive columns are redacted.
+    Requires authentication (any logged-in user) so the DB can be demoed.
+    """
+    tables_result = await db.execute(
+        text(
+            "SELECT table_name FROM information_schema.tables "
+            "WHERE table_schema='public' AND table_type='BASE TABLE' "
+            "ORDER BY table_name"
+        )
+    )
+    tables = [r[0] for r in tables_result.all()]
+
+    overview = []
+    for table in tables:
+        count = (
+            await db.execute(text(f'SELECT count(*) FROM "{table}"'))
+        ).scalar()
+        cols_result = await db.execute(
+            text(
+                "SELECT column_name, data_type FROM information_schema.columns "
+                'WHERE table_schema=\'public\' AND table_name=:t ORDER BY ordinal_position'
+            ),
+            {"t": table},
+        )
+        columns = [{"name": c[0], "type": c[1]} for c in cols_result.all()]
+        sample_result = await db.execute(
+            text(f'SELECT * FROM "{table}" ORDER BY 1 LIMIT 5')
+        )
+        rows = [_redact_row(dict(r)) for r in sample_result.mappings().all()]
+        overview.append(
+            {
+                "table": table,
+                "rows": count or 0,
+                "columns": columns,
+                "sample": rows,
+            }
+        )
+
+    return {
+        "database": "career_path",
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "tables": overview,
+        "total_tables": len(tables),
+    }
+
 
 def _get_rate_limiter_stats() -> dict[str, Any]:
     """Snapshot of the rate limiter's in-memory buckets."""

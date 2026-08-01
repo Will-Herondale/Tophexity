@@ -14,16 +14,20 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from app.core.config import get_settings
 from app.core.logging import logger
 from app.models.career import Career
 from app.models.portfolio import PortfolioItem
-from app.models.profile import Profile
+from app.models.profile import Profile, ProfileVersion
 from app.models.recommendation import Recommendation, RecommendationItem
 from app.models.user import User
 from app.services.ai.client import get_ai_client
 from app.services.career_service import find_career_by_title
+from app.services.progress_store import ProgressReporter
 from app.services.retrieval_engine import get_relevant_knowledge, compress_context, semantic_search
 from app.utils.exceptions import BadRequestException, safe_flush
+
+settings = get_settings()
 
 
 RECOMMENDATION_SYSTEM_PROMPT = """You are an expert career guidance counselor with deep knowledge of careers, skills, education paths, and industry trends.
@@ -42,6 +46,11 @@ For each recommendation, provide:
 - suggested_certifications: relevant certifications
 - reasoning: detailed explanation
 
+After the recommendations, provide a profile_suggestions object:
+- skills: list of up to 10 short skill names the user should develop based on the recommended careers
+- interests: list of up to 8 interests aligned with the recommended careers
+- target_fields: list of up to 8 fields or roles aligned with the recommended careers
+
 Respond with valid JSON only. No markdown formatting."""
 
 
@@ -50,8 +59,28 @@ async def generate_recommendation(
     user: User,
     include_profile: bool = True,
     max_results: int = 10,
+    progress_token: str | None = None,
 ) -> Recommendation:
     """Generate AI-powered career recommendations."""
+    reporter = ProgressReporter(progress_token, str(user.id))
+    try:
+        return await _generate_recommendation_inner(
+            db, user, include_profile, max_results, reporter
+        )
+    except Exception as e:
+        reporter.report(0, "Failed", f"Generation failed: {str(e)[:200]}", status="failed")
+        raise
+
+
+async def _generate_recommendation_inner(
+    db: AsyncSession,
+    user: User,
+    include_profile: bool,
+    max_results: int,
+    reporter: ProgressReporter,
+) -> Recommendation:
+    """Generate AI-powered career recommendations."""
+    reporter.report(2, "Starting", "Preparing your personalized analysis")
     profile_data = {}
     portfolio_data = []
 
@@ -84,10 +113,21 @@ async def generate_recommendation(
         for i in items
     ]
 
+    reporter.report(10, "Gathering your profile", "Reading your profile and portfolio")
     search_query = _build_search_query(profile_data, portfolio_data)
+    reporter.report(20, "Searching career knowledge base", "Finding relevant careers and insights")
     kb_context = await get_relevant_knowledge(db, search_query, max_tokens=2000)
 
+    result = await db.execute(select(Career.title).order_by(Career.title))
+    career_titles = [r[0] for r in result.all()]
+    career_titles_list = "\n".join(f"- {t}" for t in career_titles)
+
     prompt = f"""Based on the following user profile and knowledge base context, generate {max_results} personalized career recommendations.
+
+You MUST choose career titles ONLY from the list below. Do NOT invent titles that are not in this list.
+
+Available Career Titles:
+{career_titles_list}
 
 ## User Profile
 {json.dumps(profile_data, indent=2) if profile_data else "No profile available"}
@@ -114,20 +154,31 @@ Respond with a JSON object:
       "reasoning": "..."
     }}
   ],
+  "profile_suggestions": {{
+    "skills": ["..."],
+    "interests": ["..."],
+    "target_fields": ["..."]
+  }},
   "summary": "Overall recommendation summary"
 }}"""
 
     ai_client = get_ai_client()
+    reporter.report(55, "Analyzing with AI", "Comparing your profile against careers — this usually takes 30-60 seconds")
     try:
         response = await ai_client.generate(
             prompt=prompt,
             system_prompt=RECOMMENDATION_SYSTEM_PROMPT,
             user_id=str(user.id),
+            max_tokens=settings.AI_GENERATION_MAX_TOKENS,
+            reasoning_effort=settings.AI_REASONING_EFFORT,
+            response_format="json_object" if settings.AI_GENERATION_JSON_MODE else None,
         )
         parsed = json.loads(response)
     except Exception as e:
         logger.error("Recommendation generation failed: %s", str(e)[:200])
         raise BadRequestException(detail=f"Failed to generate recommendations: {str(e)[:200]}")
+
+    reporter.report(85, "Building your recommendations", "Saving your best matches")
 
     recommendation = Recommendation(
         user_id=user.id,
@@ -165,12 +216,99 @@ Respond with a JSON object:
 
     await safe_flush(db)
 
+    try:
+        await _apply_profile_suggestions(db, user, parsed.get("profile_suggestions") or {})
+    except Exception as e:
+        logger.warning("Failed to apply profile suggestions: %s", str(e)[:200])
+
     result = await db.execute(
         select(Recommendation)
-        .options(selectinload(Recommendation.items))
+        .options(selectinload(Recommendation.items).selectinload(RecommendationItem.career))
         .where(Recommendation.id == recommendation.id)
     )
+    reporter.report(100, "Done", "Recommendations ready", status="succeeded")
     return result.unique().scalar_one()
+
+
+def _clean_suggestions(items: object, limit: int = 12) -> list[str]:
+    if not isinstance(items, list):
+        return []
+    seen: set[str] = set()
+    cleaned: list[str] = []
+    for raw in items:
+        if not isinstance(raw, str):
+            continue
+        name = raw.strip()
+        if not name or len(name) > 120:
+            continue
+        key = name.casefold()
+        if key in seen:
+            continue
+        seen.add(key)
+        cleaned.append(name)
+        if len(cleaned) >= limit:
+            break
+    return cleaned
+
+
+async def _apply_profile_suggestions(
+    db: AsyncSession,
+    user: User,
+    suggestions: dict,
+) -> None:
+    """Merge AI-suggested skills/interests/target fields into the user's profile."""
+    result = await db.execute(select(Profile).where(Profile.user_id == user.id))
+    profile = result.scalar_one_or_none()
+    if not profile:
+        return
+
+    changes: dict = {}
+
+    skills = dict(profile.skills) if profile.skills else {}
+    for name in _clean_suggestions(suggestions.get("skills"), limit=15):
+        if name not in skills:
+            skills[name] = "beginner"
+    if len(skills) > len((profile.skills or {})):
+        changes["skills"] = skills
+
+    interests = dict(profile.interests) if profile.interests else {}
+    for name in _clean_suggestions(suggestions.get("interests"), limit=12):
+        if name not in interests:
+            interests[name] = "interested"
+    if len(interests) > len((profile.interests or {})):
+        changes["interests"] = interests
+
+    target_fields = dict(profile.target_fields) if profile.target_fields else {}
+    for name in _clean_suggestions(suggestions.get("target_fields"), limit=12):
+        if name not in target_fields:
+            target_fields[name] = "interested"
+    if len(target_fields) > len((profile.target_fields or {})):
+        changes["target_fields"] = target_fields
+
+    if not changes:
+        return
+
+    for field, value in changes.items():
+        setattr(profile, field, value)
+
+    snapshot = {}
+    for col in Profile.__table__.columns:
+        if col.name not in ("id", "user_id", "created_at", "updated_at"):
+            val = getattr(profile, col.name)
+            snapshot[col.name] = str(val) if val is not None else None
+    max_ver = await db.execute(
+        select(ProfileVersion.version_number)
+        .where(ProfileVersion.profile_id == profile.id)
+        .order_by(ProfileVersion.version_number.desc())
+        .limit(1)
+    )
+    last_ver = max_ver.scalar() or 0
+    db.add(ProfileVersion(
+        profile_id=profile.id,
+        version_number=last_ver + 1,
+        snapshot=snapshot,
+    ))
+    await safe_flush(db)
 
 
 def _build_search_query(profile_data: dict, portfolio_data: list[dict]) -> str:
@@ -260,7 +398,13 @@ Provide a detailed comparison with JSON:
 
     ai_client = get_ai_client()
     try:
-        response = await ai_client.generate(prompt=prompt, user_id=None)
+        response = await ai_client.generate(
+            prompt=prompt,
+            user_id=None,
+            max_tokens=settings.AI_COMPARE_MAX_TOKENS,
+            reasoning_effort=settings.AI_REASONING_EFFORT,
+            response_format="json_object" if settings.AI_GENERATION_JSON_MODE else None,
+        )
         parsed = json.loads(response)
     except Exception as e:
         parsed = {

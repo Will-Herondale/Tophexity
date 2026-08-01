@@ -4,6 +4,17 @@ from uuid import UUID
 from pydantic import BaseModel, Field
 
 
+class CareerBrief(BaseModel):
+    id: UUID
+    title: str | None = None
+    description: str | None = None
+    average_salary: float | None = None
+    demand_level: str | None = None
+    growth_outlook: str | None = None
+
+    model_config = {"from_attributes": True}
+
+
 class RecommendationItemCreate(BaseModel):
     career_id: UUID
     match_score: float = Field(..., ge=0.0, le=100.0)
@@ -23,6 +34,7 @@ class RecommendationItemResponse(BaseModel):
     match_score: float
     reasoning: str | None = None
     rank: int
+    career: CareerBrief | None = None
 
     model_config = {"from_attributes": True}
 

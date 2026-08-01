@@ -9,14 +9,18 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import get_settings
 from app.core.logging import logger
 from app.models.career import Career
 from app.models.profile import Profile
 from app.models.user import User
 from app.models.roadmap import Roadmap, RoadmapStep
 from app.services.ai.client import get_ai_client
+from app.services.progress_store import ProgressReporter
 from app.services.retrieval_engine import get_relevant_knowledge
 from app.utils.exceptions import BadRequestException, NotFoundException, safe_flush
+
+settings = get_settings()
 
 
 ROADMAP_SYSTEM_PROMPT = """You are an expert career planner and education consultant.
@@ -41,8 +45,29 @@ async def generate_roadmap(
     career_id: UUID,
     roadmap_type: str = "career",
     custom_duration_months: int | None = None,
+    progress_token: str | None = None,
 ) -> Roadmap:
     """Generate an AI-powered personalized roadmap."""
+    reporter = ProgressReporter(progress_token, str(user.id))
+    try:
+        return await _generate_roadmap_inner(
+            db, user, career_id, roadmap_type, custom_duration_months, reporter
+        )
+    except Exception as e:
+        reporter.report(0, "Failed", f"Generation failed: {str(e)[:200]}", status="failed")
+        raise
+
+
+async def _generate_roadmap_inner(
+    db: AsyncSession,
+    user: User,
+    career_id: UUID,
+    roadmap_type: str,
+    custom_duration_months: int | None,
+    reporter: ProgressReporter,
+) -> Roadmap:
+    """Generate an AI-powered personalized roadmap."""
+    reporter.report(2, "Starting", "Preparing your roadmap")
     career = await db.get(Career, career_id)
     if not career:
         raise NotFoundException(detail="Career not found")
@@ -61,9 +86,11 @@ async def generate_roadmap(
             "interests": profile.interests,
         }
 
+    reporter.report(15, "Gathering your profile", "Reading your profile and background")
     search_query = f"{career.title} career path {roadmap_type} roadmap"
     if profile_data.get("education_level"):
         search_query += f" {profile_data['education_level']}"
+    reporter.report(25, "Searching career knowledge base", "Finding relevant skills and milestones")
     kb_context = await get_relevant_knowledge(db, search_query, max_tokens=1500)
 
     duration_hint = f"Target duration: {custom_duration_months} months." if custom_duration_months else "Choose a realistic duration."
@@ -109,16 +136,22 @@ Respond with JSON:
 }}"""
 
     ai_client = get_ai_client()
+    reporter.report(55, "Designing with AI", "Planning your milestones — this usually takes 30-60 seconds")
     try:
         response = await ai_client.generate(
             prompt=prompt,
             system_prompt=ROADMAP_SYSTEM_PROMPT,
             user_id=str(user.id),
+            max_tokens=settings.AI_GENERATION_MAX_TOKENS,
+            reasoning_effort=settings.AI_REASONING_EFFORT,
+            response_format="json_object" if settings.AI_GENERATION_JSON_MODE else None,
         )
         parsed = json.loads(response)
     except Exception as e:
         logger.error("Roadmap generation failed: %s", str(e)[:200])
         raise BadRequestException(detail=f"Failed to generate roadmap: {str(e)[:200]}")
+
+    reporter.report(85, "Building your roadmap", "Saving your milestones and steps")
 
     roadmap = Roadmap(
         user_id=user.id,
@@ -150,4 +183,5 @@ Respond with JSON:
         .options(selectinload(Roadmap.steps))
         .where(Roadmap.id == roadmap.id)
     )
+    reporter.report(100, "Done", "Roadmap ready", status="succeeded")
     return result.unique().scalar_one()

@@ -66,6 +66,19 @@ class CareerComparisonResponse(BaseModel):
 class GenerateRecommendationRequest(BaseModel):
     include_profile: bool = Field(True, description="Use user profile for personalization")
     max_results: int = Field(10, ge=1, le=25, description="Maximum recommendations")
+    progress_token: str | None = Field(
+        None,
+        description="Optional token for polling generation progress via GET /intelligence/progress/{token}",
+        max_length=128,
+    )
+
+
+class ProgressResponse(BaseModel):
+    token: str
+    percent: int = Field(ge=0, le=100)
+    phase: str
+    message: str
+    status: str
 
 
 class GenerateRecommendationResponse(BaseModel):
@@ -80,6 +93,11 @@ class GenerateRoadmapRequest(BaseModel):
     career_id: UUID
     roadmap_type: str = Field("career", description="career, skill, certification, or research")
     custom_duration_months: int | None = Field(None, ge=1, le=120)
+    progress_token: str | None = Field(
+        None,
+        description="Optional token for polling generation progress via GET /intelligence/progress/{token}",
+        max_length=128,
+    )
 
 
 class GenerateRoadmapResponse(BaseModel):
@@ -94,6 +112,11 @@ class GenerateRoadmapResponse(BaseModel):
 class GenerateBackupRequest(BaseModel):
     career_id: UUID
     max_scenarios: int = Field(5, ge=1, le=10)
+    progress_token: str | None = Field(
+        None,
+        description="Optional token for polling generation progress via GET /intelligence/progress/{token}",
+        max_length=128,
+    )
 
 
 class GenerateBackupResponse(BaseModel):

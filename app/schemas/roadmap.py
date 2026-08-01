@@ -9,7 +9,7 @@ class RoadmapStepCreate(BaseModel):
     description: str | None = None
     step_order: int = Field(..., ge=1)
     duration_months: int | None = None
-    resources: dict | None = None
+    resources: list[dict] | None = None
 
 
 class RoadmapCreate(BaseModel):
@@ -26,7 +26,7 @@ class RoadmapStepResponse(BaseModel):
     description: str | None = None
     step_order: int
     duration_months: int | None = None
-    resources: dict | None = None
+    resources: list[dict] | None = None
 
     model_config = {"from_attributes": True}
 

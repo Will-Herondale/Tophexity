@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.models.recommendation import Recommendation, RecommendationItem
+from app.models.career import Career
 from app.models.user import User
 from app.schemas.recommendation import (
     RecommendationCreate,
@@ -38,7 +39,7 @@ async def create_recommendation(
     await safe_flush(db)
     result = await db.execute(
         select(Recommendation)
-        .options(selectinload(Recommendation.items))
+        .options(selectinload(Recommendation.items).selectinload(RecommendationItem.career))
         .where(Recommendation.id == recommendation.id)
     )
     rec = result.unique().scalar_one()
@@ -50,7 +51,7 @@ async def get_recommendation(
 ) -> RecommendationResponse:
     result = await db.execute(
         select(Recommendation)
-        .options(selectinload(Recommendation.items))
+        .options(selectinload(Recommendation.items).selectinload(RecommendationItem.career))
         .where(
             Recommendation.id == recommendation_id,
             Recommendation.user_id == user.id,
@@ -74,7 +75,7 @@ async def list_recommendations(
 
     query = (
         select(Recommendation)
-        .options(selectinload(Recommendation.items))
+        .options(selectinload(Recommendation.items).selectinload(RecommendationItem.career))
         .where(Recommendation.user_id == user.id)
         .order_by(Recommendation.created_at.desc())
         .offset((page - 1) * page_size)

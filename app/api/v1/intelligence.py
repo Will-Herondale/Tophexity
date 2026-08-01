@@ -8,7 +8,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import get_current_active_user, get_db_session
+from app.api.deps import get_current_active_user, get_db_session, require_admin
 from app.models.user import User
 
 from app.schemas.intelligence import (
@@ -24,6 +24,7 @@ from app.schemas.intelligence import (
     GenerateRecommendationResponse,
     GenerateRoadmapRequest,
     GenerateRoadmapResponse,
+    ProgressResponse,
     RebuildEmbeddingsRequest,
     RebuildEmbeddingsResponse,
     RetrievalResponse,
@@ -33,6 +34,8 @@ from app.schemas.intelligence import (
 from app.services import recommendation_engine, roadmap_engine, backup_engine
 from app.services import roadmap_service
 from app.services import embedding_service, retrieval_engine
+from app.services.progress_store import progress_store
+from app.utils.exceptions import NotFoundException
 
 router = APIRouter()
 
@@ -53,6 +56,7 @@ async def generate_recommendation(
         db, user,
         include_profile=request.include_profile,
         max_results=request.max_results,
+        progress_token=request.progress_token,
     )
     return GenerateRecommendationResponse(
         recommendation_id=rec.id,
@@ -72,16 +76,46 @@ async def generate_recommendation(
 )
 async def regenerate_recommendation(
     recommendation_id: UUID,
+    progress_token: str | None = Query(None, description="Optional token for polling generation progress"),
     db: AsyncSession = Depends(get_db_session),
     user: User = Depends(get_current_active_user),
 ):
-    rec = await recommendation_engine.generate_recommendation(db, user)
+    rec = await recommendation_engine.generate_recommendation(
+        db, user, progress_token=progress_token,
+    )
     return GenerateRecommendationResponse(
         recommendation_id=rec.id,
         title=rec.title,
         summary=rec.summary,
         items=[{"career_id": str(i.career_id), "match_score": float(i.match_score), "reasoning": i.reasoning, "rank": i.rank} for i in rec.items],
         generated_at=rec.created_at,
+    )
+
+
+@router.get(
+    "/progress/{token}",
+    response_model=ProgressResponse,
+    summary="Get generation progress",
+    description="Poll progress of an in-flight AI generation using its progress token.",
+    responses={
+        401: {"description": "Not authenticated"},
+        404: {"description": "Progress token not found or expired"},
+    },
+)
+async def get_generation_progress(
+    token: str,
+    db: AsyncSession = Depends(get_db_session),
+    user: User = Depends(get_current_active_user),
+):
+    rec = progress_store.get(token)
+    if not rec or rec["user_id"] != str(user.id):
+        raise NotFoundException(detail="Progress not found or expired")
+    return ProgressResponse(
+        token=token,
+        percent=rec["percent"],
+        phase=rec["phase"],
+        message=rec["message"],
+        status=rec["status"],
     )
 
 
@@ -117,6 +151,7 @@ async def generate_roadmap(
         career_id=request.career_id,
         roadmap_type=request.roadmap_type,
         custom_duration_months=request.custom_duration_months,
+        progress_token=request.progress_token,
     )
     return GenerateRoadmapResponse(
         roadmap_id=rm.id,
@@ -168,6 +203,7 @@ async def generate_backup(
         db, user,
         career_id=request.career_id,
         max_scenarios=request.max_scenarios,
+        progress_token=request.progress_token,
     )
     return GenerateBackupResponse(
         backup_plan_id=plan.id,
@@ -186,6 +222,7 @@ async def generate_backup(
 async def semantic_search(
     request: SemanticSearchRequest,
     db: AsyncSession = Depends(get_db_session),
+    user: User = Depends(get_current_active_user),
 ):
     results = await retrieval_engine.semantic_search(
         db, request.query,
@@ -211,6 +248,7 @@ async def semantic_search(
 async def hybrid_search(
     request: SemanticSearchRequest,
     db: AsyncSession = Depends(get_db_session),
+    user: User = Depends(get_current_active_user),
 ):
     results = await retrieval_engine.hybrid_search(
         db, request.query,
@@ -235,6 +273,7 @@ async def hybrid_search(
 async def debug_retrieval(
     request: DebugRetrievalRequest,
     db: AsyncSession = Depends(get_db_session),
+    user: User = Depends(get_current_active_user),
 ):
     result = await retrieval_engine.debug_retrieval(
         db, request.query,
@@ -252,6 +291,7 @@ async def debug_retrieval(
 )
 async def embedding_status(
     db: AsyncSession = Depends(get_db_session),
+    user: User = Depends(get_current_active_user),
 ):
     status = await embedding_service.get_embedding_status(db)
     return EmbeddingStatusResponse(**status)
@@ -266,7 +306,7 @@ async def embedding_status(
 async def rebuild_embeddings(
     request: RebuildEmbeddingsRequest,
     db: AsyncSession = Depends(get_db_session),
-    user: User = Depends(get_current_active_user),
+    admin: User = Depends(require_admin),
 ):
     result = await embedding_service.rebuild_embeddings(source_type=request.source_type)
     return RebuildEmbeddingsResponse(**result)
@@ -281,10 +321,10 @@ async def rebuild_embeddings(
 async def get_embedding_job(
     job_id: UUID,
     db: AsyncSession = Depends(get_db_session),
+    user: User = Depends(get_current_active_user),
 ):
     from app.models.embedding import EmbeddingJob
     job = await db.get(EmbeddingJob, job_id)
     if not job:
-        from app.utils.exceptions import NotFoundException
         raise NotFoundException(detail="Job not found")
     return EmbeddingJobResponse.model_validate(job)

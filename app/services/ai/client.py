@@ -48,6 +48,8 @@ class AIClient:
         messages: list[dict[str, str]],
         temperature: float | None = None,
         max_tokens: int | None = None,
+        reasoning_effort: str | None = None,
+        response_format: str | None = None,
         user_id: str | None = None,
         conversation_id: str | None = None,
         ip: str | None = None,
@@ -72,6 +74,8 @@ class AIClient:
             messages=messages,
             temperature=temperature,
             max_tokens=max_tokens,
+            reasoning_effort=reasoning_effort,
+            response_format=response_format,
         )
 
         request_id = str(uuid.uuid4())
@@ -124,6 +128,8 @@ class AIClient:
         system_prompt: str | None = None,
         temperature: float | None = None,
         max_tokens: int | None = None,
+        reasoning_effort: str | None = None,
+        response_format: str | None = None,
         user_id: str | None = None,
     ) -> str:
         messages = []
@@ -135,6 +141,8 @@ class AIClient:
             messages=messages,
             temperature=temperature,
             max_tokens=max_tokens,
+            reasoning_effort=reasoning_effort,
+            response_format=response_format,
             user_id=user_id,
         )
         return response.content

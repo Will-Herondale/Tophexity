@@ -49,3 +49,6 @@ next.config.ts
 
 # Frontend is its own git repo (branch halfpanda)
 Tophexity-Frontend/
+
+# DB dumps — keep the gz archive + core sql, ignore the huge uncompressed full sql
+docs/db_dumps/tophexity_full_dump.sql
